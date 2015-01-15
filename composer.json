@@ -1,8 +1,8 @@
 {
-    "name": "Greg Framework",
+    "name": "greg-md/framework",
     "type": "library",
-    "description": "PHP Framework",
-    "keywords": ["php","framework"],
+    "description": "Greg Framework",
+    "keywords": ["greg","framework"],
     "homepage": "https://github.com/greg-md/framework",
     "license": "MIT",
     "authors": [
