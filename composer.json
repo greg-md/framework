@@ -1,0 +1,24 @@
+{
+    "name": "greg-md/framework",
+    "type": "library",
+    "description": "PHP Framework",
+    "keywords": ["php","framework"],
+    "homepage": "https://github.com/greg-md/framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Grigorii Duca",
+            "email": "contact@greg.md",
+            "homepage": "http://greg.md",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Greg\\": "src/"
+        }
+    }
+}
