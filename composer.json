@@ -1,6 +1,5 @@
 {
     "name": "greg-md/framework",
-    "version": "1.0.0",
     "type": "library",
     "description": "Greg Framework",
     "keywords": ["greg","framework"],
