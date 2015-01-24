@@ -60,7 +60,9 @@ abstract class Route implements RouteInterface
 
     static public function getPathParts($path)
     {
-        return $path ? explode('/', trim($path, '/')) : [];
+        $path = trim($path, '/');
+
+        return $path ? explode('/', $path) : [];
     }
 
     static public function pathToParam($path)
