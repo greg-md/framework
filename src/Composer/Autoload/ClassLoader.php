@@ -11,6 +11,7 @@
  */
 namespace Greg\Composer\Autoload;
 use Greg\Engine\Internal;
+use Greg\Support\Obj;
 
 /**
  * ClassLoader implements a PSR-0 class loader
@@ -27,7 +28,7 @@ use Greg\Engine\Internal;
  *     $loader->register();
  *
  *     // to enable searching the include path (eg. for PEAR packages)
- *     $loader->setUseIncludePath(true);
+ *     $loader->useIncludePath(true);
  *
  * In this example, if you try to use a class in the Symfony\Component
  * namespace or one of its children (Symfony\Component\Console for instance),
@@ -45,16 +46,25 @@ class ClassLoader
     use Internal;
 
     // PSR-4
-    private $prefixLengthsPsr4 = array();
-    private $prefixDirsPsr4 = array();
-    private $fallbackDirsPsr4 = array();
+    protected $prefixLengthsPsr4 = array();
+    protected $prefixDirsPsr4 = array();
+    protected $fallbackDirsPsr4 = array();
 
     // PSR-0
-    private $prefixesPsr0 = array();
-    private $fallbackDirsPsr0 = array();
+    protected $prefixesPsr0 = array();
+    protected $fallbackDirsPsr0 = array();
 
-    private $useIncludePath = false;
-    private $classMap = array();
+    protected $useIncludePath = false;
+    protected $classMap = array();
+
+    public function __construct(array $psr4 = array())
+    {
+        foreach($psr4 as $key => $value) {
+            $this->addPsr4($key, $value);
+        }
+
+        return $this;
+    }
 
     public function getPrefixes()
     {
@@ -245,30 +255,6 @@ class ClassLoader
     }
 
     /**
-     * Turns on searching the include path for class files.
-     *
-     * @param bool $useIncludePath
-     * @return $this
-     */
-    public function setUseIncludePath($useIncludePath)
-    {
-        $this->useIncludePath = $useIncludePath;
-
-        return $this;
-    }
-
-    /**
-     * Can be used to check if the autoloader uses the include path to check
-     * for classes.
-     *
-     * @return bool
-     */
-    public function getUseIncludePath()
-    {
-        return $this->useIncludePath;
-    }
-
-    /**
      * Registers this instance as an autoloader.
      *
      * @param bool $prepend Whether to prepend the autoloader or not
@@ -403,6 +389,20 @@ class ClassLoader
         }
 
         return false;
+    }
+
+    /**
+     * Turns on/off searching the include path for class files.
+     * Can be used to check if the autoloader uses the include path to check
+     * for classes.
+     *
+     * @param bool $value
+     * @param $type
+     * @return $this|bool
+     */
+    public function useIncludePath($value = null, $type = Obj::VAR_REPLACE)
+    {
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 }
 

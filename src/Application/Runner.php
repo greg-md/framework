@@ -2,13 +2,13 @@
 
 namespace Greg\Application;
 
+use Greg\Composer\Autoload\ClassLoader;
 use Greg\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
-use Greg\Server\AutoLoader;
 use Greg\Server\Config as ServerConfig;
 use Greg\Server\Ini as ServerIni;
 use Greg\Server\Session as ServerSession;
@@ -61,13 +61,17 @@ class Runner implements \ArrayAccess
             ServerSession::persistent((bool)$this->indexGet('session.persistent'));
         }
 
-        //$this->autoLoader($autoLoader = AutoLoader::create($this->appName(), $this->get('autoLoader.paths')));
-
         $this->binder($binder = Binder::create($this->appName()));
 
         $binder->add($this);
 
         $binder->add($binder);
+
+        $this->loader($loader = ClassLoader::create($this->appName(), $this->get('loader.paths')));
+
+        $loader->register(true);
+
+        $binder->add($loader);
 
         $this->listener($listener = Listener::create($this->appName()));
 
@@ -167,22 +171,31 @@ class Runner implements \ArrayAccess
         return $component;
     }
 
-    public function newClass($class)
+    public function newClass($className)
     {
         $args = func_get_args();
 
         array_shift($args);
 
-        if (is_bool($class)) {
-            $loadExtended = $class;
-            $class = array_shift($args);
+        if (is_bool($className)) {
+            $loadExtended = $className;
+            $className = array_shift($args);
         } else {
             $loadExtended = true;
         }
 
-        $class = $loadExtended ? $this->getExtended($class) : $class;
+        $className = $loadExtended ? $this->getExtended($className) : $className;
 
-        return $this->binder() ? $this->binder()->newClass($class, $args) : Obj::instanceArgs($class, $args);
+        /* @var $class Internal */
+        $class = $this->binder() ? $this->binder()->newClass($className, $args) : Obj::instanceArgs($className, $args);
+
+        $class->appName($this->appName());
+
+        if (method_exists($class, 'init')) {
+            $class->init();
+        }
+
+        return $class;
     }
 
     public function getExtended($class)
@@ -229,9 +242,12 @@ class Runner implements \ArrayAccess
     {
         $name = Str::phpName($name);
 
-        foreach(array_merge([''], (array)$this->get('controllers.namespaces')) as $namespace) {
+        $prefixes = array_merge([''], (array)$this->get('controllers.prefixes'));
+        //$prefixes = (array)$this->get('controllers.prefixes');
+
+        foreach($prefixes as $prefix) {
             /* @var $class Controller */
-            $class = $namespace . '\Controllers\\' . $name . '\Controller';
+            $class = $prefix . '\Controllers\\' . $name . '\Controller';
             if (class_exists($class)) {
                 return $class::create($this->appName(), $name, $request, $view);
             }
@@ -241,17 +257,17 @@ class Runner implements \ArrayAccess
     }
 
     /**
-     * @param AutoLoader $autoLoader
-     * @return AutoLoader
+     * @param ClassLoader $loader
+     * @return ClassLoader|bool
      */
-    //public function autoLoader(AutoLoader $autoLoader = null)
-    //{
-    //    return func_num_args() ? $this->memory('autoLoader', $autoLoader) : $this->memory('autoLoader');
-    //}
+    public function loader(ClassLoader $loader = null)
+    {
+        return func_num_args() ? $this->memory('loader', $loader) : $this->memory('loader');
+    }
 
     /**
      * @param Binder $binder
-     * @return Binder
+     * @return Binder|bool
      */
     public function binder(Binder $binder = null)
     {
@@ -260,7 +276,7 @@ class Runner implements \ArrayAccess
 
     /**
      * @param Listener $listener
-     * @return Listener
+     * @return Listener|bool
      */
     public function listener(Listener $listener = null)
     {
@@ -269,7 +285,7 @@ class Runner implements \ArrayAccess
 
     /**
      * @param Response $response
-     * @return Response
+     * @return Response|bool
      */
     public function response(Response $response = null)
     {
@@ -278,7 +294,7 @@ class Runner implements \ArrayAccess
 
     /**
      * @param Dispatcher $router
-     * @return Dispatcher
+     * @return Dispatcher|bool
      */
     public function router(Dispatcher $router = null)
     {
