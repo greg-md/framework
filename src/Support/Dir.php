@@ -17,6 +17,6 @@ class Dir
 
     static public function throwErrors($errNo, $errStr, $errFile, $errLine)
     {
-        throw new Exception($errStr);
+        throw new \Exception($errStr);
     }
 }

@@ -17,7 +17,7 @@ class Link
 
         $attr['href'] = $href;
 
-        if (func_num_args() >= 4) {
+        if ($id !== null) {
             $this->storage[$id] = $attr;
         } else {
             $this->storage[] = $attr;
@@ -30,6 +30,11 @@ class Link
     {
         $attr['mime'] = $mime;
         return $this->set(__FUNCTION__, $href, $attr, $id);
+    }
+
+    public function style($href, array $attr = [], $id = null)
+    {
+        $this->set('stylesheet', $href, $attr, $id);
     }
 
     public function __call($method, $args)
@@ -52,7 +57,7 @@ class Link
 
     public function fetchItem($attr)
     {
-        return new Element('link', $attr);
+        return Element::create($this->appName(), 'link', $attr);
     }
 
     public function __toString()

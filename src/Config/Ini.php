@@ -3,7 +3,6 @@
 namespace Greg\Config;
 
 use Greg\Engine\Internal;
-use Greg\Event\Exception;
 use Greg\Storage\ArrayIndexAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
@@ -61,7 +60,7 @@ class Ini
             }
             if ($section) {
                 if (!isset($return[$section])) {
-                    throw new Exception('Config ini section `' . $section . '` not found.');
+                    throw new \Exception('Config ini section `' . $section . '` not found.');
                 }
                 $return = $return[$section];
             }

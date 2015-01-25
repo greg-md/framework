@@ -12,14 +12,14 @@ trait Internal
     /**
      * @param string $appName
      * @return static
-     * @throws Exception
+     * @throws \Exception
      */
     static public function create($appName = 'default')
     {
         $app = Memory::get($appName . ':app');
 
         if (!$app) {
-            throw new Exception('App `' . $appName . '` is not registered in memory.');
+            throw new \Exception('App `' . $appName . '` is not registered in memory.');
         }
 
         $args = func_get_args();

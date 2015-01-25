@@ -14,7 +14,7 @@ class Listener implements \ArrayAccess
 
     public function on($event, $function, $id = null)
     {
-        if (func_num_args() >= 3) {
+        if ($id !== null) {
             $this[$event][$id] = $function;
         } else {
             $this[$event][] = $function;
@@ -26,7 +26,7 @@ class Listener implements \ArrayAccess
     public function register($event, $class)
     {
         if (!is_object($class)) {
-            throw new Exception('Event registrar is not an object.');
+            throw Exception::create($this->appName(), 'Event registrar is not an object.');
         }
 
         foreach(Arr::bring($event) as $event) {
@@ -73,7 +73,8 @@ class Listener implements \ArrayAccess
         }
 
         if (!($subscriber instanceof SubscriberInterface)) {
-            throw new Exception('Subscriber `' . $name . '` should be an instance of Greg\Event\SubscriberInterface');
+            throw Exception::create($this->appName(), 'Subscriber `' . $name
+                . '` should be an instance of Greg\Event\SubscriberInterface');
         }
 
         $subscriber->subscribe($this);

@@ -101,7 +101,7 @@ class Image extends File
             $image = imagecreatefromstring(file_get_contents($file));
 
             if (!$image) {
-                throw new Exception('Wrong file type.');
+                throw new \Exception('Wrong file type.');
             }
         }
 

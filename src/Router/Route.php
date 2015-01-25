@@ -83,7 +83,8 @@ abstract class Route implements RouteInterface
 
     protected function paramException($param)
     {
-        throw new Exception('Parameter `' . $param . '` is required in router `' . $this->name() . '`.');
+        throw Exception::create($this->appName(), 'Parameter `' . $param
+            . '` is required in router `' . $this->name() . '`.');
     }
 
     public function name($value = null, $type = Obj::VAR_REPLACE)

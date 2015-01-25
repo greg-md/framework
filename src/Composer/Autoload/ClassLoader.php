@@ -10,6 +10,7 @@
  * file that was distributed with this source code.
  */
 namespace Greg\Composer\Autoload;
+use Greg\Composer\Exception;
 use Greg\Engine\Internal;
 use Greg\Support\Obj;
 
@@ -46,18 +47,18 @@ class ClassLoader
     use Internal;
 
     // PSR-4
-    protected $prefixLengthsPsr4 = array();
-    protected $prefixDirsPsr4 = array();
-    protected $fallbackDirsPsr4 = array();
+    protected $prefixLengthsPsr4 = [];
+    protected $prefixDirsPsr4 = [];
+    protected $fallbackDirsPsr4 = [];
 
     // PSR-0
-    protected $prefixesPsr0 = array();
-    protected $fallbackDirsPsr0 = array();
+    protected $prefixesPsr0 = [];
+    protected $fallbackDirsPsr0 = [];
 
     protected $useIncludePath = false;
-    protected $classMap = array();
+    protected $classMap = [];
 
-    public function __construct(array $psr4 = array())
+    public function __construct(array $psr4 = [])
     {
         foreach($psr4 as $key => $value) {
             $this->addPsr4($key, $value);
@@ -72,7 +73,7 @@ class ClassLoader
             return call_user_func_array('array_merge', $this->prefixesPsr0);
         }
 
-        return array();
+        return [];
     }
 
     public function getPrefixesPsr4()
@@ -167,7 +168,7 @@ class ClassLoader
      * @param bool         $prepend Whether to prepend the directories
      * @return $this
      *
-     * @throws \InvalidArgumentException
+     * @throws Exception
      */
     public function addPsr4($prefix, $paths, $prepend = false)
     {
@@ -188,7 +189,7 @@ class ClassLoader
             // Register directories for a new namespace.
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw new \InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw Exception::create($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -236,7 +237,7 @@ class ClassLoader
      * @param array|string $paths  The PSR-4 base directories
      * @return $this
      *
-     * @throws \InvalidArgumentException
+     * @throws Exception
      */
     public function setPsr4($prefix, $paths)
     {
@@ -245,7 +246,7 @@ class ClassLoader
         } else {
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw new \InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw Exception::create($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -262,7 +263,7 @@ class ClassLoader
      */
     public function register($prepend = false)
     {
-        spl_autoload_register(array($this, 'loadClass'), true, $prepend);
+        spl_autoload_register([$this, 'loadClass'], true, $prepend);
 
         return $this;
     }
@@ -273,7 +274,7 @@ class ClassLoader
      */
     public function unregister()
     {
-        spl_autoload_unregister(array($this, 'loadClass'));
+        spl_autoload_unregister([$this, 'loadClass']);
 
         return $this;
     }

@@ -5,6 +5,7 @@ namespace Greg\Html;
 use Greg\Engine\Internal;
 use Greg\Html\Head\Link;
 use Greg\Html\Head\Meta;
+use Greg\Html\Head\Style;
 use Greg\Support\Obj;
 
 class Head
@@ -13,17 +14,30 @@ class Head
 
     protected $title = null;
 
-    protected $link = null;
-
     protected $meta = null;
 
-    public function __construct()
-    {
-        $this->link(new Link());
+    protected $link = null;
 
-        $this->meta(new Meta());
+    protected $style = null;
+
+    public function init()
+    {
+        $this->meta(Meta::create($this->appName()));
+
+        $this->link(Link::create($this->appName()));
+
+        $this->style(Style::create($this->appName()));
 
         return $this;
+    }
+
+    /**
+     * @param Meta $value
+     * @return Meta|$this|null
+     */
+    public function meta(Meta $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
     /**
@@ -36,10 +50,10 @@ class Head
     }
 
     /**
-     * @param Meta $value
-     * @return Meta|$this|null
+     * @param Style $value
+     * @return Style|$this|null
      */
-    public function meta(Meta $value = null)
+    public function style(Style $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }

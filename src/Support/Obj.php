@@ -3,7 +3,6 @@
 namespace Greg\Support;
 
 use Closure;
-use ReflectionClass;
 
 class Obj
 {
@@ -29,7 +28,7 @@ class Obj
      */
     static public function instanceArgs($className, array $args = [])
     {
-        $class = new ReflectionClass($className);
+        $class = new \ReflectionClass($className);
 
         return $class->newInstanceArgs($class->hasMethod('__construct') ? $args : []);
     }

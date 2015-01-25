@@ -6,6 +6,7 @@ use Greg\Component\Layout;
 use Greg\Event\Listener;
 use Greg\Html\ElementClass;
 use Greg\Html\Head;
+use Greg\Html\Script;
 use Greg\Http\Response;
 use Greg\Support\Obj;
 use Greg\Tools\Minify;
@@ -26,17 +27,21 @@ class Html extends Layout
 
     protected $bodyClose = [];
 
+    protected $script = null;
+
     protected $subLayout = 'layout/default';
 
     protected $minifyHtml = false;
 
-    public function __construct()
+    public function init()
     {
-        $this->htmlClass(new ElementClass());
+        $this->htmlClass(ElementClass::create($this->appName()));
 
-        $this->bodyClass(new ElementClass());
+        $this->head(Head::create($this->appName()));
 
-        $this->head(new Head());
+        $this->bodyClass(ElementClass::create($this->appName()));
+
+        $this->script(Script::create($this->appName()));
 
         return $this;
     }
@@ -104,6 +109,15 @@ class Html extends Layout
     public function bodyClose($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+    }
+
+    /**
+     * @param Script $value
+     * @return Script|$this|null
+     */
+    public function script(Script $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
     public function subLayout($value = null, $type = Obj::VAR_REPLACE)

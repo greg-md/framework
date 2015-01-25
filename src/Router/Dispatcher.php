@@ -57,7 +57,7 @@ class Dispatcher
                 return Normal::create($this->appName(), $name, $info['format'], $info['options']);
         }
 
-        throw new Exception('Wrong type of router `' . $name . '`');
+        throw Exception::create($this->appName(), 'Wrong type of router `' . $name . '`');
     }
 
     public function dispatch()

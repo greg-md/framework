@@ -20,7 +20,9 @@ class Element implements \ArrayAccess
 
     protected $after = null;
 
-    public function __construct($name = null, array $attr = [])
+    protected $condition = null;
+
+    public function __construct($name = null, array $attr = [], $condition = null)
     {
         if ($name !== null) {
             $this->name($name);
@@ -30,16 +32,9 @@ class Element implements \ArrayAccess
             $this->attr($attr);
         }
 
-        $this->subscribe();
-
-        return $this;
-    }
-
-    public function subscribe()
-    {
-        //$listener = $this->getListener();
-
-        //v($listener);
+        if ($condition !== null) {
+            $this->condition($condition);
+        }
 
         return $this;
     }
@@ -88,6 +83,11 @@ class Element implements \ArrayAccess
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
+    public function condition($value = null, $type = Obj::VAR_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+    }
+
     public function startTag()
     {
         $attr = $this->attrToString();
@@ -121,7 +121,7 @@ class Element implements \ArrayAccess
     {
         $name = $this->name();
         if (!$name) {
-            throw new Exception('Undefined tag name.');
+            throw Exception::create($this->appName(), 'Undefined tag name.');
         }
         return $name;
     }
@@ -133,7 +133,13 @@ class Element implements \ArrayAccess
 
     public function toString()
     {
-        return $this->before() . $this->startTag() . $this->inner() . $this->endTag() . $this->after();
+        $string = $this->startTag() . $this->inner() . $this->endTag();
+
+        if ($condition = $this->condition()) {
+            $string = '<!--[if ' . $condition . ']>' . $string . '<![endif]-->';
+        }
+
+        return $this->before() . $string . $this->after();
     }
 
     public function &__call($method, $args)

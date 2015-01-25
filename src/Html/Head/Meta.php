@@ -101,7 +101,7 @@ class Meta
 
     public function fetchItem($attr)
     {
-        return new Element('meta', $attr);
+        return Element::create($this->appName(), 'meta', $attr);
     }
 
     protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)

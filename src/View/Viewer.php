@@ -43,7 +43,7 @@ class Viewer
             $controller = current($this->controllers());
 
             if (!$controller) {
-                throw new Exception('No render view controller defined.');
+                throw Exception::create($this->appName(), 'No render view controller defined.');
             }
 
             $controllerName = $controller->name();
@@ -70,7 +70,7 @@ class Viewer
         $paths = $this->paths();
 
         if (!$paths) {
-            throw new Exception('Undefined view paths.');
+            throw Exception::create($this->appName(), 'Undefined view paths.');
         }
 
         $data = null;
@@ -83,7 +83,7 @@ class Viewer
         }
 
         if ($data === false) {
-            throw new Exception('View file `' . $file . '` does not exist in view paths.');
+            throw Exception::create($this->appName(), 'View file `' . $file . '` does not exist in view paths.');
         }
 
         return $data;
@@ -174,6 +174,6 @@ class Viewer
             return $app->getComponent($method);
         }
 
-        throw new Exception('Component `' . $method . '` not found!');
+        throw Exception::create($this->appName(), 'Component `' . $method . '` not found!');
     }
 }

@@ -165,7 +165,7 @@ class Runner implements \ArrayAccess
         $component = $this->memory('component/' . $name);
 
         if (!$component) {
-            throw new Exception('Undefined component `' . $name . '`.');
+            throw Exception::create($this->appName(), 'Undefined component `' . $name . '`.');
         }
 
         return $component;
@@ -186,13 +186,15 @@ class Runner implements \ArrayAccess
 
         $className = $loadExtended ? $this->getExtended($className) : $className;
 
+        $binder = $this->binder();
+
         /* @var $class Internal */
-        $class = $this->binder() ? $this->binder()->newClass($className, $args) : Obj::instanceArgs($className, $args);
+        $class = $binder ? $binder->newClass($className, $args) : Obj::instanceArgs($className, $args);
 
         $class->appName($this->appName());
 
         if (method_exists($class, 'init')) {
-            $class->init();
+            $binder ? $binder->call(array($class, 'init')) : $class->init();
         }
 
         return $class;

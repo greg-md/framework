@@ -93,13 +93,12 @@ class Binder implements \ArrayAccess
             $arg = $this->find($className);
 
             if (!$arg and !$expectedArg->isOptional()) {
-                throw new Exception('`' . $className . '` is not registered in binder.');
+                throw Exception::create($this->appName(), '`' . $className . '` is not registered in binder.');
                 //$arg = $className::create($this->appName());
             }
         } else {
             if (!$expectedArg->isOptional()) {
-                throw new Exception(
-                    'Argument `' . $expectedArg->getName() . '` is required in `'
+                throw Exception::create($this->appName(), 'Argument `' . $expectedArg->getName() . '` is required in `'
                     . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
             }
 

@@ -5,8 +5,6 @@ namespace Greg\Http;
 use Greg\Engine\Internal;
 use Greg\Support\Obj;
 use Greg\Support\Type;
-use DateTimeZone;
-use DateTime;
 
 class Response
 {
@@ -241,7 +239,7 @@ class Response
         if ($maxAge > 0) {
             $serverTime = Request::time();
             if ($modifiedSince) {
-                $modifiedSinceTime = new DateTime($modifiedSince, new DateTimeZone('UTC'));
+                $modifiedSinceTime = new \DateTime($modifiedSince, new \DateTimeZone('UTC'));
                 $modifiedSinceTime = strtotime($modifiedSinceTime->format('Y-m-d H:i:s'));
                 if ($modifiedSinceTime < $serverTime - $maxAge) {
                     $timestamp = $serverTime;
