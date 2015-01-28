@@ -3,13 +3,13 @@
 namespace Greg\Config;
 
 use Greg\Engine\Internal;
-use Greg\Storage\ArrayIndexAccess;
+use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Ini
 {
-    use ArrayIndexAccess, Internal;
+    use ArrayAccess, Internal;
 
     protected $contents = null;
 

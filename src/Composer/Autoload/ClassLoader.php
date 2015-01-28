@@ -401,7 +401,7 @@ class ClassLoader
      * @param $type
      * @return $this|bool
      */
-    public function useIncludePath($value = null, $type = Obj::VAR_REPLACE)
+    public function useIncludePath($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }

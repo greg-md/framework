@@ -83,7 +83,7 @@ class Layout implements SubscriberInterface
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function disabled($value = null, $type = Obj::VAR_REPLACE)
+    public function disabled($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }

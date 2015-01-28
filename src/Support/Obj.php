@@ -102,6 +102,28 @@ class Obj
         return $var;
     }
 
+    static public function &fetchFloatVar($obj, &$var, array $args = [], $unsigned = false)
+    {
+        if ($args) {
+            $var = static::fetchFloat(array_shift($args), $unsigned);
+
+            return $obj;
+        }
+
+        $var = static::fetchFloat($var, $unsigned); return $var;
+    }
+
+    static public function fetchFloat($var, $unsigned = false)
+    {
+        $var = (float)$var;
+
+        if ($unsigned and $var < 0) {
+            $var = 0;
+        }
+
+        return $var;
+    }
+
     static public function &fetchEnumVar($obj, &$var, array $args = [], array $stack = [], $default = null)
     {
         if ($args) {
@@ -149,6 +171,9 @@ class Obj
             $key = array_shift($args);
             if (is_array($key)) {
                 $addType = $args ? array_shift($args) : static::VAR_APPEND;
+                if ($addType === true) {
+                    $addType = static::VAR_REPLACE;
+                }
 
                 if ($addType == static::VAR_REPLACE) {
                     $var = $key;

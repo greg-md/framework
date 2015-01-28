@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Resource;
+namespace Greg\System;
 
 use Greg\Engine\Internal;
 use Greg\Support\Obj;

@@ -81,7 +81,7 @@ class Arr
         return [$var];
     }
 
-    static public function indexHas(array $array, $index, $delimiter = self::INDEX_DELIMITER)
+    static public function indexHas($array, $index, $delimiter = self::INDEX_DELIMITER)
     {
         if (is_array($index)) {
             foreach(($indexes = $index) as $key => $index) {
@@ -118,7 +118,7 @@ class Arr
         return true;
     }
 
-    static public function indexSet(array &$array, $index, $value, $delimiter = self::INDEX_DELIMITER)
+    static public function indexSet(&$array, $index, $value, $delimiter = self::INDEX_DELIMITER)
     {
         $indexes = explode($delimiter, $index);
 
@@ -134,7 +134,7 @@ class Arr
         return true;
     }
 
-    static public function &indexGet(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
+    static public function &indexGet(&$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
     {
         if (is_array($index)) {
             $else = (array)$else;
@@ -174,7 +174,7 @@ class Arr
         return static::subValue($array[$index], $indexes, $else);
     }
 
-    static public function indexDel(array &$array, $index, $delimiter = self::INDEX_DELIMITER)
+    static public function indexDel(&$array, $index, $delimiter = self::INDEX_DELIMITER)
     {
         if (is_array($index)) {
             foreach(($indexes = $index) as $key => $index) {
@@ -317,5 +317,10 @@ class Arr
         }
 
         return $grouped;
+    }
+
+    static public function filled($array, $filter = null)
+    {
+        return sizeof($filter ? array_filter($array, $filter) : array_filter($array)) == sizeof($array);
     }
 }

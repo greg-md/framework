@@ -94,7 +94,6 @@ class Binder implements \ArrayAccess
 
             if (!$arg and !$expectedArg->isOptional()) {
                 throw Exception::create($this->appName(), '`' . $className . '` is not registered in binder.');
-                //$arg = $className::create($this->appName());
             }
         } else {
             if (!$expectedArg->isOptional()) {

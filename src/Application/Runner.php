@@ -9,10 +9,10 @@ use Greg\Event\SubscriberInterface;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
-use Greg\Server\Config as ServerConfig;
-use Greg\Server\Ini as ServerIni;
-use Greg\Server\Session as ServerSession;
-use Greg\Storage\ArrayIndexAccess;
+use Greg\Server\Config;
+use Greg\Server\Ini;
+use Greg\Server\Session;
+use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 use Greg\View\Viewer;
@@ -20,7 +20,7 @@ use Closure;
 
 class Runner implements \ArrayAccess
 {
-    use ArrayIndexAccess, Internal;
+    use ArrayAccess, Internal;
 
     const EVENT_INIT = 'app.init';
     const EVENT_RUN = 'app.run';
@@ -45,54 +45,73 @@ class Runner implements \ArrayAccess
 
     public function init()
     {
-        if ($serverIni = (array)$this->get('server.ini')) {
-            ServerIni::param($serverIni);
+        // Server ini
+        if ($serverIni = (array)$this->indexGet('server.ini')) {
+            Ini::param($serverIni);
         }
 
-        if ($serverConfig = (array)$this->get('server.config')) {
-            ServerConfig::param($serverConfig);
+        // Server config
+        if ($serverConfig = (array)$this->indexGet('server.config')) {
+            Config::param($serverConfig);
         }
 
+        // Session ini
         if ($sessionIni = (array)$this->indexGet('session.ini')) {
-            ServerSession::ini($sessionIni);
+            Session::ini($sessionIni);
         }
 
+        // Session persistent
         if ($this->indexHas('session.persistent')) {
-            ServerSession::persistent((bool)$this->indexGet('session.persistent'));
+            Session::persistent((bool)$this->indexGet('session.persistent'));
         }
 
+        // Load Binder
         $this->binder($binder = Binder::create($this->appName()));
 
-        $binder->add($this);
-
+        // Load Binder to Binder
         $binder->add($binder);
 
-        $this->loader($loader = ClassLoader::create($this->appName(), $this->get('loader.paths')));
+        // Add myself to Binder
+        $binder->add($this);
 
+        // Load ClassLoader
+        $this->loader($loader = ClassLoader::create($this->appName(), $this->indexGet('loader.paths')));
+
+        // Register the ClassLoader to autoload classes
         $loader->register(true);
 
+        // Add ClassLoader to Binder
         $binder->add($loader);
 
+        // Load Listener
         $this->listener($listener = Listener::create($this->appName()));
 
+        // Add Listener to Binder
         $binder->add($listener);
 
+        // Load Response
         $this->response($response = Response::create($this->appName()));
 
+        // Add Response to Binder
         $binder->add($response);
 
+        // Load Router
         $this->router($router = Dispatcher::create($this->appName()));
 
+        // Add Router to Binder
         $binder->add($router);
 
+        // Load subscribers
         if ($subscribers = (array)$this->get('subscribers')) {
             $listener->addSubscribers($subscribers);
         }
 
+        // Load components
         if ($components = (array)$this->get('components')) {
             $this->addComponents($components);
         }
 
+        // Fire app init event
         $listener->fire(static::EVENT_INIT);
 
         return $this;
@@ -100,7 +119,7 @@ class Runner implements \ArrayAccess
 
     public function run($path = '/')
     {
-        if (!func_num_args() and $routeRequestParam = $this->get('route.request.param')) {
+        if (!func_num_args() and $routeRequestParam = $this->indexGet('request.route_param')) {
             $path = Request::getRequest($routeRequestParam);
         }
 
@@ -171,6 +190,23 @@ class Runner implements \ArrayAccess
         return $component;
     }
 
+    public function getResource($name)
+    {
+        $resource = $this->memory('resource/' . $name);
+
+        if (!$resource) {
+            if (!isset($this['resources'][$name]) or !$this['resources'][$name]) {
+                throw Exception::create($this->appName(), 'Undefined component `' . $name . '`.');
+            }
+
+            $resource = call_user_func_array([$this, 'newClass'], $this['resources'][$name]);
+
+            $this->memory('resource/' . $name, $resource);
+        }
+
+        return $resource;
+    }
+
     public function newClass($className)
     {
         $args = func_get_args();
@@ -194,7 +230,7 @@ class Runner implements \ArrayAccess
         $class->appName($this->appName());
 
         if (method_exists($class, 'init')) {
-            $binder ? $binder->call(array($class, 'init')) : $class->init();
+            $binder ? $binder->call([$class, 'init']) : $class->init();
         }
 
         return $class;
@@ -237,15 +273,15 @@ class Runner implements \ArrayAccess
      */
     public function viewCreate($request, array $param = [])
     {
-        return Viewer::create($this->appName(), $request, (array)$this->get('view.paths'), $param);
+        return Viewer::create($this->appName(), $request, (array)$this->indexGet('view.paths'), $param);
     }
 
     public function loadController($name, $request, $view)
     {
         $name = Str::phpName($name);
 
-        $prefixes = array_merge([''], (array)$this->get('controllers.prefixes'));
-        //$prefixes = (array)$this->get('controllers.prefixes');
+        $prefixes = array_merge([''], (array)$this->indexGet('controllers.prefixes'));
+        //$prefixes = (array)$this->indexGet('controllers.prefixes');
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */

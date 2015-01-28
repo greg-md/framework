@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Resource;
+namespace Greg\System;
 
 use \Greg\Support\Image as ImageHelper;
 

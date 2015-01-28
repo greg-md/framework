@@ -93,4 +93,9 @@ class Str
 
         return false;
     }
+
+    static public function quote($str, $with = '"')
+    {
+        return $with . $str . $with;
+    }
 }

@@ -4,12 +4,12 @@ namespace Greg\Http;
 
 use Greg\Engine\Internal;
 use Greg\Server\Info as ServerInfo;
-use Greg\Storage\ArrayIndexAccess;
+use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 
 class Request
 {
-    use ArrayIndexAccess, Internal;
+    use ArrayAccess, Internal;
 
     static public function &protocol()
     {

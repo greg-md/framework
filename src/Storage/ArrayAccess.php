@@ -2,12 +2,22 @@
 
 namespace Greg\Storage;
 
+use Greg\Support\Arr;
+
 trait ArrayAccess
 {
     protected $storage = [];
 
     public function has($index)
     {
+        if (is_array($index)) {
+            foreach(($indexes = $index) as $index) {
+                if (!array_key_exists($index, $this->storage)) {
+                    return false;
+                }
+            }
+            return true;
+        }
         return array_key_exists($index, $this->storage);
     }
 
@@ -20,6 +30,20 @@ trait ArrayAccess
 
     public function &get($index, $else = null)
     {
+        if (is_array($index)) {
+            $return = array();
+            $else = Arr::bring($else);
+            foreach(($indexes = $index) as $index) {
+                if ($this->has($index)) {
+                    $return[$index] = $this->storage[$index];
+                } elseif (array_key_exists($index, $else)) {
+                    $return[$index] = $else[$index];
+                } else {
+                    $return[$index] = null;
+                }
+            }
+            return $return;
+        }
         if ($this->has($index)) return $this->storage[$index]; return $else;
     }
 
@@ -63,6 +87,28 @@ trait ArrayAccess
         $this->storage = array_replace($array, $this->storage);
 
         return $this;
+    }
+
+    public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::indexHas($this->storage, $index, $delimiter);
+    }
+
+    public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        Arr::indexSet($this->storage, $index, $value, $delimiter);
+
+        return $this;
+    }
+
+    public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::indexGet($this->storage, $index, $else, $delimiter);
+    }
+
+    public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::indexDel($this->storage, $index, $delimiter);
     }
 
     /* Magic methods for ArrayAccess interface */
