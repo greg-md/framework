@@ -77,7 +77,7 @@ class Runner implements \ArrayAccess
         // Load ClassLoader
         $this->loader($loader = ClassLoader::create($this->appName(), $this->indexGet('loader.paths')));
 
-        // Register the ClassLoader to autoload classes
+        // Register the ClassLoader to autoload
         $loader->register(true);
 
         // Add ClassLoader to Binder
