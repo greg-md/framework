@@ -68,7 +68,7 @@ class Runner implements \ArrayAccess
         // Load Binder
         $this->binder($binder = Binder::create($this->appName()));
 
-        // Load Binder to Binder
+        // Add Binder to Binder
         $binder->add($binder);
 
         // Add myself to Binder
