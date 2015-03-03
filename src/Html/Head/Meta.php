@@ -3,10 +3,11 @@
 namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Html\Element;
 use Greg\Support\Obj;
 
-class Meta
+class Meta implements InternalInterface
 {
     use Internal;
 
@@ -85,7 +86,7 @@ class Meta
 
     static public function clear($content)
     {
-        return htmlspecialchars(preg_replace("#\n+#", " ", trim(strip_tags($content))));
+        return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
     }
 
     public function fetch()
@@ -104,7 +105,7 @@ class Meta
         return Element::create($this->appName(), 'meta', $attr);
     }
 
-    protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

@@ -26,7 +26,9 @@ class Path
         foreach(glob($path . DIRECTORY_SEPARATOR . '*' . $ext) as $file) {
             if (is_file($file)) {
                 $basename = basename($file);
+
                 $basename = mb_substr($basename, 0, mb_strlen($basename) - $extLen);
+
                 $config[$basename] = require $file;
             }
         }

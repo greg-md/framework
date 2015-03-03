@@ -14,6 +14,7 @@ class Normal extends Route
         switch($key) {
             case 'strict':
                 $this->{$key}($value);
+
                 break;
             default:
                 parent::setOption($key, $value);
@@ -25,29 +26,34 @@ class Normal extends Route
     public function fetch($path)
     {
         $path = $this->getPathParts($path);
+
         $format = $this->getPathParts($this->format());
+
         $strict = $this->strict();
+
         $param = $this->param();
+
         $index = 0;
 
         foreach($format as $key) {
             if ($key[0] == ':') {
                 $key = substr($key, 1);
+
                 if (array_key_exists($index, $path)) {
                     $param[$key] = $path[$index];
                 } else {
                     if ($strict) {
-
                         return false;
                     }
+
                     break;
                 }
             } else {
                 if ($key !== $path[$index]) {
-
                     return false;
                 }
             }
+
             ++$index;
         }
 
@@ -75,12 +81,14 @@ class Normal extends Route
         foreach($format as $key) {
             if ($key[0] == ':') {
                 $formatKey = substr($key, 1);
+
                 if (array_key_exists($formatKey, $allParam)) {
                     $param[$formatKey] = $allParam[$formatKey];
                 } else {
                     if ($strict) {
                         $this->paramException($formatKey);
                     }
+
                     break;
                 }
             }
@@ -94,12 +102,15 @@ class Normal extends Route
         $format = $this->getPathParts($this->format());
 
         $parts = [];
+
         foreach($format as $key => $value) {
             if ($value[0] == ':') {
                 $formatKey = substr($value, 1);
+
                 if (!array_key_exists($formatKey, $param)) {
                     break;
                 }
+
                 $parts[] = urlencode($param[$formatKey]);
             } else {
                 $parts[] = urlencode($value);
@@ -130,6 +141,7 @@ class Normal extends Route
             foreach(array_reverse($format) as $key) {
                 if ($key[0] == ':') {
                     $formatKey = substr($key, 1);
+
                     if (array_key_exists($formatKey, $defaultParam) and $defaultParam[$formatKey] == $formatParam[$formatKey]) {
                         unset($formatParam[$formatKey]);
                     } else {
@@ -147,6 +159,7 @@ class Normal extends Route
         // Add extended params to url parts
         if ($this->extend()) {
             $remain = str_replace('=', '/', http_build_query($extendParams, '', '/'));
+
             if ($remain) {
                 $urlParts[] = $remain;
             }

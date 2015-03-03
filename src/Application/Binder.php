@@ -3,11 +3,36 @@
 namespace Greg\Application;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Storage\ArrayAccess;
+use Greg\Support\Obj;
 
-class Binder implements \ArrayAccess
+class Binder implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
+
+    protected $adapters = [];
+
+    protected $instancesPrefixes = [];
+
+    public function addAdapter($name, $callback, $storage)
+    {
+        $this->adapters[$name] = [
+            'callback' => $callback,
+            'storage' => $storage,
+        ];
+    }
+
+    public function findInAdapters($className)
+    {
+        foreach($this->adapters as $adapter) {
+            if (isset($adapter['storage'][$className])) {
+                return [$adapter['callback'], $adapter['storage'][$className]];
+            }
+        }
+
+        return false;
+    }
 
     public function add($class)
     {
@@ -93,7 +118,28 @@ class Binder implements \ArrayAccess
             $arg = $this->find($className);
 
             if (!$arg and !$expectedArg->isOptional()) {
-                throw Exception::create($this->appName(), '`' . $className . '` is not registered in binder.');
+                $found = false;
+
+                if (($adapter = $this->findInAdapters($className))) {
+                    list($callback, $args) = $adapter;
+
+                    $arg = $this->call($callback, (array)$args);
+
+                    $found = true;
+                }
+
+                if ($this->instancesPrefixes()->has(function($value) use ($className) {
+                    return strpos($className, $value) === 0;
+                })) {
+                    /* @var $className string|Internal */
+                    $arg = $className::instance();
+
+                    $found = true;
+                }
+
+                if (!$found) {
+                    throw Exception::create($this->appName(), '`' . $className . '` is not registered in binder.');
+                }
             }
         } else {
             if (!$expectedArg->isOptional()) {
@@ -105,5 +151,10 @@ class Binder implements \ArrayAccess
         }
 
         return $arg;
+    }
+
+    public function instancesPrefixes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 }

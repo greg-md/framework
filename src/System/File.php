@@ -3,10 +3,10 @@
 namespace Greg\System;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
-use \Greg\Support\File as FileHelper;
 
-class File
+class File implements InternalInterface
 {
     use Internal;
 
@@ -21,12 +21,12 @@ class File
 
     public function ext()
     {
-        return FileHelper::ext($this->file());
+        return \Greg\Support\File::ext($this->file());
     }
 
     public function mime()
     {
-        return FileHelper::mime($this->file());
+        return \Greg\Support\File::mime($this->file());
     }
 
     public function file($value = null, $type = Obj::VAR_REPLACE)

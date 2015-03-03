@@ -14,6 +14,7 @@ class Ini
         $args = func_get_args();
         if ($args) {
             $var = array_shift($args);
+
             if (is_array($var)) {
                 foreach($var as $key => $value) {
                     static::set($key, $value);
@@ -21,8 +22,8 @@ class Ini
 
                 return true;
             }
-            if ($args) {
 
+            if ($args) {
                 return static::set($var, array_shift($args));
             }
 

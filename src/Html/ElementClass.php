@@ -3,8 +3,9 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 
-class ElementClass
+class ElementClass implements InternalInterface
 {
     use Internal;
 

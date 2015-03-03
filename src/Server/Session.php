@@ -21,7 +21,6 @@ class Session
         }
 
         if (func_num_args() > 1) {
-
             return static::iniSet($var, $value);
         }
 
@@ -64,6 +63,7 @@ class Session
     {
         if (!isset($_SESSION)) {
             session_start();
+
             if (static::persistent()) {
                 static::resetLifetime();
             }
@@ -85,9 +85,11 @@ class Session
 
         if ($nameEnd !== false) {
             $name = substr($data, $startIndex, $nameEnd - $startIndex);
+
             $rest = substr($data, $nameEnd + 1);
 
             $value = unserialize($rest); // PHP will unserialize up to "|" delimiter.
+
             $dict[$name] = $value;
 
             return static::unserializePart($data, $nameEnd + 1 + strlen(serialize($value)), $dict);
@@ -136,6 +138,7 @@ class Session
     {
         if ($handler !== null) {
             session_set_save_handler($handler);
+
             static::$handler = $handler;
         }
 
@@ -182,6 +185,7 @@ class Session
     static public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
         static::start();
+
         return Arr::indexSet($_SESSION, $index, $value, $delimiter);
     }
 

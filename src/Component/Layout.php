@@ -4,6 +4,7 @@ namespace Greg\Component;
 
 use Greg\Application\Runner;
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
@@ -13,7 +14,7 @@ use Greg\Router\Dispatcher;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
-class Layout implements SubscriberInterface
+class Layout implements SubscriberInterface, InternalInterface
 {
     use SubscriberTrait, Internal;
 

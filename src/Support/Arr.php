@@ -87,12 +87,10 @@ class Arr
             foreach(($indexes = $index) as $key => $index) {
                 if (is_array($index)) {
                     if (!(array_key_exists($index, $array) and is_array($array[$key]) and static::indexHas($array[$key], $index, $delimiter))) {
-
                         return false;
                     }
                 } else {
                     if (!static::indexHas($array, $index, $delimiter)) {
-
                         return false;
                     }
                 }
@@ -107,11 +105,12 @@ class Arr
     static public function currentIndexHas(array $array, $index, $delimiter = self::INDEX_DELIMITER)
     {
         $indexes = explode($delimiter, $index);
+
         foreach($indexes as $index) {
             if (!(is_array($array) and array_key_exists($index, $array))) {
-
                 return false;
             }
+
             $array = $array[$index];
         }
 
@@ -126,6 +125,7 @@ class Arr
 
         foreach($indexes as $index) {
             $current = (array)$current;
+
             $current = &$current[$index];
         }
 
@@ -138,11 +138,15 @@ class Arr
     {
         if (is_array($index)) {
             $else = (array)$else;
+
             $return = [];
+
             foreach(($indexes = $index) as $key => $index) {
                 $keyElse = array_key_exists($key, $else) ? $else[$key] : null;
+
                 if (is_array($index)) {
                     $child = array_key_exists($key, $array) ? (array)$array[$key] : [];
+
                     $return[$key] = static::indexGet($child, $index, $keyElse, $delimiter);
                 } else {
                     $return[$key] = static::indexGet($array, $index, $keyElse, $delimiter);
@@ -200,11 +204,13 @@ class Arr
             if (!is_array($current)) {
                 break;
             }
+
             $current = &$current[$index];
         }
 
         if (is_array($current)) {
             $current[$lastIndex] = null;
+
             unset($current[$lastIndex]);
         }
 
@@ -237,9 +243,11 @@ class Arr
 
             if (is_array($value)) {
                 array_unshift($valArgs, $callback);
+
                 static::mapRecursive($value, $valArgs);
             } else {
                 array_unshift($valArgs, $value);
+
                 $value = call_user_func_array($callback, $valArgs);
             }
 
@@ -287,21 +295,27 @@ class Arr
                 }
             } else {
                 $current = &$grouped;
+
                 if (is_numeric($maxLevel)) {
                     $i = 1;
+
                     foreach($item as $key => $value) {
                         if ($i > $maxLevel) {
                             break;
                         }
+
                         $current = &$current[$value];
+
                         if ($removeGroupedKey) {
                             unset($item[$key]);
                         }
+
                         ++$i;
                     }
                 } else {
                     foreach((array)$maxLevel as $level) {
                         $current = &$current[$item[$level]];
+
                         if ($removeGroupedKey) {
                             unset($item[$level]);
                         }

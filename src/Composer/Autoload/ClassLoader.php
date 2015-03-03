@@ -10,8 +10,10 @@
  * file that was distributed with this source code.
  */
 namespace Greg\Composer\Autoload;
+
 use Greg\Composer\Exception;
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
 /**
@@ -42,7 +44,7 @@ use Greg\Support\Obj;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
-class ClassLoader
+class ClassLoader implements InternalInterface
 {
     use Internal;
 

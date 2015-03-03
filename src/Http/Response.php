@@ -3,10 +3,11 @@
 namespace Greg\Http;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 use Greg\Support\Type;
 
-class Response
+class Response implements InternalInterface
 {
     use Internal;
 

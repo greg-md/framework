@@ -3,10 +3,11 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Router\Route\Normal;
 use Greg\Support\Obj;
 
-class Dispatcher
+class Dispatcher implements InternalInterface
 {
     use Internal;
 
@@ -26,10 +27,14 @@ class Dispatcher
 
         foreach($this->routes() as $name => $info) {
             $route = $this->newRouter($name, $info);
+
             $param = $route->fetch($path);
+
             if ($param !== false) {
                 $this->route($route);
+
                 $this->param($param);
+
                 break;
             }
         }
@@ -66,6 +71,7 @@ class Dispatcher
 
         if ($route) {
             $callback = $route->callback();
+
             if ($callback) {
                 $data = $callback($this->param());
             } else {
@@ -92,12 +98,12 @@ class Dispatcher
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function routes($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function routes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

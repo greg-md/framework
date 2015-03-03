@@ -16,8 +16,10 @@ trait ArrayAccess
                     return false;
                 }
             }
+
             return true;
         }
+
         return array_key_exists($index, $this->storage);
     }
 
@@ -31,8 +33,10 @@ trait ArrayAccess
     public function &get($index, $else = null)
     {
         if (is_array($index)) {
-            $return = array();
+            $return = [];
+
             $else = Arr::bring($else);
+
             foreach(($indexes = $index) as $index) {
                 if ($this->has($index)) {
                     $return[$index] = $this->storage[$index];
@@ -42,8 +46,10 @@ trait ArrayAccess
                     $return[$index] = null;
                 }
             }
+
             return $return;
         }
+
         if ($this->has($index)) return $this->storage[$index]; return $else;
     }
 

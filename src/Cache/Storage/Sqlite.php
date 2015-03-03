@@ -5,18 +5,18 @@ namespace Greg\Cache\Storage;
 use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
-use Greg\Db\Storage\Sqlite as DbSqlite;
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 
-class Sqlite implements StorageInterface
+class Sqlite implements StorageInterface, InternalInterface
 {
     use StorageTrait, Internal;
 
     protected $path = null;
 
-    protected $adapterClass = '\\Greg\\Db\\Storage\\Sqlite\\Adapter\\Pdo';
+    protected $adapterClass = '\Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo';
 
     protected $storage = null;
 
@@ -35,7 +35,7 @@ class Sqlite implements StorageInterface
 
     public function init()
     {
-        $this->storage(DbSqlite::create($this->appName(), $this->path(), $this->adapterClass()));
+        $this->storage(\Greg\Db\Sql\Storage\Sqlite::create($this->appName(), $this->path(), $this->adapterClass()));
 
         $this->checkAndBuildStructure();
 
@@ -66,7 +66,7 @@ class Sqlite implements StorageInterface
                     ->whereCol('type', 'table')
                     ->whereCol('name', 'Cache')
                     ->limit(1)
-                    ->fetchOne();
+                    ->one();
     }
 
     protected function buildStructure()
@@ -111,7 +111,7 @@ class Sqlite implements StorageInterface
             ->from('Cache')
             ->whereCol('Id', md5($id))
             ->limit(1)
-            ->fetchOne() ? true : false;
+            ->one() ? true : false;
     }
 
     public function load($id)
@@ -120,7 +120,7 @@ class Sqlite implements StorageInterface
             ->from('Cache', 'Content')
             ->whereCol('Id', md5($id))
             ->limit(1)
-            ->fetchOne();
+            ->one();
 
         return $content ? unserialize($content) : null;
     }
@@ -131,7 +131,7 @@ class Sqlite implements StorageInterface
             ->from('Cache', 'LastModified')
             ->whereCol('Id', md5($id))
             ->limit(1)
-            ->fetchOne();
+            ->one();
     }
 
     public function delete($ids = [])
@@ -164,10 +164,10 @@ class Sqlite implements StorageInterface
     }
 
     /**
-     * @param DbSqlite $value
-     * @return DbSqlite|$this|null
+     * @param \Greg\Db\Sql\Storage\Sqlite $value
+     * @return \Greg\Db\Sql\Storage\Sqlite|$this|null
      */
-    public function storage(DbSqlite $value = null)
+    public function storage(\Greg\Db\Sql\Storage\Sqlite $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }

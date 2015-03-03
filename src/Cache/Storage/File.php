@@ -6,10 +6,11 @@ use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 
-class File implements StorageInterface
+class File implements StorageInterface, InternalInterface
 {
     use StorageTrait, Internal;
 
@@ -158,7 +159,7 @@ class File implements StorageInterface
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

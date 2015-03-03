@@ -3,6 +3,9 @@
 namespace Greg\Support;
 
 use Closure;
+use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
+use Greg\Storage\ArrayObject;
 
 class Obj
 {
@@ -44,6 +47,43 @@ class Obj
         return $var;
     }
 
+    static public function &fetchScalarVar($obj, &$var, array $args = [], $unsigned = false)
+    {
+        if ($args) {
+            $value = static::fetchScalar(array_shift($args), $unsigned);
+
+            $addType = $args ? array_shift($args) : static::VAR_REPLACE;
+
+            switch ($addType) {
+                case static::VAR_APPEND:
+                    $var .= $value;
+
+                    break;
+                case static::VAR_PREPEND:
+                    $var = $value . $var;
+
+                    break;
+                case static::VAR_REPLACE:
+                    $var = $value;
+
+                    break;
+            }
+
+            return $obj;
+        }
+
+        $var = static::fetchScalar($var, $unsigned); return $var;
+    }
+
+    static public function fetchScalar($var)
+    {
+        if (!is_scalar($var)) {
+            $var = (string)$var;
+        }
+
+        return $var;
+    }
+
     static public function &fetchStrVar($obj, &$var, array $args = [])
     {
         if ($args) {
@@ -54,12 +94,15 @@ class Obj
             switch ($addType) {
                 case static::VAR_APPEND:
                     $var .= $value;
+
                     break;
                 case static::VAR_PREPEND:
                     $var = $value . $var;
+
                     break;
                 case static::VAR_REPLACE:
                     $var = $value;
+
                     break;
             }
 
@@ -164,13 +207,83 @@ class Obj
         return $value;
     }
 
+    static public function &fetchArrayObjVar(InternalInterface $obj, &$var, array $args = [])
+    {
+        if (!($var instanceof ArrayObject)) {
+            $var = ArrayObject::create($obj->appName());
+        }
+
+        if ($args) {
+            $key = array_shift($args);
+
+            if (is_array($key)) {
+                $addType = $args ? array_shift($args) : static::VAR_APPEND;
+
+                if ($addType === true) {
+                    $addType = static::VAR_REPLACE;
+                }
+
+                if ($addType == static::VAR_REPLACE) {
+                    $var->exchange($key);
+
+                    return $obj;
+                }
+
+                $replace = (bool)array_shift($args);
+
+                if ($replace) {
+                    switch ($addType) {
+                        case static::VAR_APPEND:
+                            $var->selfReplace($key);
+
+                            break;
+                        case static::VAR_PREPEND:
+                            $var->selfReplacePrepend($key);
+
+                            break;
+                    }
+                } else {
+                    switch ($addType) {
+                        case static::VAR_APPEND:
+                            $var->selfMerge($key);
+
+                            break;
+                        case static::VAR_PREPEND:
+                            $var->selfMergePrepend($key);
+
+                            break;
+                    }
+                }
+
+                return $obj;
+            }
+
+            if ($args) {
+                $var[$key] = array_shift($args);
+
+                return $obj;
+            }
+
+            if (array_key_exists($key, $var)) {
+                return $var[$key];
+            }
+
+            $return = null; return $return;
+        }
+
+        return $var;
+    }
+
     static public function &fetchArrayVar($obj, &$var, array $args = [])
     {
         $var = Arr::bring($var);
+
         if ($args) {
             $key = array_shift($args);
+
             if (is_array($key)) {
                 $addType = $args ? array_shift($args) : static::VAR_APPEND;
+
                 if ($addType === true) {
                     $addType = static::VAR_REPLACE;
                 }
@@ -181,27 +294,31 @@ class Obj
                     return $obj;
                 }
 
-                $recursive = (bool)array_shift($args);
-
                 $replace = (bool)array_shift($args);
+
+                $recursive = (bool)array_shift($args);
 
                 if ($replace) {
                     if ($recursive) {
                         switch ($addType) {
                             case static::VAR_APPEND:
                                 $var = array_replace_recursive($var, $key);
+
                                 break;
                             case static::VAR_PREPEND:
                                 $var = array_replace_recursive($key, $var);
+
                                 break;
                         }
                     } else {
                         switch ($addType) {
                             case static::VAR_APPEND:
                                 $var = array_replace($var, $key);
+
                                 break;
                             case static::VAR_PREPEND:
                                 $var = array_replace($key, $var);
+
                                 break;
                         }
                     }
@@ -210,18 +327,22 @@ class Obj
                         switch ($addType) {
                             case static::VAR_APPEND:
                                 $var = array_merge_recursive($var, $key);
+
                                 break;
                             case static::VAR_PREPEND:
                                 $var = array_merge_recursive($key, $var);
+
                                 break;
                         }
                     } else {
                         switch ($addType) {
                             case static::VAR_APPEND:
                                 $var = array_merge($var, $key);
+
                                 break;
                             case static::VAR_PREPEND:
                                 $var = array_merge($key, $var);
+
                                 break;
                         }
                     }

@@ -3,87 +3,88 @@
 namespace Greg\Http;
 
 use Greg\Engine\Internal;
-use Greg\Server\Info as ServerInfo;
+use Greg\Engine\InternalInterface;
+use Greg\Server\Info;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 
-class Request
+class Request implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
 
     static public function &protocol()
     {
-        return ServerInfo::get('SERVER_PROTOCOL');
+        return Info::get('SERVER_PROTOCOL');
     }
 
     static public function &clientHost()
     {
-        return ServerInfo::get('HTTP_HOST');
+        return Info::get('HTTP_HOST');
     }
 
     static public function &serverHost()
     {
-        return ServerInfo::get('SERVER_NAME');
+        return Info::get('SERVER_NAME');
     }
 
     static public function &serverAdmin()
     {
-        return ServerInfo::get('SERVER_ADMIN');
+        return Info::get('SERVER_ADMIN');
     }
 
     static public function &secured()
     {
-        return ServerInfo::get('HTTPS');
+        return Info::get('HTTPS');
     }
 
     static public function &with()
     {
-        return ServerInfo::get('HTTP_X_REQUESTED_WITH');
+        return Info::get('HTTP_X_REQUESTED_WITH');
     }
 
     static public function &port()
     {
-        return ServerInfo::get('SERVER_PORT');
+        return Info::get('SERVER_PORT');
     }
 
     static public function &agent()
     {
-        return ServerInfo::get('HTTP_USER_AGENT');
+        return Info::get('HTTP_USER_AGENT');
     }
 
     static public function &ip()
     {
-        return ServerInfo::get('REMOTE_ADDR');
+        return Info::get('REMOTE_ADDR');
     }
 
     static public function &uri()
     {
-        return ServerInfo::get('REQUEST_URI');
+        return Info::get('REQUEST_URI');
     }
 
     static public function &referrer()
     {
-        return ServerInfo::get('HTTP_REFERER');
+        return Info::get('HTTP_REFERER');
     }
 
     static public function &modifiedSince()
     {
-        return ServerInfo::get('HTTP_IF_MODIFIED_SINCE');
+        return Info::get('HTTP_IF_MODIFIED_SINCE');
     }
 
     static public function &match()
     {
-        return ServerInfo::get('HTTP_IF_NONE_MATCH');
+        return Info::get('HTTP_IF_NONE_MATCH');
     }
 
     static public function &time()
     {
-        return ServerInfo::requestTime();
+        return Info::requestTime();
     }
 
     static public function &microTime()
     {
-        return ServerInfo::requestMicroTime();
+        return Info::requestMicroTime();
     }
 
     static public function ajax()

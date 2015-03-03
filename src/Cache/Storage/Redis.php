@@ -5,10 +5,11 @@ namespace Greg\Cache\Storage;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 
-class Redis extends \Redis implements StorageInterface
+class Redis extends \Redis implements StorageInterface, InternalInterface
 {
     use StorageTrait, Internal;
 
@@ -54,10 +55,10 @@ class Redis extends \Redis implements StorageInterface
 
     public function save($id, $data = null)
     {
-        $this->hMset($id, array(
+        $this->hMset($id, [
             'Content' => serialize($data),
             'LastModified' => Request::time(),
-        ));
+        ]);
 
         return $this;
     }

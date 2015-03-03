@@ -3,9 +3,10 @@
 namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Html\Element;
 
-class Link
+class Link implements InternalInterface
 {
     use Internal;
 
@@ -29,6 +30,7 @@ class Link
     public function icon($href, $mime, array $attr = [], $id = null)
     {
         $attr['mime'] = $mime;
+
         return $this->set(__FUNCTION__, $href, $attr, $id);
     }
 

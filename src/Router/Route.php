@@ -3,9 +3,10 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-abstract class Route implements RouteInterface
+abstract class Route implements RouteInterface, InternalInterface
 {
     use Internal;
 
@@ -97,7 +98,7 @@ abstract class Route implements RouteInterface
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

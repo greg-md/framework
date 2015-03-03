@@ -3,12 +3,13 @@
 namespace Greg\View;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
-class Viewer
+class Viewer implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
 
@@ -77,6 +78,7 @@ class Viewer
 
         foreach ($paths as $path) {
             $data = $this->renderPath($path, $file, $include);
+
             if ($data !== false) {
                 break;
             }
@@ -151,7 +153,7 @@ class Viewer
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function controllers($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function controllers($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -161,7 +163,7 @@ class Viewer
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function paths($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function paths($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

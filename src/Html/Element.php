@@ -3,10 +3,11 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 
-class Element implements \ArrayAccess
+class Element implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
 
@@ -42,6 +43,7 @@ class Element implements \ArrayAccess
     public function &attr($key = null, $value = null)
     {
         $numArgs = func_num_args();
+
         if ($numArgs > 0) {
             if (is_array($key)) {
                 foreach(($attr = $key) as $key => $value) {
@@ -120,9 +122,11 @@ class Element implements \ArrayAccess
     protected function getName()
     {
         $name = $this->name();
+
         if (!$name) {
             throw Exception::create($this->appName(), 'Undefined tag name.');
         }
+
         return $name;
     }
 

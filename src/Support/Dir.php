@@ -8,7 +8,9 @@ class Dir
     {
         if (!file_exists($dir)) {
             set_error_handler(['static', 'throwErrors']);
+
             @mkdir($dir, 0777, $recursive);
+
             restore_error_handler();
         }
 

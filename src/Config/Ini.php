@@ -3,15 +3,16 @@
 namespace Greg\Config;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
-class Ini
+class Ini implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
 
-    protected $contents = null;
+    protected $contents = [];
 
     protected $section = null;
 
@@ -91,7 +92,7 @@ class Ini
         return $fetchedSection;
     }
 
-    public function contents($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function contents($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

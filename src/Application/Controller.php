@@ -3,11 +3,12 @@
 namespace Greg\Application;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
-abstract class Controller
+abstract class Controller implements InternalInterface
 {
     use Internal;
 
@@ -25,7 +26,12 @@ abstract class Controller
 
         $this->view($view);
 
-        $view->controllers($name, $this);
+        return $this;
+    }
+
+    public function init()
+    {
+        $this->view()->controllers($this->name(), $this);
 
         return $this;
     }

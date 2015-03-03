@@ -31,9 +31,11 @@ class Image extends File
         switch($ext) {
             case 'jpeg':
                 $ext = 'jpg';
+
                 break;
             case 'tiff':
                 $ext = 'tif';
+
                 break;
         }
 
@@ -88,12 +90,15 @@ class Image extends File
         switch(self::type($file)) {
             case IMAGETYPE_GIF:
                 $image = imagecreatefromgif($file);
+
                 break;
             case IMAGETYPE_JPEG:
                 $image = imagecreatefromjpeg($file);
+
                 break;
             case IMAGETYPE_PNG:
                 $image = imagecreatefrompng($file);
+
                 break;
         }
 

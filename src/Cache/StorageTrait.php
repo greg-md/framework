@@ -6,7 +6,7 @@ use Greg\Http\Request;
 
 trait StorageTrait
 {
-    public function fetch($id, $expire, $callback)
+    public function fetch($id, $callback, $expire = 0)
     {
         if ($this->expired($id, $expire)) {
             $this->save($id, $result = $this->app()->binder()->call($callback));

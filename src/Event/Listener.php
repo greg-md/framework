@@ -3,12 +3,13 @@
 namespace Greg\Event;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Str;
 use Closure;
 
-class Listener implements \ArrayAccess
+class Listener implements \ArrayAccess, InternalInterface
 {
     use ArrayAccess, Internal;
 
@@ -31,6 +32,7 @@ class Listener implements \ArrayAccess
 
         foreach(Arr::bring($event) as $event) {
             $method = lcfirst(Str::phpName($event));
+
             $this->on($event, [$class, $method], get_class($class) . '::' . $method);
         }
 

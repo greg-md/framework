@@ -3,12 +3,13 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Html\Head\Link;
 use Greg\Html\Head\Meta;
 use Greg\Html\Head\Style;
 use Greg\Support\Obj;
 
-class Head
+class Head implements InternalInterface
 {
     use Internal;
 

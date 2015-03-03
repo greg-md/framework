@@ -3,13 +3,14 @@
 namespace Greg\Storage;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Arr;
 
-class ArrayObject extends \ArrayObject
+class ArrayObject extends \ArrayObject implements InternalInterface
 {
     use Internal;
 
-    public function __construct($input = array(), $iteratorClass = 'ArrayIterator', $flag = ArrayObject::ARRAY_AS_PROPS)
+    public function __construct($input = [], $iteratorClass = 'ArrayIterator', $flag = ArrayObject::ARRAY_AS_PROPS)
     {
         parent::__construct(Arr::bring($input), $flag, $iteratorClass);
     }
@@ -36,6 +37,16 @@ class ArrayObject extends \ArrayObject
             return true;
         }
 
+        if (($index instanceof \Closure)) {
+            foreach($this as $key => $value) {
+                if ($index($value, $key) === true) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return parent::offsetExists((string)$index);
     }
 
@@ -49,7 +60,7 @@ class ArrayObject extends \ArrayObject
     public function &get($index, $else = null)
     {
         if (is_array($index)) {
-            $return = array();
+            $return = [];
 
             $else = Arr::bring($else);
 
@@ -65,6 +76,7 @@ class ArrayObject extends \ArrayObject
 
             return $this->returnArray($return);
         }
+
         if ($this->has($index)) return parent::offsetGet($index); return $else;
     }
 
@@ -230,7 +242,7 @@ class ArrayObject extends \ArrayObject
 
     public function clear()
     {
-        parent::exchangeArray(array());
+        parent::exchangeArray([]);
 
         return $this;
     }
@@ -638,7 +650,8 @@ class ArrayObject extends \ArrayObject
 
     public function column($key)
     {
-        $array = array();
+        $array = [];
+
         if ($this->count()) {
             $items = $this->getArrayCopy();
 

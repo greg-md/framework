@@ -3,9 +3,10 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-class Script
+class Script implements InternalInterface
 {
     use Internal;
 
@@ -120,7 +121,7 @@ class Script
         return $this;
     }
 
-    public function order($key = null, $value = null, $type = Obj::VAR_APPEND, $recursive = false, $replace = false)
+    public function order($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
