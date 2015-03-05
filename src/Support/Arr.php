@@ -257,6 +257,15 @@ class Arr
         return $array;
     }
 
+    static public function find(array $array, $callable)
+    {
+        foreach($array as $value) {
+            if (call_user_func_array($callable, [$value])) return $value;
+        }
+
+        return false;
+    }
+
     static public function filter(array $array, array $args)
     {
         array_unshift($args, $array);

@@ -59,11 +59,11 @@ abstract class Route implements RouteInterface, InternalInterface
         return $this;
     }
 
-    static public function getPathParts($path)
+    static public function getPathParts($path, $limit = false)
     {
         $path = trim($path, '/');
 
-        return $path ? explode('/', $path) : [];
+        return $path ? ($limit !== false ? explode('/', $path, $limit) : explode('/', $path)) : [];
     }
 
     static public function pathToParam($path)

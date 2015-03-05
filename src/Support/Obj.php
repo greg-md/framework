@@ -274,6 +274,12 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @return array|null|$this
+     */
     static public function &fetchArrayVar($obj, &$var, array $args = [])
     {
         $var = Arr::bring($var);

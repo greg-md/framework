@@ -507,6 +507,11 @@ class ArrayObject extends \ArrayObject implements InternalInterface
         return $this;
     }
 
+    public function find($callback = null)
+    {
+        return Arr::find(parent::getArrayCopy(), $callback);
+    }
+
     public function filter($callback = null, $flag = 0)
     {
         return $this->returnArray(Arr::filter(parent::getArrayCopy(), func_get_args()));

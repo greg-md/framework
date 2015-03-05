@@ -86,7 +86,40 @@ class Table implements InternalInterface
             $columns = func_get_args();
         }
 
-        return $this->storage()->select($columns)->from($this);
+        return $this->storage()->select($columns)->table($this)->from($this);
+    }
+
+    public function createRow($data, $reset = true)
+    {
+        $class = $this->rowClass();
+
+        if (!$class) {
+            throw Exception::create($this->appName(), 'Undefined table row class.');
+        }
+
+        if ($reset) {
+            $rowData = [];
+
+            /* @var $column Table\Column */
+            foreach($this->columns() as $name => $column) {
+                $rowData[$column->name()] = $column->def();
+            }
+
+            $data = array_merge($rowData, $data);
+        }
+
+        return $this->app()->binder()->newClass($class, [$this, $data]);
+    }
+
+    public function createRowSet($data)
+    {
+        $class = $this->rowSetClass();
+
+        if (!$class) {
+            throw Exception::create($this->appName(), 'Undefined table row set class.');
+        }
+
+        return $this->app()->binder()->newClass($class, [$this, $data]);
     }
 
     public function prefix($value = null, $type = Obj::VAR_REPLACE)

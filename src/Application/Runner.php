@@ -16,6 +16,7 @@ use Greg\Server\Session;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 use Greg\Support\Str;
+use Greg\Translation\Translator;
 use Greg\View\Viewer;
 use Closure;
 
@@ -61,6 +62,8 @@ class Runner implements \ArrayAccess, InternalInterface
         $this->initListener();
 
         $this->initResponse();
+
+        $this->initTranslator();
 
         $this->initResources();
 
@@ -122,7 +125,7 @@ class Runner implements \ArrayAccess, InternalInterface
         $binder->add($this);
 
         // Register instances prefixes
-        $binder->instancesPrefixes((array)$this->indexGet('binder.instancesPrefixes'));
+        $binder->instancesPrefixes((array)$this->indexGet('binder.instances_prefixes'));
 
         return $this;
     }
@@ -159,6 +162,17 @@ class Runner implements \ArrayAccess, InternalInterface
 
         // Add Response to Binder
         $this->binder()->add($response);
+
+        return $this;
+    }
+
+    public function initTranslator()
+    {
+        // Load Translator
+        $this->translator($translator = Translator::create($this->appName()));
+
+        // Add Translator to Binder
+        $this->binder()->add($translator);
 
         return $this;
     }
@@ -454,6 +468,15 @@ class Runner implements \ArrayAccess, InternalInterface
     public function response(Response $response = null)
     {
         return func_num_args() ? $this->memory('response', $response) : $this->memory('response');
+    }
+
+    /**
+     * @param Translator $translator
+     * @return Translator|bool
+     */
+    public function translator(Translator $translator = null)
+    {
+        return func_num_args() ? $this->memory('translator', $translator) : $this->memory('translator');
     }
 
     /**

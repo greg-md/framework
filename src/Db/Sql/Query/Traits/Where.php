@@ -6,8 +6,18 @@ trait Where
 {
     protected $where = [];
 
-    public function whereCol($column, $value = null, $operator = '=')
+    public function whereCol($column, $operator = '=', $value = null)
     {
+        $args = func_get_args();
+
+        if (sizeof($args) < 3) {
+            $column = array_shift($args);
+
+            $value = array_shift($args);
+
+            $operator = '=';
+        }
+
         $this->where[] = [
             'logic' => 'and',
             'expr' => $this->quoteExpr($column) . ' ' . $operator . ' ?',

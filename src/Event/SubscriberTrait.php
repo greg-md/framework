@@ -22,9 +22,14 @@ trait SubscriberTrait
         $method = lcfirst(Str::phpName($event));
 
         if (method_exists($this, $method)) {
-            call_user_func_array([$this, $method], $param);
+            $this->app()->binder()->call([$this, $method], $param);
         }
 
         return $this;
     }
+
+    /**
+     * @return \Greg\Application\Runner
+     */
+    abstract public function app();
 }

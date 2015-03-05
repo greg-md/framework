@@ -24,10 +24,15 @@ class Stmt extends \PDOStatement implements StmtInterface, InternalInterface
     {
         $pairs = [];
 
-        foreach(parent::fetchAll(\PDO::FETCH_NUM) as $row) {
+        foreach(parent::fetchAll() as $row) {
             $pairs[$row[$key]] = $row[$value];
         }
 
         return $pairs;
+    }
+
+    public function fetchAssoc()
+    {
+        return parent::fetchAll(\PDO::FETCH_ASSOC);
     }
 }

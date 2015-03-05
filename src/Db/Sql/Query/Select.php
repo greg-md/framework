@@ -6,6 +6,7 @@ use Greg\Db\Sql\Query;
 use Greg\Db\Sql\QueryTrait;
 use Greg\Db\Sql\Query\Traits\From;
 use Greg\Db\Sql\Query\Traits\Where;
+use Greg\Db\Sql\Table;
 use Greg\Engine\Internal;
 use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
@@ -33,6 +34,8 @@ class Select implements InternalInterface
     protected $limit = null;
 
     protected $offset = null;
+
+    protected $table = null;
 
     public function columns($columns = null, $_ = null)
     {
@@ -167,26 +170,58 @@ class Select implements InternalInterface
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function one($column = 0)
+    public function stmt($execute = true)
     {
         $stmt = $this->storage()->prepare($this->toString());
 
         $this->bindParamsToStmt($stmt);
 
-        $stmt->execute();
+        $execute && $stmt->execute();
 
-        return $stmt->fetchOne($column);
+        return $stmt;
+    }
+
+    public function one($column = 0)
+    {
+        return $this->stmt()->fetchOne($column);
     }
 
     public function pairs($key = 0, $value = 1)
     {
-        $stmt = $this->storage()->prepare($this->toString());
+        return $this->stmt()->fetchPairs($key, $value);
+    }
 
-        $this->bindParamsToStmt($stmt);
+    public function selectRows()
+    {
+        return $this->stmt()->fetchAssoc();
+    }
 
-        $stmt->execute();
+    public function fetchRows()
+    {
+        $items = $this->selectRows();
 
-        return $stmt->fetchPairs($key, $value);
+        $table = $this->table();
+        if (!$table) {
+            throw Exception::create($this->appName(), 'Undefined table in SELECT query.');
+        }
+
+        foreach($items as &$item) {
+            $item = $table->createRow($item);
+        }
+        unset($item);
+
+        $items = $table->createRowSet($items);
+
+        return $items;
+    }
+
+    /**
+     * @param Table $value
+     * @return Table|null|$this
+     */
+    public function table(Table $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
     /**

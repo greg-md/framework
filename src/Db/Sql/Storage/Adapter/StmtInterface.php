@@ -46,5 +46,9 @@ interface StmtInterface
 
     public function setFetchMode($mode, $_ = null);
 
+    /* custom */
+
     public function fetchPairs($key = 0, $value = 1);
+
+    public function fetchAssoc();
 }
