@@ -15,7 +15,7 @@ use Greg\Support\Obj;
  * Class Select
  * @package Greg\Db\Sql\Query
  *
- * @method Select whereCol($column, $value = null, $operator = '=')
+ * @method Select whereCol($column, $operator, $value = null)
  */
 class Select implements InternalInterface
 {
@@ -191,14 +191,14 @@ class Select implements InternalInterface
         return $this->stmt()->fetchPairs($key, $value);
     }
 
-    public function selectRows()
+    public function assoc()
     {
         return $this->stmt()->fetchAssoc();
     }
 
-    public function fetchRows()
+    public function rows()
     {
-        $items = $this->selectRows();
+        $items = $this->assoc();
 
         $table = $this->table();
         if (!$table) {

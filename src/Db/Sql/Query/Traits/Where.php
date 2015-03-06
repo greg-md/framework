@@ -6,7 +6,7 @@ trait Where
 {
     protected $where = [];
 
-    public function whereCol($column, $operator = '=', $value = null)
+    public function whereCol($column, $operator, $value = null)
     {
         $args = func_get_args();
 

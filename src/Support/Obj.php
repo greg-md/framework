@@ -36,6 +36,12 @@ class Obj
         return $class->newInstanceArgs($class->hasMethod('__construct') ? $args : []);
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @return mixed|$this
+     */
     static public function &fetchVar($obj, &$var, array $args = [])
     {
         if ($args) {
@@ -47,6 +53,13 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @param bool $unsigned
+     * @return int|float|bool|string|$this
+     */
     static public function &fetchScalarVar($obj, &$var, array $args = [], $unsigned = false)
     {
         if ($args) {
@@ -84,6 +97,12 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @return string|$this
+     */
     static public function &fetchStrVar($obj, &$var, array $args = [])
     {
         if ($args) {
@@ -123,6 +142,13 @@ class Obj
         $var = (bool)$var; return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @param bool $unsigned
+     * @return int|$this
+     */
     static public function &fetchIntVar($obj, &$var, array $args = [], $unsigned = false)
     {
         if ($args) {
@@ -145,6 +171,13 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @param bool $unsigned
+     * @return float|$this
+     */
     static public function &fetchFloatVar($obj, &$var, array $args = [], $unsigned = false)
     {
         if ($args) {
@@ -167,6 +200,14 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @param array $stack
+     * @param null $default
+     * @return mixed|$this
+     */
     static public function &fetchEnumVar($obj, &$var, array $args = [], array $stack = [], $default = null)
     {
         if ($args) {
@@ -187,6 +228,13 @@ class Obj
         return $var;
     }
 
+    /**
+     * @param $obj
+     * @param $var
+     * @param array $args
+     * @param callable $callback
+     * @return mixed|$this
+     */
     static public function &fetchCallbackVar($obj, &$var, array $args = [], Closure $callback = null)
     {
         if ($args) {
@@ -278,7 +326,7 @@ class Obj
      * @param $obj
      * @param $var
      * @param array $args
-     * @return array|null|$this
+     * @return mixed|$this
      */
     static public function &fetchArrayVar($obj, &$var, array $args = [])
     {
