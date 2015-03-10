@@ -104,7 +104,7 @@ class Column
     public function getMaxValue()
     {
         if ($len = $this->getNumericLength($this->type())) {
-            $maxValue = pow(16, $len * 2);
+            $maxValue = 16 ** ($len * 2);
 
             if (!$this->unsigned()) {
                 $maxValue = $maxValue / 2;
@@ -137,42 +137,42 @@ class Column
         return $this;
     }
 
-    public function name($value = null, $type = Obj::VAR_REPLACE)
+    public function name($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function type($value = null, $type = Obj::VAR_REPLACE)
+    public function type($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function length($value = null, $type = Obj::VAR_REPLACE)
+    public function length($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function isUnsigned($value = null, $type = Obj::VAR_REPLACE)
+    public function isUnsigned($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function allowNull($value = null, $type = Obj::VAR_REPLACE)
+    public function allowNull($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function def($value = null, $type = Obj::VAR_REPLACE)
+    public function def($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchScalarVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function comment($value = null, $type = Obj::VAR_REPLACE)
+    public function comment($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function values($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

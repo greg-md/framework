@@ -172,7 +172,7 @@ class Mysql extends Storage
 
     public function query($query, $mode = null, $_ = null)
     {
-        return call_user_func_array([$this->adapter(), __FUNCTION__], func_get_args());
+        return $this->adapter()->query(...func_get_args());
     }
 
     public function quote($string, $type = self::PARAM_STR)
@@ -195,22 +195,22 @@ class Mysql extends Storage
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function username($value = null, $type = Obj::VAR_REPLACE)
+    public function username($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function password($value = null, $type = Obj::VAR_REPLACE)
+    public function password($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    protected function options($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    protected function options($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function adapterClass($value = null, $type = Obj::VAR_REPLACE)
+    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -226,6 +226,6 @@ class Mysql extends Storage
 
     public function __call($method, array $args = [])
     {
-        return call_user_func_array([$this->adapter(), $method], $args);
+        return $this->adapter()->{$method}(...$args);
     }
 }

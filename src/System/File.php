@@ -3,10 +3,9 @@
 namespace Greg\System;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-class File implements InternalInterface
+class File
 {
     use Internal;
 
@@ -29,7 +28,7 @@ class File implements InternalInterface
         return \Greg\Support\File::mime($this->file());
     }
 
-    public function file($value = null, $type = Obj::VAR_REPLACE)
+    public function file($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

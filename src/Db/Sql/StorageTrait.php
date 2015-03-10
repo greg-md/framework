@@ -12,5 +12,5 @@ trait StorageTrait
         return Expr::create($this->appName(), $expr);
     }
 
-    abstract public function appName($value = null, $type = Obj::VAR_REPLACE);
+    abstract public function appName($value = null, $type = Obj::PROP_REPLACE);
 }

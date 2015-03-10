@@ -2,6 +2,8 @@
 
 namespace Greg\Engine;
 
+use Greg\Application\Runner;
+
 trait Manager
 {
     protected $storage = null;
@@ -9,7 +11,7 @@ trait Manager
     public function __construct($storage)
     {
         if (is_array($storage)) {
-            $storage = call_user_func_array([$this->app(), 'newClass'], $storage);
+            $storage = $this->app()->newInstance(...$storage);
         }
 
         $this->storage($storage);
@@ -17,10 +19,14 @@ trait Manager
 
     public function __call($method, $args)
     {
-        return call_user_func_array([$this->storage(), $method], $args);
+        return $this->storage()->{$method}(...$args);
     }
 
-    abstract public function app();
+    /**
+     * @param Runner $app
+     * @return Runner
+     */
+    abstract public function app(Runner $app = null);
 
     abstract public function storage();
 }

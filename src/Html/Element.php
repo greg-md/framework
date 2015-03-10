@@ -3,13 +3,13 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 
-class Element implements \ArrayAccess, InternalInterface
+class Element implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     const SHORT_TAGS = 'h1,h2,h3,h4,h5,h6,input,hr,br,link,meta,img,keygen';
 
@@ -65,27 +65,27 @@ class Element implements \ArrayAccess, InternalInterface
         return $this->storage;
     }
 
-    public function name($value = null, $type = Obj::VAR_REPLACE)
+    public function name($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function inner($value = null, $type = Obj::VAR_REPLACE)
+    public function inner($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function before($value = null, $type = Obj::VAR_REPLACE)
+    public function before($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function after($value = null, $type = Obj::VAR_REPLACE)
+    public function after($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function condition($value = null, $type = Obj::VAR_REPLACE)
+    public function condition($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

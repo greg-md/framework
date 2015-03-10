@@ -3,10 +3,9 @@
 namespace Greg\Db\Sql\Query;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-class Expr implements InternalInterface
+class Expr
 {
     use Internal;
 
@@ -17,7 +16,7 @@ class Expr implements InternalInterface
         $this->data($data);
     }
 
-    public function data($value = null, $type = Obj::VAR_REPLACE)
+    public function data($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

@@ -39,7 +39,7 @@ class Session
 
     static public function id($id = null)
     {
-        return func_num_args() ? session_id($id) : session_id();
+        return session_id(...func_get_args());
     }
 
     static public function getId()
@@ -56,7 +56,7 @@ class Session
 
     static public function name($name = null)
     {
-        return func_num_args() ? session_name($name) : session_name();
+        return session_name(...func_get_args());
     }
 
     static public function start()

@@ -3,12 +3,11 @@
 namespace Greg\Application;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
-abstract class Controller implements InternalInterface
+abstract class Controller
 {
     use Internal;
 
@@ -36,7 +35,7 @@ abstract class Controller implements InternalInterface
         return $this;
     }
 
-    public function name($value = null, $type = Obj::VAR_REPLACE)
+    public function name($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

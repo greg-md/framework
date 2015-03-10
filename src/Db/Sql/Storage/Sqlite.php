@@ -160,7 +160,7 @@ class Sqlite extends Storage
 
     public function query($query, $mode = null, $_ = null)
     {
-        return call_user_func_array([$this->adapter(), __FUNCTION__], func_get_args());
+        return $this->adapter()->query(...func_get_args());
     }
 
     public function quote($string, $type = self::PARAM_STR)
@@ -178,12 +178,12 @@ class Sqlite extends Storage
         return $this->adapter()->setAttribute($name, $value);
     }
 
-    public function path($value = null, $type = Obj::VAR_REPLACE)
+    public function path($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function adapterClass($value = null, $type = Obj::VAR_REPLACE)
+    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -199,6 +199,6 @@ class Sqlite extends Storage
 
     public function __call($method, array $args = [])
     {
-        return call_user_func_array([$this->adapter(), $method], $args);
+        return $this->adapter()->{$method}(...$args);
     }
 }

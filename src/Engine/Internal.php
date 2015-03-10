@@ -2,6 +2,7 @@
 
 namespace Greg\Engine;
 
+use Greg\Application\Runner;
 use Greg\Support\Obj;
 
 trait Internal
@@ -10,23 +11,20 @@ trait Internal
 
     /**
      * @param string $appName
+     * @param ...$args
      * @return static
      * @throws \Exception
      */
-    static public function create($appName = 'default')
+    static public function create($appName = 'default', ...$args)
     {
+        /* @var $app \Greg\Application\Runner */
         $app = Memory::get($appName . ':app');
 
         if (!$app) {
             throw new \Exception('App `' . $appName . '` is not registered in memory.');
         }
 
-        $args = func_get_args();
-        //array_shift($args);
-        //array_unshift($args, get_called_class());
-        $args[0] = get_called_class(); // better solution instead of shifting
-
-        return call_user_func_array([$app, 'newClass'], $args);
+        return $app->newInstance(get_called_class(), ...$args);
     }
 
     /**
@@ -50,9 +48,7 @@ trait Internal
     {
         $key = $this->appName();
 
-        $args = func_get_args();
-
-        if ($args) {
+        if ($args = func_get_args()) {
             $key .= ':' . array_shift($args);
 
             if ($args) {
@@ -66,14 +62,15 @@ trait Internal
     }
 
     /**
-     * @return \Greg\Application\Runner
+     * @param Runner $app
+     * @return Runner|null
      */
-    public function app()
+    public function app(Runner $app = null)
     {
-        return $this->memory('app');
+        return $this->memory('app', ...func_get_args());
     }
 
-    public function appName($value = null, $type = Obj::VAR_REPLACE)
+    public function appName($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

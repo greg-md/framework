@@ -2,6 +2,7 @@
 
 namespace Greg\Cache;
 
+use Greg\Application\Runner;
 use Greg\Http\Request;
 
 trait StorageTrait
@@ -39,9 +40,10 @@ trait StorageTrait
     }
 
     /**
-     * @return \Greg\Application\Runner
+     * @param Runner $app
+     * @return Runner
      */
-    abstract public function app();
+    abstract public function app(Runner $app = null);
 
     abstract public function save($id, $data = null);
 

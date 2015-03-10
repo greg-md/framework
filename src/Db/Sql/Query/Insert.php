@@ -4,10 +4,9 @@ namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\QueryTrait;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-class Insert implements InternalInterface
+class Insert
 {
     use QueryTrait, Internal;
 
@@ -52,17 +51,17 @@ class Insert implements InternalInterface
         return $stmt->execute();
     }
 
-    public function columns($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function columns($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function values($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function select($value = null, $type = Obj::VAR_REPLACE)
+    public function select($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

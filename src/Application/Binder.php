@@ -2,32 +2,33 @@
 
 namespace Greg\Application;
 
+use Greg\Application\Binder\Adapter;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 
-class Binder implements \ArrayAccess, InternalInterface
+class Binder implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     protected $adapters = [];
 
     protected $instancesPrefixes = [];
 
-    public function addAdapter($name, $callback, $storage)
+    public function addAdapter($name, callable $callable, $storage)
     {
-        $this->adapters[$name] = [
-            'callback' => $callback,
-            'storage' => $storage,
-        ];
+        $this->adapters[$name] = new Adapter($callable, $storage);
+
+        return $this;
     }
 
     public function findInAdapters($className)
     {
+        /* @var $adapter Adapter */
         foreach($this->adapters as $adapter) {
-            if (isset($adapter['storage'][$className])) {
-                return [$adapter['callback'], $adapter['storage'][$className]];
+            if ($adapter->has($className)) {
+                return $adapter;
             }
         }
 
@@ -39,29 +40,40 @@ class Binder implements \ArrayAccess, InternalInterface
         return $this->set(get_class($class), $class);
     }
 
-    public function find($class)
+    public function newInstance($className, ...$args)
     {
-        return $this->get($class);
+        return $this->newInstanceArgs($className, $args);
     }
 
-    public function newClass($className, array $args = [])
+    public function newInstanceArgs($className, array $args = [])
     {
         $class = new \ReflectionClass($className);
 
-        if ($class->hasMethod('__construct')) {
-            $expectedArgs = $class->getMethod('__construct')->getParameters();
+        $self = $class->newInstanceWithoutConstructor();
+
+        if (method_exists($self, '__bind')) {
+            $this->call([$self, '__bind']);
+        }
+
+        if ($constructor = $class->getConstructor()) {
+            $expectedArgs = $constructor->getParameters();
 
             if ($expectedArgs) {
                 $args = $this->addExpectedArgs($args, $expectedArgs);
             }
-        } else {
-            $args = [];
+
+            $constructor->invokeArgs($self, $args);
         }
 
-        return $class->newInstanceArgs($args);
+        return $self;
     }
 
-    public function call($function, array $args = [])
+    public function call($function, ...$args)
+    {
+        return $this->callArgs($function, $args);
+    }
+
+    public function callArgs($function, array $args = [])
     {
         if (is_scalar($function) and strpos($function, '::')) {
             $function = explode('::', $function, 2);
@@ -82,7 +94,7 @@ class Binder implements \ArrayAccess, InternalInterface
         return call_user_func_array($function, $args);
     }
 
-    protected function addExpectedArgs($args, $expectedArgs)
+    public function addExpectedArgs($args, $expectedArgs)
     {
         if ($args) {
             $expectedArgs = array_slice($expectedArgs, sizeof($args));
@@ -115,20 +127,18 @@ class Binder implements \ArrayAccess, InternalInterface
         if ($expectedType) {
             $className = $expectedType->getName();
 
-            $arg = $this->find($className);
+            $arg = $this->get($className);
 
             if (!$arg and !$expectedArg->isOptional()) {
                 $found = false;
 
                 if (($adapter = $this->findInAdapters($className))) {
-                    list($callback, $args) = $adapter;
-
-                    $arg = $this->call($callback, (array)$args);
+                    $arg = $this->callArgs($adapter->caller(), (array)$adapter->get($className));
 
                     $found = true;
                 }
 
-                if ($this->instancesPrefixes()->has(function($value) use ($className) {
+                if (!$found and $this->instancesPrefixes()->has(function($value) use ($className) {
                     return strpos($className, $value) === 0;
                 })) {
                     /* @var $className string|Internal */
@@ -153,7 +163,7 @@ class Binder implements \ArrayAccess, InternalInterface
         return $arg;
     }
 
-    public function instancesPrefixes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function instancesPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }

@@ -6,9 +6,8 @@ use Greg\Db\Sql\Query\Traits\From;
 use Greg\Db\Sql\Query\Traits\Where;
 use Greg\Db\Sql\QueryTrait;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 
-class Delete implements InternalInterface
+class Delete
 {
     use From, Where, QueryTrait, Internal;
 

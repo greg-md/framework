@@ -5,11 +5,10 @@ namespace Greg\Cache\Storage;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 
-class Redis extends \Redis implements StorageInterface, InternalInterface
+class Redis extends \Redis implements StorageInterface
 {
     use StorageTrait, Internal;
 
@@ -97,7 +96,7 @@ class Redis extends \Redis implements StorageInterface, InternalInterface
         return $this;
     }
 
-    public function host($value = null, $type = Obj::VAR_REPLACE)
+    public function host($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -107,9 +106,9 @@ class Redis extends \Redis implements StorageInterface, InternalInterface
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function prefix($value = null, $type = Obj::VAR_REPLACE)
+    public function prefix($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args(), true);
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
     public function timeout($value = null)

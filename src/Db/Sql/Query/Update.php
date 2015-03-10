@@ -5,7 +5,6 @@ namespace Greg\Db\Sql\Query;
 use Greg\Db\Sql\Query\Traits\Where;
 use Greg\Db\Sql\QueryTrait;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 
 /**
  * Class Update
@@ -13,7 +12,7 @@ use Greg\Engine\InternalInterface;
  *
  * @method Update whereCol($column, $value = null, $operator = '=')
  */
-class Update implements InternalInterface
+class Update
 {
     use Where, QueryTrait, Internal;
 

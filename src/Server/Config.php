@@ -6,7 +6,7 @@ class Config
 {
     static public function encoding($encoding = null)
     {
-        return func_num_args() ? mb_internal_encoding($encoding) : mb_internal_encoding();
+        return mb_internal_encoding(...func_get_args());
     }
 
     static public function timezone($timezone = null)

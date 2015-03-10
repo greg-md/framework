@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Tools;
+namespace Greg\Tool;
 
 class Minify
 {

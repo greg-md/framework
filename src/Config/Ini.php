@@ -3,14 +3,14 @@
 namespace Greg\Config;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
-class Ini implements \ArrayAccess, InternalInterface
+class Ini implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     protected $contents = [];
 
@@ -92,17 +92,17 @@ class Ini implements \ArrayAccess, InternalInterface
         return $fetchedSection;
     }
 
-    public function contents($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function contents($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function section($value = null, $type = Obj::VAR_REPLACE)
+    public function section($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function indexDelimiter($value = null, $type = Obj::VAR_REPLACE)
+    public function indexDelimiter($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

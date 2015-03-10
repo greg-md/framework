@@ -9,7 +9,7 @@ use Greg\Html\Head;
 use Greg\Html\Script;
 use Greg\Http\Response;
 use Greg\Support\Obj;
-use Greg\Tools\Minify;
+use Greg\Tool\Minify;
 
 class Html extends Layout
 {
@@ -82,12 +82,12 @@ class Html extends Layout
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function headOpen($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function headOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function headClose($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function headClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -101,12 +101,12 @@ class Html extends Layout
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function bodyOpen($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function bodyOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function bodyClose($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function bodyClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -120,7 +120,7 @@ class Html extends Layout
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function subLayout($value = null, $type = Obj::VAR_REPLACE)
+    public function subLayout($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

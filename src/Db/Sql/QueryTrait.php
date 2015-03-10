@@ -105,7 +105,7 @@ trait QueryTrait
         return Str::quote($name, $this->quoteNameWith());
     }
 
-    public function quoteNameWith($value = null, $type = Obj::VAR_REPLACE)
+    public function quoteNameWith($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -130,7 +130,7 @@ trait QueryTrait
 
             array_unshift($param, is_int($key) ? $k++ : $key);
 
-            call_user_func_array([$stmt, 'bindValue'], $param);
+            $stmt->bindValue(...$param);
         }
 
         return $this;

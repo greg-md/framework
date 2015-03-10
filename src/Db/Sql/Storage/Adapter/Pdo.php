@@ -3,10 +3,9 @@
 namespace Greg\Db\Sql\Storage\Adapter;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-class Pdo extends \PDO implements AdapterInterface, InternalInterface
+class Pdo extends \PDO implements AdapterInterface
 {
     protected $stmtClass = '\Greg\Db\Sql\Storage\Adapter\Pdo\Stmt';
 
@@ -25,7 +24,7 @@ class Pdo extends \PDO implements AdapterInterface, InternalInterface
         return $this;
     }
 
-    public function stmtClass($value = null, $type = Obj::VAR_REPLACE)
+    public function stmtClass($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

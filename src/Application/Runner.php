@@ -4,30 +4,32 @@ namespace Greg\Application;
 
 use Greg\Composer\Autoload\ClassLoader;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Event\Listener;
-use Greg\Event\SubscriberInterface;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
 use Greg\Server\Config;
 use Greg\Server\Ini;
 use Greg\Server\Session;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 use Greg\Translation\Translator;
 use Greg\View\Viewer;
-use Closure;
 
-class Runner implements \ArrayAccess, InternalInterface
+class Runner implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     const EVENT_INIT = 'app.init';
+
     const EVENT_RUN = 'app.run';
+
     const EVENT_STARTUP = 'app.startup';
+
     const EVENT_DISPATCH = 'app.dispatch';
+
     const EVENT_FINISH = 'app.finish';
 
     protected $viewPaths = [];
@@ -36,15 +38,17 @@ class Runner implements \ArrayAccess, InternalInterface
 
     protected $modelsPrefixes = [];
 
+    protected $extended = [];
+
     public function __construct($settings = [], $appName = null)
     {
-        if ($appName) {
+        if ($appName !== null) {
             $this->appName($appName);
         }
 
         $this->memory('app', $this);
 
-        $this->replace($settings);
+        $this->storage = $settings;
 
         return $this;
     }
@@ -84,6 +88,8 @@ class Runner implements \ArrayAccess, InternalInterface
         $this->viewPaths((array)$this->indexGet('view.paths'));
 
         $this->controllersPrefixes((array)$this->indexGet('controllers.prefixes'));
+
+        $this->extended((array)$this->get('extended'));
 
         return $this;
     }
@@ -186,7 +192,7 @@ class Runner implements \ArrayAccess, InternalInterface
         $this->binder()->add($resources);
 
         // Add Resources to Manager
-        $resources->addMore((array)$this['resources']);
+        $resources->addMore((array)$this->get('resources'));
 
         // Register Resources Manager to Binder adapters
         $this->binder()->addAdapter('resources', [$resources, 'get'], array_flip($resources->getClasses()));
@@ -196,10 +202,10 @@ class Runner implements \ArrayAccess, InternalInterface
 
     public function initRouter()
     {
-        // Load Router
+        // Load Subscribers
         $this->router($router = Dispatcher::create($this->appName()));
 
-        // Add Router to Binder
+        // Add Subscribers to Binder
         $this->binder()->add($router);
 
         return $this;
@@ -217,12 +223,83 @@ class Runner implements \ArrayAccess, InternalInterface
 
     public function initComponents()
     {
-        // Load components
-        if ($components = (array)$this->get('components')) {
-            $this->addComponents($components);
-        }
+        // Load Components Manager
+        $this->components($components = Components::create($this->appName()));
+
+        // Add Components Manager to Binder
+        $this->binder()->add($components);
+
+        // Add Components to Manager
+        $components->addMore((array)$this->get('components'));
 
         return $this;
+    }
+
+    //public function new
+
+    public function newInstance($className, ...$args)
+    {
+        return $this->newInstanceArgs($className, $args);
+    }
+
+    public function newInstanceArgs($className, array $args = [])
+    {
+        if (is_bool($className)) {
+            $loadExtended = $className;
+            $className = array_shift($args);
+        } else {
+            $loadExtended = true;
+        }
+
+        $className = $loadExtended ? $this->getExtended($className) : $className;
+
+        $binder = $this->binder();
+
+        /* @var $class Internal */
+        $class = $binder ? $binder->newInstanceArgs($className, $args) : Obj::newInstanceArgs($className, $args);
+
+        $class->appName($this->appName());
+
+        if (method_exists($class, 'init')) {
+            $binder ? $binder->call([$class, 'init']) : $class->init();
+        }
+
+        return $class;
+    }
+
+    public function getInstance($className, ...$args)
+    {
+        if (is_bool($className)) {
+            $loadExtended = $className;
+            $className = array_shift($args);
+        } else {
+            $loadExtended = true;
+        }
+
+        $className = $loadExtended ? $this->getExtended($className) : $className;
+
+        $instance = $this->memory('instances/' . $className);
+        if (!$instance) {
+            $binder = $this->binder();
+
+            /* @var $instance Internal */
+            $instance = $binder ? $binder->newInstance($className) : Obj::newInstance($className);
+
+            $instance->appName($this->appName());
+
+            if (method_exists($instance, 'init')) {
+                $binder ? $binder->call([$instance, 'init']) : $instance->init();
+            }
+
+            $this->memory('instances/' . $className, $instance);
+        }
+
+        return $instance;
+    }
+
+    public function getExtended($class)
+    {
+        return $this->extended()->get($class, $class);
     }
 
     public function run($path = '/')
@@ -252,122 +329,6 @@ class Runner implements \ArrayAccess, InternalInterface
         return $this;
     }
 
-    public function addComponents(array $components, Closure $callback = null)
-    {
-        foreach ($components as $name => $component) {
-            $this->addComponent($name, $component, $callback);
-        }
-
-        return $this;
-    }
-
-    public function addComponent($name, $component, Closure $callback = null)
-    {
-        if (is_string($component)) {
-            $component = $this->newClass($component);
-        }
-
-        $this->memory('component/' . $name, $component);
-
-        $this->binder()->add($component);
-
-        if ($component instanceof SubscriberInterface) {
-            $this->listener()->subscribe('component/' . $name, $component);
-        }
-
-        if ($callback) {
-            $callback($component);
-        }
-
-        return $this;
-    }
-
-    public function hasComponent($name)
-    {
-        return $this->memory('component/' . $name) ? true : false;
-    }
-
-    public function getComponent($name)
-    {
-        $component = $this->memory('component/' . $name);
-
-        if (!$component) {
-            throw Exception::create($this->appName(), 'Undefined component `' . $name . '`.');
-        }
-
-        return $component;
-    }
-
-    public function newClass($className)
-    {
-        $args = func_get_args();
-
-        array_shift($args);
-
-        if (is_bool($className)) {
-            $loadExtended = $className;
-            $className = array_shift($args);
-        } else {
-            $loadExtended = true;
-        }
-
-        $className = $loadExtended ? $this->getExtended($className) : $className;
-
-        $binder = $this->binder();
-
-        /* @var $class InternalInterface */
-        $class = $binder ? $binder->newClass($className, $args) : Obj::instanceArgs($className, $args);
-
-        $class->appName($this->appName());
-
-        if (method_exists($class, 'init')) {
-            $binder ? $binder->call([$class, 'init']) : $class->init();
-        }
-
-        return $class;
-    }
-
-    public function getInstance($className)
-    {
-        $args = func_get_args();
-
-        array_shift($args);
-
-        if (is_bool($className)) {
-            $loadExtended = $className;
-            $className = array_shift($args);
-        } else {
-            $loadExtended = true;
-        }
-
-        $className = $loadExtended ? $this->getExtended($className) : $className;
-
-        $instance = $this->memory('instances/' . $className);
-        if (!$instance) {
-            $binder = $this->binder();
-
-            /* @var $instance InternalInterface */
-            $instance = $binder ? $binder->newClass($className) : Obj::instanceArgs($className);
-
-            $instance->appName($this->appName());
-
-            if (method_exists($instance, 'init')) {
-                $binder ? $binder->call([$instance, 'init']) : $instance->init();
-            }
-
-            $this->memory('instances/' . $className, $instance);
-        }
-
-        return $instance;
-    }
-
-    public function getExtended($class)
-    {
-        $extended = (array)$this->get('extended');
-
-        return array_key_exists($class, $extended) ? $extended[$class] : $class;
-    }
-
     public function action($name = null, $controllerName = null, $param = [])
     {
         $name = $name ?: 'index';
@@ -376,12 +337,13 @@ class Runner implements \ArrayAccess, InternalInterface
 
         $request = Request::create($this->appName(), $param);
 
-        $view = $this->viewCreate($request, $param);
+        $view = $this->newView($request, $param);
 
         $controller = $this->loadController($controllerName, $request, $view);
 
         if ($controller) {
             $actionName = Str::phpName($name) . 'Action';
+
             if (method_exists($controller, $actionName)) {
                 $controller->$actionName();
             }
@@ -394,14 +356,14 @@ class Runner implements \ArrayAccess, InternalInterface
      * @param $request
      * @param array $param
      * @return Viewer
-     * @throws \Greg\Engine\Exception
+     * @throws \Exception
      */
-    public function viewCreate($request, array $param = [])
+    public function newView($request, array $param = [])
     {
         return Viewer::create($this->appName(), $request, $this->viewPaths()->toArray(), $param);
     }
 
-    public function loadController($name, $request, $view)
+    public function loadController($name, Request $request, Viewer $view)
     {
         $name = Str::phpName($name);
 
@@ -410,7 +372,8 @@ class Runner implements \ArrayAccess, InternalInterface
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
-            $class = $prefix . '\Controllers\\' . $name . '\Controller';
+            $class = $prefix . 'Controllers\\' . $name . '\Controller';
+
             if (class_exists($class)) {
                 return $class::create($this->appName(), $name, $request, $view);
             }
@@ -425,13 +388,14 @@ class Runner implements \ArrayAccess, InternalInterface
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
-            $class = $prefix . '\Model\\' . $name;
+            $class = $prefix . 'Model\\' . $name;
+
             if (class_exists($class)) {
                 return $class::create($this->appName());
             }
         }
 
-        throw Exception::create('Model `' . $name . '` not found!');
+        throw Exception::create('Model `' . $name . '` not found.');
     }
 
     /**
@@ -440,7 +404,7 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function loader(ClassLoader $loader = null)
     {
-        return func_num_args() ? $this->memory('loader', $loader) : $this->memory('loader');
+        return $this->memory('loader', ...func_get_args());
     }
 
     /**
@@ -449,7 +413,7 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function binder(Binder $binder = null)
     {
-        return func_num_args() ? $this->memory('binder', $binder) : $this->memory('binder');
+        return $this->memory('binder', ...func_get_args());
     }
 
     /**
@@ -458,7 +422,7 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function listener(Listener $listener = null)
     {
-        return func_num_args() ? $this->memory('listener', $listener) : $this->memory('listener');
+        return $this->memory('listener', ...func_get_args());
     }
 
     /**
@@ -467,7 +431,7 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function response(Response $response = null)
     {
-        return func_num_args() ? $this->memory('response', $response) : $this->memory('response');
+        return $this->memory('response', ...func_get_args());
     }
 
     /**
@@ -476,7 +440,7 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function translator(Translator $translator = null)
     {
-        return func_num_args() ? $this->memory('translator', $translator) : $this->memory('translator');
+        return $this->memory('translator', ...func_get_args());
     }
 
     /**
@@ -485,7 +449,16 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function resources(Resources $resources = null)
     {
-        return func_num_args() ? $this->memory('resources', $resources) : $this->memory('resources');
+        return $this->memory('resources', ...func_get_args());
+    }
+
+    /**
+     * @param Components $components
+     * @return Components|bool
+     */
+    public function components(Components $components = null)
+    {
+        return $this->memory('components', ...func_get_args());
     }
 
     /**
@@ -494,20 +467,25 @@ class Runner implements \ArrayAccess, InternalInterface
      */
     public function router(Dispatcher $router = null)
     {
-        return func_num_args() ? $this->memory('router', $router) : $this->memory('router');
+        return $this->memory('router', ...func_get_args());
     }
 
-    public function viewPaths($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function viewPaths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function controllersPrefixes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function modelsPrefixes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false)
+    public function modelsPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+    }
+
+    public function extended($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
     }

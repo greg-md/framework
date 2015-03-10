@@ -13,7 +13,6 @@ namespace Greg\Composer\Autoload;
 
 use Greg\Composer\Exception;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
 /**
@@ -44,7 +43,7 @@ use Greg\Support\Obj;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
-class ClassLoader implements InternalInterface
+class ClassLoader
 {
     use Internal;
 
@@ -72,7 +71,7 @@ class ClassLoader implements InternalInterface
     public function getPrefixes()
     {
         if (!empty($this->prefixesPsr0)) {
-            return call_user_func_array('array_merge', $this->prefixesPsr0);
+            return array_merge(...$this->prefixesPsr0);
         }
 
         return [];

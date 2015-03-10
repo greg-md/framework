@@ -24,7 +24,7 @@ class File extends Ini
         return parent::fetchContents(parse_ini_file($file, true), $section, $indexDelimiter);
     }
 
-    public function file($value = null, $type = Obj::VAR_REPLACE)
+    public function file($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

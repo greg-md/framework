@@ -3,11 +3,10 @@
 namespace Greg\Http;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 use Greg\Support\Type;
 
-class Response implements InternalInterface
+class Response
 {
     use Internal;
 
@@ -40,17 +39,17 @@ class Response implements InternalInterface
         return $this;
     }
 
-    public function &contentType($value = null, $type = Obj::VAR_REPLACE)
+    public function &contentType($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function &charset($value = null, $type = Obj::VAR_REPLACE)
+    public function &charset($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function &body($value = null, $type = Obj::VAR_REPLACE)
+    public function &body($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

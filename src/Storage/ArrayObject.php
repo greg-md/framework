@@ -2,17 +2,21 @@
 
 namespace Greg\Storage;
 
-use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Arr;
 
-class ArrayObject extends \ArrayObject implements InternalInterface
+class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \Countable
 {
-    use Internal;
+    use Accessor, ArrayAccess, IteratorAggregate, Serializable, Countable;
 
-    public function __construct($input = [], $iteratorClass = 'ArrayIterator', $flag = ArrayObject::ARRAY_AS_PROPS)
+    public function __construct($input = [], $iteratorClass = null)
     {
-        parent::__construct(Arr::bring($input), $flag, $iteratorClass);
+        $this->mergeMe(Arr::bring($input));
+
+        if ($iteratorClass !== null) {
+            $this->iteratorClass($iteratorClass);
+        }
+
+        return $this;
     }
 
     protected function fixArray($array)
@@ -20,236 +24,94 @@ class ArrayObject extends \ArrayObject implements InternalInterface
         return Arr::bring($array);
     }
 
-    protected function returnArray($input)
+    static public function newInstance($input)
     {
-        return ArrayObject::create($this->appName(), $input);
-    }
-
-    public function has($index)
-    {
-        if (is_array($index)) {
-            foreach(($indexes = $index) as $index) {
-                if (!parent::offsetExists((string)$index)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (($index instanceof \Closure)) {
-            foreach($this as $key => $value) {
-                if ($index($value, $key) === true) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        return parent::offsetExists((string)$index);
-    }
-
-    public function set($index, $value)
-    {
-        parent::offsetSet($index, $value);
-
-        return $this;
-    }
-
-    public function &get($index, $else = null)
-    {
-        if (is_array($index)) {
-            $return = [];
-
-            $else = Arr::bring($else);
-
-            foreach(($indexes = $index) as $index) {
-                if ($this->has($index)) {
-                    $return[$index] = $this->storage[$index];
-                } elseif (array_key_exists($index, $else)) {
-                    $return[$index] = $else[$index];
-                } else {
-                    $return[$index] = null;
-                }
-            }
-
-            return $this->returnArray($return);
-        }
-
-        if ($this->has($index)) return parent::offsetGet($index); return $else;
-    }
-
-    public function del($index)
-    {
-        if (is_array($index)) {
-            foreach(($indexes = $index) as $index) {
-                parent::offsetUnset($index);
-            }
-        } else {
-            parent::offsetUnset($index);
-        }
-
-        return $this;
-    }
-
-    public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexHas($this, $index, $delimiter);
-    }
-
-    public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        Arr::indexSet($this, $index, $value, $delimiter);
-
-        return $this;
-    }
-
-    public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexGet($this, $index, $else, $delimiter);
-    }
-
-    public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        Arr::indexDel($this, $index, $delimiter);
-
-        return $this;
+        return new ArrayObject($input);
     }
 
     public function exchange($input)
     {
-        return parent::exchangeArray($this->fixArray($input));
+        return $this->storage = $this->fixArray($input);
     }
 
     public function toArray()
     {
-        return parent::getArrayCopy();
+        return $this->storage;
     }
 
     public function append($value)
     {
-        parent::append($value);
+        $this->storage[] = $value;
 
         return $this;
     }
 
-    public function getArrayCopy()
+    public function prepend($value, $index = null)
     {
-        return $this->toArray();
-    }
-
-    public function prepend($value)
-    {
-        $copy = parent::getArrayCopy();
-
-        array_unshift($copy, $value);
-
-        parent::exchangeArray($copy);
+        Arr::prepend($this->storage, $value, $index);
 
         return $this;
     }
 
-    public function exchangeArray($input)
+    public function asort($flag = SORT_REGULAR)
     {
-        return $this->exchange($input);
-    }
-
-    public function asort()
-    {
-        parent::asort();
+        asort($this->storage, $flag);
 
         return $this;
     }
 
-    public function ksort()
+    public function ksort($flag = SORT_REGULAR)
     {
-        parent::ksort();
+        ksort($this->storage, $flag);
 
         return $this;
     }
 
     public function natcasesort()
     {
-        parent::natcasesort();
+        natcasesort($this->storage);
 
         return $this;
     }
 
     public function natsort()
     {
-        parent::natsort();
-
-        return $this;
-    }
-
-    public function offsetExists($index)
-    {
-        return $this->has($index);
-    }
-
-    public function offsetSet($index, $value)
-    {
-        return $this->set($index, $value);
-    }
-
-    public function offsetUnset($index)
-    {
-        return $this->del($index);
-    }
-
-    public function setFlags($flags)
-    {
-        parent::setFlags($flags);
-
-        return $this;
-    }
-
-    public function setIteratorClass($class)
-    {
-        parent::setIteratorClass($class);
+        natsort($this->storage);
 
         return $this;
     }
 
     public function uasort($function)
     {
-        parent::uasort($function);
+        uasort($this->storage, $function);
 
         return $this;
     }
 
     public function uksort($function)
     {
-        parent::uksort($function);
-
-        return $this;
-    }
-
-    public function unserialize($serialized)
-    {
-        parent::unserialize($serialized);
+        uksort($this->storage, $function);
 
         return $this;
     }
 
     public function reset()
     {
-        reset($this);
+        reset($this->storage);
 
         return $this;
     }
 
     public function clear()
     {
-        parent::exchangeArray([]);
+        $this->storage = [];
 
         return $this;
     }
 
     public function inArray($value, $strict = false)
     {
-        return in_array($value, parent::getArrayCopy(), $strict);
+        return in_array($value, $this->storage, $strict);
     }
 
     public function inArrayValues($values, $strict = false)
@@ -263,306 +125,250 @@ class ArrayObject extends \ArrayObject implements InternalInterface
         return true;
     }
 
-    public function merge($array, $_ = null)
+    public function merge(array $array, array ...$arrays)
     {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, parent::getArrayCopy());
-
-        return $this->returnArray(call_user_func_array('array_merge', $arrays));
+        return $this->newInstance(array_merge($this->storage, $array, ...$arrays));
     }
 
-    public function mergeRecursive($array, $_ = null)
+    public function mergeMe(array $array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        $this->storage = array_merge($this->storage, $array, ...$arrays);
 
-        array_unshift($arrays, $this->getArrayCopy());
-
-        return $this->returnArray(call_user_func_array('array_merge_recursive', $arrays));
+        return $this;
     }
 
-    public function mergePrepend($array, $_ = null)
+    public function mergeRecursive(array $array, array ...$arrays)
     {
-        $arrays = func_get_args();
-
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = parent::getArrayCopy();
-
-        return $this->returnArray(call_user_func_array('array_merge', $arrays));
+        return $this->newInstance(array_merge_recursive($this->toArray(), $array, ...$arrays));
     }
 
-    public function mergePrependRecursive($array, $_ = null)
+    public function mergeRecursiveMe(array $array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        $this->exchange(array_merge_recursive($this->toArray(), $array, ...$arrays));
 
-        $arrays = array_reverse($arrays);
+        return $this;
+    }
 
-        $arrays[] = $this->getArrayCopy();
+    public function mergePrepend(array $array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
 
-        return $this->returnArray(call_user_func_array('array_merge_recursive', $arrays));
+        $arrays[] = $this->storage;
+
+        return $this->newInstance(array_merge(...$arrays));
+    }
+
+    public function mergePrependMe(array $array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->storage;
+
+        $this->storage = array_merge(...$arrays);
+
+        return $this;
+    }
+
+    public function mergePrependRecursive(array $array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->toArray();
+
+        return $this->newInstance(array_merge_recursive(...$arrays));
+    }
+
+    public function mergePrependRecursiveMe(array $array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->toArray();
+
+        $this->exchange(array_merge_recursive(...$arrays));
+
+        return $this;
     }
 
     public function mergeValues()
     {
-        return $this->returnArray(call_user_func_array('array_merge', parent::getArrayCopy()));
+        return $this->newInstance(array_merge(...$this->storage));
     }
 
-    public function selfMerge($array, $_ = null)
+    public function mergeValuesMe()
     {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, parent::getArrayCopy());
-
-        parent::exchangeArray(call_user_func_array('array_merge', $arrays));
+        $this->storage = array_merge(...$this->storage);
 
         return $this;
     }
 
-    public function selfMergeRecursive($array, $_ = null)
+    public function replace($array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        return $this->newInstance(array_replace($this->storage, $array, ...$arrays));
+    }
 
-        array_unshift($arrays, $this->getArrayCopy());
-
-        $this->exchangeArray(call_user_func_array('array_merge_recursive', $arrays));
+    public function replaceMe($array, array ...$arrays)
+    {
+        $this->storage = array_replace($this->storage, $array, ...$arrays);
 
         return $this;
     }
 
-    public function selfMergePrepend($array, $_ = null)
+    public function replaceRecursive($array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        return $this->newInstance(array_replace_recursive($this->toArray(), $array, ...$arrays));
+    }
 
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = parent::getArrayCopy();
-
-        parent::exchangeArray(call_user_func_array('array_merge', $arrays));
+    public function replaceRecursiveMe($array, array ...$arrays)
+    {
+        $this->exchange(array_replace_recursive($this->toArray(), $array, ...$arrays));
 
         return $this;
     }
 
-    public function selfMergePrependRecursive($array, $_ = null)
+    public function replacePrepend($array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        $arrays = array_reverse(func_get_args());
 
-        $arrays = array_reverse($arrays);
+        $arrays[] = $this->storage;
 
-        $arrays[] = $this->getArrayCopy();
+        return $this->newInstance(array_replace(...$arrays));
+    }
 
-        $this->exchangeArray(call_user_func_array('array_merge_recursive', $arrays));
+    public function replacePrependMe($array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->storage;
+
+        $this->storage = array_replace(...$arrays);
 
         return $this;
     }
 
-    public function selfMergeValues()
+    public function replacePrependRecursive($array, array ...$arrays)
     {
-        parent::exchangeArray(call_user_func_array('array_merge', parent::getArrayCopy()));
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->toArray();
+
+        return $this->newInstance(array_replace_recursive(...$arrays));
+    }
+
+    public function replacePrependRecursiveMe($array, array ...$arrays)
+    {
+        $arrays = array_reverse(func_get_args());
+
+        $arrays[] = $this->toArray();
+
+        $this->exchange(array_replace_recursive(...$arrays));
 
         return $this;
-    }
-
-    public function replace($array, $_ = null)
-    {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, parent::getArrayCopy());
-
-        return $this->returnArray(call_user_func_array('array_replace', $arrays));
-    }
-
-    public function replaceRecursive($array, $_ = null)
-    {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, $this->getArrayCopy());
-
-        return $this->returnArray(call_user_func_array('array_replace_recursive', $arrays));
-    }
-
-    public function replacePrepend($array, $_ = null)
-    {
-        $arrays = func_get_args();
-
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = parent::getArrayCopy();
-
-        return $this->returnArray(call_user_func_array('array_replace', $arrays));
-    }
-
-    public function replacePrependRecursive($array, $_ = null)
-    {
-        $arrays = func_get_args();
-
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = $this->getArrayCopy();
-
-        return $this->returnArray(call_user_func_array('array_replace_recursive', $arrays));
     }
 
     public function replaceValues()
     {
-        return $this->returnArray(call_user_func_array('array_replace', parent::getArrayCopy()));
+        return $this->newInstance(array_replace(...$this->storage));
     }
 
-    public function selfReplace($array, $_ = null)
+    public function replaceValuesMe()
     {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, parent::getArrayCopy());
-
-        parent::exchangeArray(call_user_func_array('array_replace', $arrays));
+        $this->storage = array_replace(...$this->storage);
 
         return $this;
     }
 
-    public function selfReplaceRecursive($array, $_ = null)
+    public function diff($array, array ...$arrays)
     {
-        $arrays = func_get_args();
+        return $this->newInstance(array_diff($this->storage, $array, ...func_get_args()));
+    }
 
-        array_unshift($arrays, $this->getArrayCopy());
-
-        $this->exchangeArray(call_user_func_array('array_replace_recursive', $arrays));
+    public function diffMe($array, array ...$arrays)
+    {
+        $this->storage = array_diff($this->storage, $array, ...func_get_args());
 
         return $this;
     }
 
-    public function selfReplacePrepend($array, $_ = null)
+    public function map(callable $callable = null, array ...$arrays)
     {
-        $arrays = func_get_args();
+        return $this->newInstance(array_map($callable, $this->storage, ...$arrays));
+    }
 
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = parent::getArrayCopy();
-
-        parent::exchangeArray(call_user_func_array('array_replace', $arrays));
+    public function mapMe(callable $callable = null, array ...$arrays)
+    {
+        $this->storage = array_map($callable, $this->storage, ...$arrays);
 
         return $this;
     }
 
-    public function selfReplacePrependRecursive($array, $_ = null)
+    public function mapRecursive(callable $callable = null, array ...$arrays)
     {
-        $arrays = func_get_args();
+        return $this->newInstance(Arr::mapRecursive($callable, $this->toArray(), ...$arrays));
+    }
 
-        $arrays = array_reverse($arrays);
-
-        $arrays[] = $this->getArrayCopy();
-
-        $this->exchangeArray(call_user_func_array('array_replace_recursive', $arrays));
+    public function mapRecursiveMe(callable $callable = null, array ...$arrays)
+    {
+        $this->exchange(Arr::mapRecursive($callable, $this->toArray(), ...$arrays));
 
         return $this;
     }
 
-    public function selfReplaceValues()
+    public function find(callable $callable = null)
     {
-        parent::exchangeArray(call_user_func_array('array_replace', parent::getArrayCopy()));
+        return Arr::find($this->storage, $callable);
+    }
+
+    public function filter(callable $callable = null, $flag = 0)
+    {
+        return $this->newInstance(array_filter($this->storage, ...func_get_args()));
+    }
+
+    public function filterMe(callable $callable = null, $flag = 0)
+    {
+        $this->storage = array_filter($this->storage, ...func_get_args());
 
         return $this;
     }
 
-    public function diff($array, $_ = null)
+    public function filterRecursive(callable $callable = null, $flag = 0)
     {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, $array);
-
-        return $this->returnArray(call_user_func_array('array_diff', $arrays));
+        return $this->newInstance(Arr::filterRecursive($this->toArray(), ...func_get_args()));
     }
 
-    public function selfDiff($array, $_ = null)
+    public function filterRecursiveMe(callable $callable = null, $flag = 0)
     {
-        $arrays = func_get_args();
-
-        array_unshift($arrays, $array);
-
-        parent::exchangeArray(call_user_func_array('array_diff', $arrays));
-
-        return $this;
-    }
-
-    public function map($callback, $_ = null)
-    {
-        return $this->returnArray(Arr::map(parent::getArrayCopy(), func_get_args()));
-    }
-
-    public function mapRecursive($callback, $_ = null)
-    {
-        return $this->returnArray(Arr::mapRecursive($this->getArrayCopy(), func_get_args()));
-    }
-
-    public function selfMap($callback, $_ = null)
-    {
-        parent::exchangeArray(Arr::map(parent::getArrayCopy(), func_get_args()));
-
-        return $this;
-    }
-
-    public function selfMapRecursive($callback, $_ = null)
-    {
-        $this->exchangeArray(Arr::mapRecursive($this->getArrayCopy(), func_get_args()));
-
-        return $this;
-    }
-
-    public function find($callback = null)
-    {
-        return Arr::find(parent::getArrayCopy(), $callback);
-    }
-
-    public function filter($callback = null, $flag = 0)
-    {
-        return $this->returnArray(Arr::filter(parent::getArrayCopy(), func_get_args()));
-    }
-
-    public function filterRecursive($callback = null, $flag = 0)
-    {
-        return $this->returnArray(Arr::filterRecursive($this->getArrayCopy(), func_get_args()));
-    }
-
-    public function selfFilter($callback = null, $flag = 0)
-    {
-        parent::exchangeArray(Arr::filter(parent::getArrayCopy(), func_get_args()));
-
-        return $this;
-    }
-
-    public function selfFilterRecursive($callback = null, $flag = 0)
-    {
-        $this->exchangeArray(Arr::filterRecursive($this->getArrayCopy(), func_get_args()));
+        $this->exchange(Arr::filterRecursive($this->toArray(), ...func_get_args()));
 
         return $this;
     }
 
     public function reverse($preserveKeys = false)
     {
-        return $this->returnArray(Arr::reverse(parent::getArrayCopy(), func_get_args()));
+        return $this->newInstance(array_reverse($this->storage, $preserveKeys));
     }
 
-    public function selfReverse($preserveKeys = false)
+    public function reverseMe($preserveKeys = false)
     {
-        parent::exchangeArray(Arr::reverse(parent::getArrayCopy(), func_get_args()));
+        $this->storage = array_reverse($this->storage, $preserveKeys);
 
         return $this;
     }
 
     public function chunk($size, $preserveKeys = false)
     {
-        return $this->returnArray(array_chunk(parent::getArrayCopy(), $size, $preserveKeys));
+        return $this->newInstance(array_chunk($this->storage, $size, $preserveKeys));
     }
 
-    public function selfChunk($size, $preserveKeys = false)
+    public function chunkMe($size, $preserveKeys = false)
     {
-        parent::exchangeArray(array_chunk(parent::getArrayCopy(), $size, $preserveKeys));
+        $this->exchange(array_chunk($this->storage, $size, $preserveKeys));
 
         return $this;
     }
 
     public function implode($param = '')
     {
-        return $this->count() ? implode($param, parent::getArrayCopy()) : '';
+        return implode($param, $this->storage);
     }
 
     public function join($param = '')
@@ -572,180 +378,95 @@ class ArrayObject extends \ArrayObject implements InternalInterface
 
     public function shift()
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            $item = array_shift($copy);
-
-            parent::exchangeArray($copy);
-
-            return $item;
-        }
-
-        return null;
+        return array_shift($this->storage);
     }
 
     public function pop()
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            $item = array_pop($copy);
-
-            parent::exchangeArray($copy);
-
-            return $item;
-        }
-
-        return null;
+        return array_pop($this->storage);
     }
 
     public function first()
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
+        reset($this->storage);
 
-            reset($copy);
-
-            return current($copy);
-        }
-
-        return null;
+        return current($this->storage);
     }
 
     public function last()
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            reset($copy);
-
-            return end($copy);
-        }
-
-        return null;
+        return end($this->storage);
     }
 
     public function current()
     {
-        return key($this);
+        return key($this->storage);
     }
 
     public function next()
     {
-        return next($this);
-    }
-
-    public function toArrayObject()
-    {
-        return $this->returnArray(parent::getArrayCopy());
+        return next($this->storage);
     }
 
     public function group($maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
     {
-        return $this->returnArray(Arr::group($this->getArrayCopy(), $maxLevel, $replaceLast, $removeGroupedKey));
+        return $this->newInstance(Arr::group($this->toArray(), $maxLevel, $replaceLast, $removeGroupedKey));
     }
 
-    public function selfGroup($maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
+    public function groupMe($maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
     {
-        parent::exchangeArray(Arr::group($this->getArrayCopy(), $maxLevel, $replaceLast, $removeGroupedKey));
+        $this->exchange(Arr::group($this->toArray(), $maxLevel, $replaceLast, $removeGroupedKey));
 
         return $this;
     }
 
-    public function column($key)
+    public function column($key, $indexKey = null)
     {
-        $array = [];
-
-        if ($this->count()) {
-            $items = $this->getArrayCopy();
-
-            if (function_exists('array_column')) {
-                $array = array_column($items, $key);
-            } else {
-                foreach($items as $item) {
-                    if (isset($item[$key])) {
-                        $array[] = $item[$key];
-                    }
-                }
-            }
-        }
-
-        return $this->returnArray($array);
+        return $this->newInstance(array_column($this->toArray(), ...func_get_args()));
     }
 
-    public function walk($callback, $data = null)
+    public function walk(callable $callable, $data = null)
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            array_walk($copy, $callback, $data);
-
-            parent::exchangeArray($copy);
-        }
+        array_walk($this->storage, $callable, $data);
 
         return $this;
     }
 
     public function shuffle()
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            shuffle($copy);
-
-            parent::exchangeArray($copy);
-        }
+        shuffle($this->storage);
 
         return $this;
     }
 
     public function sort($flags = SORT_REGULAR)
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            sort($copy, $flags);
-
-            parent::exchangeArray($copy);
-        }
+        sort($this->storage, $flags);
 
         return $this;
     }
 
     public function arsort($flags = SORT_REGULAR)
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            arsort($copy, $flags);
-
-            parent::exchangeArray($copy);
-        }
+        arsort($this->storage, $flags);
 
         return $this;
     }
 
     public function krsort($flags = SORT_REGULAR)
     {
-        if ($this->count()) {
-            $copy = parent::getArrayCopy();
-
-            krsort($copy, $flags);
-
-            parent::exchangeArray($copy);
-        }
+        krsort($this->storage, $flags);
 
         return $this;
     }
 
     public function keys()
     {
-        return $this->returnArray(array_keys(parent::getArrayCopy()));
+        return $this->newInstance(array_keys($this->storage));
     }
 
     public function values()
     {
-        return $this->returnArray(array_values(parent::getArrayCopy()));
+        return $this->newInstance(array_values($this->storage));
     }
 }

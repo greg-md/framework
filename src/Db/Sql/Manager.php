@@ -3,7 +3,6 @@
 namespace Greg\Db\Sql;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
 /**
@@ -24,7 +23,7 @@ use Greg\Support\Obj;
  * @method rollBack();
  * @method setAttribute($name, $value);
  */
-class Manager implements InternalInterface
+class Manager
 {
     use \Greg\Engine\Manager, Internal;
 

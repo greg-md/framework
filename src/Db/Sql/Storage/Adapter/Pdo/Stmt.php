@@ -4,9 +4,8 @@ namespace Greg\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 
-class Stmt extends \PDOStatement implements StmtInterface, InternalInterface
+class Stmt extends \PDOStatement implements StmtInterface
 {
     use Internal;
 

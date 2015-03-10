@@ -3,11 +3,10 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Router\Route\Normal;
 use Greg\Support\Obj;
 
-class Dispatcher implements InternalInterface
+class Dispatcher
 {
     use Internal;
 
@@ -84,7 +83,7 @@ class Dispatcher implements InternalInterface
         return $data;
     }
 
-    public function path($value = null, $type = Obj::VAR_REPLACE)
+    public function path($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -98,12 +97,12 @@ class Dispatcher implements InternalInterface
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function param($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function routes($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function routes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }

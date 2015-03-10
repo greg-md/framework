@@ -13,7 +13,7 @@ class File
 
     static public function mime($file)
     {
-        return (new \finfo())->file($file, FILEINFO_MIME_TYPE);
+        return (new \finfo)->file($file, FILEINFO_MIME_TYPE);
     }
 
     static public function fixDir($file, $recursive = false)

@@ -3,9 +3,8 @@
 namespace Greg\Event;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 
-abstract class Subscriber implements SubscriberInterface, InternalInterface
+abstract class Subscriber implements SubscriberInterface
 {
     use SubscriberTrait, Internal;
 }

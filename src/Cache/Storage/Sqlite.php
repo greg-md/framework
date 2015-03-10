@@ -6,11 +6,10 @@ use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
 use Greg\Support\Obj;
 
-class Sqlite implements StorageInterface, InternalInterface
+class Sqlite implements StorageInterface
 {
     use StorageTrait, Internal;
 
@@ -153,12 +152,12 @@ class Sqlite implements StorageInterface, InternalInterface
         return $query->exec();
     }
 
-    public function path($value = null, $type = Obj::VAR_REPLACE)
+    public function path($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function adapterClass($value = null, $type = Obj::VAR_REPLACE)
+    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

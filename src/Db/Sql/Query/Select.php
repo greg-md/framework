@@ -8,7 +8,6 @@ use Greg\Db\Sql\Query\Traits\From;
 use Greg\Db\Sql\Query\Traits\Where;
 use Greg\Db\Sql\Table;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
 /**
@@ -17,7 +16,7 @@ use Greg\Support\Obj;
  *
  * @method Select whereCol($column, $operator, $value = null)
  */
-class Select implements InternalInterface
+class Select
 {
     use From, Where, QueryTrait, Internal;
 

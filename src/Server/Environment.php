@@ -2,7 +2,6 @@
 
 namespace Greg\Server;
 
-use Closure;
 use Greg\Support\Arr;
 use Greg\Support\Str;
 
@@ -35,7 +34,7 @@ class Environment
         // If the given environment is just a Closure, we will defer the environment check
         // to the Closure the developer has provided, which allows them to totally swap
         // the webs environment detection logic with their own custom Closure's code.
-        if ($environments instanceof Closure) {
+        if ($environments instanceof \Closure) {
             return call_user_func($environments);
         }
 

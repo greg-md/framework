@@ -3,10 +3,9 @@
 namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Html\Element;
 
-class Link implements InternalInterface
+class Link
 {
     use Internal;
 
@@ -41,9 +40,7 @@ class Link implements InternalInterface
 
     public function __call($method, $args)
     {
-        array_unshift($args, $method);
-
-        return call_user_func_array([$this, 'set'], $args);
+        return $this->set($method, ...$args);
     }
 
     public function fetch()

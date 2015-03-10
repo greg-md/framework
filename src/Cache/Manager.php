@@ -3,7 +3,6 @@
 namespace Greg\Cache;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
 /**
@@ -20,7 +19,7 @@ use Greg\Support\Obj;
  * @method expired($id, $expire = 0);
  * @method delete($ids = []);
  */
-class Manager implements InternalInterface
+class Manager
 {
     use \Greg\Engine\Manager, Internal;
 

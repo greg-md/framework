@@ -3,9 +3,8 @@
 namespace Greg\Db\Sql;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 
-abstract class Storage implements StorageInterface, InternalInterface
+abstract class Storage implements StorageInterface
 {
     const PARAM_BOOL = 5;
 

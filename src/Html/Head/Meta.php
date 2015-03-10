@@ -3,11 +3,10 @@
 namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Html\Element;
 use Greg\Support\Obj;
 
-class Meta implements InternalInterface
+class Meta
 {
     use Internal;
 
@@ -39,49 +38,53 @@ class Meta implements InternalInterface
 
     public function charset($charset = null)
     {
-        return func_num_args() ? $this->storage('charset', ['charset' => $charset]) : $this->storage('charset');
+        return func_num_args() ? $this->storage('charset', [
+            'charset' => $charset,
+        ]) : $this->storage('charset');
     }
 
-    public function refresh()
+    public function refresh($timeout = 0, $url = null)
     {
-        $args = func_get_args();
-        array_unshift($args, __FUNCTION__);
-        return call_user_func_array([$this, 'httpEquiv'], $args);
+        $args = [__FUNCTION__];
+
+        if (func_num_args()) {
+            $content = [
+                $timeout,
+            ];
+
+            if ($url) {
+                $content[] = 'url=' . $url;
+            }
+
+            $args[] = implode('; ', $content);
+        }
+
+        return $this->httpEquiv(...$args);
     }
 
-    public function author()
+    public function author($name = null)
     {
-        $args = func_get_args();
-        array_unshift($args, __FUNCTION__);
-        return call_user_func_array([$this, 'name'], $args);
+        return $this->name(__FUNCTION__, ...func_get_args());
     }
 
-    public function description()
+    public function description($content = null)
     {
-        $args = func_get_args();
-        array_unshift($args, __FUNCTION__);
-        return call_user_func_array([$this, 'name'], $args);
+        return $this->name(__FUNCTION__, ...func_get_args());
     }
 
-    public function generator()
+    public function generator($name = null)
     {
-        $args = func_get_args();
-        array_unshift($args, __FUNCTION__);
-        return call_user_func_array([$this, 'name'], $args);
+        return $this->name(__FUNCTION__, ...func_get_args());
     }
 
-    public function keywords()
+    public function keywords($content = null)
     {
-        $args = func_get_args();
-        array_unshift($args, __FUNCTION__);
-        return call_user_func_array([$this, 'name'], $args);
+        return $this->name(__FUNCTION__, ...func_get_args());
     }
 
-    public function viewPort()
+    public function viewPort($name = null)
     {
-        $args = func_get_args();
-        array_unshift($args, strtolower(__FUNCTION__));
-        return call_user_func_array([$this, 'name'], $args);
+        return $this->name('viewport', ...func_get_args());
     }
 
     static public function clear($content)
@@ -89,7 +92,7 @@ class Meta implements InternalInterface
         return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
     }
 
-    public function fetch()
+    public function toString()
     {
         $items = [];
 
@@ -105,20 +108,13 @@ class Meta implements InternalInterface
         return Element::create($this->appName(), 'meta', $attr);
     }
 
-    protected function storage($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    protected function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function __call($method, $args)
-    {
-        array_unshift($args, $method);
-
-        return call_user_func_array([$this, 'set'], $args);
-    }
-
     public function __toString()
     {
-        return implode("\n", $this->fetch());
+        return implode("\n", $this->toString());
     }
 }

@@ -62,7 +62,7 @@ class Image extends File
         list($width, $height) = @getimagesize($file);
 
         if (!$height) {
-            $height = imagesy(self::get($file));
+            $height = imagesy(static::get($file));
         }
 
         return $height;
@@ -70,12 +70,12 @@ class Image extends File
 
     static public function is($file)
     {
-        return self::type($file) ? true : false;
+        return static::type($file) ? true : false;
     }
 
     static public function mime($file)
     {
-        return self::typeToMime(self::type($file));
+        return static::typeToMime(static::type($file));
     }
 
     static public function typeToMime($type)
@@ -87,7 +87,7 @@ class Image extends File
     {
         $image = null;
 
-        switch(self::type($file)) {
+        switch(static::type($file)) {
             case IMAGETYPE_GIF:
                 $image = imagecreatefromgif($file);
 
@@ -113,13 +113,22 @@ class Image extends File
         return $image;
     }
 
-    static public function saveJPEG($image, $file, $quality = 75, $fixDir = false)
+    static public function saveJPEG($image, $file, $fixDir = false, $quality = 75)
     {
         $fixDir && static::fixDir($file, true);
 
         imagejpeg($image, $file, $quality);
 
         return true;
+    }
+
+    static public function getJPEG($image, $quality = 75)
+    {
+        ob_start();
+
+        imagejpeg($image, null, $quality);
+
+        return ob_get_clean();
     }
 
     static public function saveGIF($image, $file, $fixDir = false)
@@ -131,12 +140,30 @@ class Image extends File
         return true;
     }
 
-    static public function savePNG($image, $file, $quality = 9, $fixDir = false, $filters = PNG_NO_FILTER)
+    static public function getGIF($image)
+    {
+        ob_start();
+
+        imagegif($image, null);
+
+        return ob_get_clean();
+    }
+
+    static public function savePNG($image, $file, $fixDir = false, $quality = 9, $filters = PNG_NO_FILTER)
     {
         $fixDir && static::fixDir($file, true);
 
         imagepng($image, $file, $quality, $filters);
 
         return true;
+    }
+
+    static public function getPNG($image, $quality = 9, $filters = PNG_NO_FILTER)
+    {
+        ob_start();
+
+        imagepng($image, null, $quality, $filters);
+
+        return ob_get_clean();
     }
 }

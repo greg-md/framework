@@ -3,11 +3,14 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
+use Greg\Engine\Internal;
 use Greg\Storage\ArrayObject;
 use Greg\Support\Obj;
 
 abstract class RowAbstract extends ArrayObject
 {
+    use Internal;
+
     protected $tableName = null;
 
     public function __construct($tableName, $data = [])
@@ -18,7 +21,9 @@ abstract class RowAbstract extends ArrayObject
 
         $this->tableName($tableName);
 
-        return parent::__construct($data);
+        parent::__construct($data);
+
+        return $this;
     }
 
     public function tableName($value = null)

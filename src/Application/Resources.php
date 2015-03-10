@@ -46,7 +46,7 @@ class Resources
                 throw Exception::create($this->appName(), 'Undefined resource `' . $name . '`.');
             }
 
-            $resource = call_user_func_array([$this->app(), 'newClass'], $this->storage[$name]);
+            $resource = $this->app()->newInstance(...$this->storage[$name]);
 
             $this->memory('resource/' . $name, $resource);
         }

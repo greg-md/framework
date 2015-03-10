@@ -3,15 +3,15 @@
 namespace Greg\View;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Http\Request;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
-class Viewer implements \ArrayAccess, InternalInterface
+class Viewer implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     protected $request = null;
 
@@ -27,7 +27,7 @@ class Viewer implements \ArrayAccess, InternalInterface
 
         $this->paths($paths);
 
-        $this->replace($param);
+        $this->storage = $param;
 
         return $this;
     }
@@ -153,17 +153,17 @@ class Viewer implements \ArrayAccess, InternalInterface
         return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function controllers($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function controllers($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function extension($value = null, $type = Obj::VAR_REPLACE)
+    public function extension($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function paths($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function paths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
@@ -172,8 +172,10 @@ class Viewer implements \ArrayAccess, InternalInterface
     {
         $app = $this->app();
 
-        if ($app->hasComponent($method)) {
-            return $app->getComponent($method);
+        $components = $app->components();
+
+        if ($components->has($method)) {
+            return $components->get($method);
         }
 
         throw Exception::create($this->appName(), 'Component `' . $method . '` not found!');

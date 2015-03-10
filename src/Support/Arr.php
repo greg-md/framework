@@ -2,6 +2,8 @@
 
 namespace Greg\Support;
 
+use Greg\Storage\ArrayReference;
+
 class Arr
 {
     const INDEX_DELIMITER = '.';
@@ -26,32 +28,16 @@ class Arr
     }
 
     /**
-     * Delete value by index.
-     *
      * @param array $array
-     * @param $key
-     * @return bool
+     * @param callable $callable
+     * @param null $else
+     * @return mixed
      */
-    static public function del(array &$array, $key)
+    static public function first(array $array, callable $callable = null, $else = null)
     {
-        unset($array[$key]);
-
-        return true;
-    }
-
-    /**
-     * Get the first element of an array. May passing a given truth test.
-     *
-     * @param array $array
-     * @param null $callback
-     * @param null $default
-     * @return mixed|null
-     */
-    static public function first(array $array, $callback = null, $default = null)
-    {
-        if ($callback !== null) {
+        if ($callable !== null) {
             foreach ($array as $key => $value) {
-                if (call_user_func($callback, $value, $key)) return $value;
+                if (call_user_func($callable, $value, $key)) return $value;
             }
         }
 
@@ -59,7 +45,7 @@ class Arr
             return reset($array);
         }
 
-        return $default;
+        return $else;
     }
 
     /**
@@ -119,6 +105,11 @@ class Arr
 
     static public function indexSet(&$array, $index, $value, $delimiter = self::INDEX_DELIMITER)
     {
+        return static::indexSetRef($array, $index, $value, $delimiter);
+    }
+
+    static public function indexSetRef(&$array, $index, &$value, $delimiter = self::INDEX_DELIMITER)
+    {
         $indexes = explode($delimiter, $index);
 
         $current = &$array;
@@ -129,7 +120,7 @@ class Arr
             $current = &$current[$index];
         }
 
-        $current = $value;
+        $current = &$value;
 
         return true;
     }
@@ -217,38 +208,23 @@ class Arr
         return true;
     }
 
-    static public function map(array $array, array $args)
+    static public function mapRecursive(callable $callable, array $array, array ...$arrays)
     {
-        $callback = array_shift($args);
-
-        array_unshift($args, $array);
-
-        array_unshift($args, $callback);
-
-        return call_user_func_array('array_map', $args);
-    }
-
-    static public function mapRecursive(array $array, array $args)
-    {
-        $callback = array_shift($args);
-
         $k = 0;
 
         foreach($array as &$value) {
-            $valArgs = [];
+            $callArgs = [];
 
-            foreach($args as $arg) {
-                $valArgs[] = $arg[$k];
+            foreach($arrays as $arg) {
+                $callArgs[] = $arg[$k];
             }
 
             if (is_array($value)) {
-                array_unshift($valArgs, $callback);
-
-                static::mapRecursive($value, $valArgs);
+                static::mapRecursive($callable, $value, ...$callArgs);
             } else {
-                array_unshift($valArgs, $value);
+                array_unshift($callArgs, $value);
 
-                $value = call_user_func_array($callback, $valArgs);
+                $value = call_user_func_array($callable, $callArgs);
             }
 
             ++$k;
@@ -257,7 +233,7 @@ class Arr
         return $array;
     }
 
-    static public function find(array $array, $callable)
+    static public function find(array $array, callable $callable)
     {
         foreach($array as $value) {
             if (call_user_func_array($callable, [$value])) return $value;
@@ -266,29 +242,21 @@ class Arr
         return false;
     }
 
-    static public function filter(array $array, array $args)
-    {
-        array_unshift($args, $array);
-
-        return call_user_func_array('array_filter', $args);
-    }
-
-    static public function filterRecursive(array $array, array $args)
+    /**
+     * @param array $array
+     * @param callable ...$callable
+     * @param int ...$flag
+     * @return array
+     */
+    static public function filterRecursive(array $array, ...$args)
     {
         foreach($array as &$value) {
             if (is_array($value)) {
-                $value = static::filterRecursive($value, $args);
+                $value = static::filterRecursive($value, ...$args);
             }
         }
 
-        return static::filter($array, $args);
-    }
-
-    static public function reverse(array $array, array $args)
-    {
-        array_unshift($args, $array);
-
-        return call_user_func_array('array_reverse', $args);
+        return array_filter($array, ...$args);
     }
 
     static public function group(array $array, $maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
@@ -342,8 +310,13 @@ class Arr
         return $grouped;
     }
 
-    static public function filled($array, $filter = null)
+    static public function filled($array, ...$args)
     {
-        return sizeof($filter ? array_filter($array, $filter) : array_filter($array)) == sizeof($array);
+        return sizeof(array_filter($array, ...$args)) == sizeof($array);
+    }
+
+    static public function ref(&$var)
+    {
+        return new ArrayReference($var);
     }
 }

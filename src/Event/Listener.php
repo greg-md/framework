@@ -3,15 +3,14 @@
 namespace Greg\Event;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Str;
-use Closure;
 
-class Listener implements \ArrayAccess, InternalInterface
+class Listener implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     public function on($event, $function, $id = null)
     {
@@ -39,12 +38,8 @@ class Listener implements \ArrayAccess, InternalInterface
         return $this;
     }
 
-    public function fire($event, $_ = null)
+    public function fire($event, ...$args)
     {
-        $args = func_get_args();
-
-        array_shift($args);
-
         return $this->fireArgs($event, $args);
     }
 
@@ -53,13 +48,13 @@ class Listener implements \ArrayAccess, InternalInterface
         $binder = $this->app()->binder();
 
         if (isset($this[$event])) foreach($this[$event] as $function) {
-            $binder->call($function, $params);
+            $binder->callArgs($function, $params);
         }
 
         return $this;
     }
 
-    public function addSubscribers($subscribers, Closure $callback = null)
+    public function addSubscribers($subscribers, \Closure $callback = null)
     {
         foreach($subscribers as $name => $subscriber) {
             $this->subscribe($name, $subscriber, $callback);
@@ -68,10 +63,10 @@ class Listener implements \ArrayAccess, InternalInterface
         return $this;
     }
 
-    public function subscribe($name, $subscriber, Closure $callback = null)
+    public function subscribe($name, $subscriber, \Closure $callback = null)
     {
         if (is_string($subscriber)) {
-            $subscriber = $this->app()->newClass($subscriber);
+            $subscriber = $this->app()->newInstance($subscriber);
         }
 
         if (!($subscriber instanceof SubscriberInterface)) {

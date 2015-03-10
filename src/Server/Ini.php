@@ -6,12 +6,13 @@ class Ini
 {
     static public function all($extension = null, $details = true)
     {
-        return call_user_func_array('ini_get_all', func_get_args());
+        return ini_get_all(...func_get_args());
     }
 
     static public function param($key = null, $value = null)
     {
         $args = func_get_args();
+
         if ($args) {
             $var = array_shift($args);
 

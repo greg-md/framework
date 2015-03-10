@@ -6,13 +6,13 @@ use Greg\Support\Arr;
 
 trait ArrayAccess
 {
-    protected $storage = [];
+    abstract protected function &accessor(array $accessor = []);
 
     public function has($index)
     {
         if (is_array($index)) {
             foreach(($indexes = $index) as $index) {
-                if (!array_key_exists($index, $this->storage)) {
+                if (!array_key_exists($index, $this->accessor())) {
                     return false;
                 }
             }
@@ -20,12 +20,35 @@ trait ArrayAccess
             return true;
         }
 
-        return array_key_exists($index, $this->storage);
+        if (($index instanceof \Closure)) {
+            foreach($this->accessor() as $key => $value) {
+                if ($index($value, $key) === true) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return array_key_exists($index, $this->accessor());
     }
 
     public function set($index, $value)
     {
-        $this->storage[$index] = $value;
+        if ($value instanceof ArrayReference) {
+            $value = &$value->get();
+        }
+
+        return $this->setRef($index, $value);
+    }
+
+    public function setRef($index, &$value)
+    {
+        if ($index !== null) {
+            $this->accessor()[$index] = &$value;
+        } else {
+            $this->accessor()[] = &$value;
+        }
 
         return $this;
     }
@@ -39,7 +62,7 @@ trait ArrayAccess
 
             foreach(($indexes = $index) as $index) {
                 if ($this->has($index)) {
-                    $return[$index] = $this->storage[$index];
+                    $return[$index] = $this->accessor()[$index];
                 } elseif (array_key_exists($index, $else)) {
                     $return[$index] = $else[$index];
                 } else {
@@ -50,92 +73,96 @@ trait ArrayAccess
             return $return;
         }
 
-        if ($this->has($index)) return $this->storage[$index]; return $else;
+        if ($this->has($index)) return $this->accessor()[$index]; return $else;
     }
 
     public function del($index)
     {
-        unset($this->storage[$index]);
+        if (is_array($index)) {
+            foreach(($indexes = $index) as $index) {
+                unset($this->accessor()[$index]);
+            }
+        } else {
+            unset($this->accessor()[$index]);
+        }
 
         return $this;
     }
 
-    public function exchange(array $array)
-    {
-        $this->storage = $array;
-
-        return $this;
-    }
-
-    public function merge(array $array)
-    {
-        $this->storage = array_merge($this->storage, $array);
-
-        return $this;
-    }
-
-    public function mergePrepend(array $array)
-    {
-        $this->storage = array_merge($array, $this->storage);
-
-        return $this;
-    }
-
-    public function replace(array $array)
-    {
-        $this->storage = array_replace($this->storage, $array);
-
-        return $this;
-    }
-
-    public function replacePrepend(array $array)
-    {
-        $this->storage = array_replace($array, $this->storage);
-
-        return $this;
-    }
+    /* May be split index methods in another trait in the future */
 
     public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::indexHas($this->storage, $index, $delimiter);
+        if (strpos($index, $delimiter) !== false) {
+            return Arr::indexHas($this->accessor(), $index, $delimiter);
+        }
+
+        return $this->has($index);
     }
 
     public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        Arr::indexSet($this->storage, $index, $value, $delimiter);
+        if ($value instanceof ArrayReference) {
+            $value = &$value->get();
+        }
+
+        if (strpos($index, $delimiter) !== false) {
+            Arr::indexSet($this->accessor(), $index, $value, $delimiter);
+        } else {
+            $this->set($index, $value);
+        }
+
+        return $this;
+    }
+
+    public function indexSetRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        if (strpos($index, $delimiter) !== false) {
+            Arr::indexSetRef($this->accessor(), $index, $value, $delimiter);
+        } else {
+            $this->setRef($index, $value);
+        }
 
         return $this;
     }
 
     public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::indexGet($this->storage, $index, $else, $delimiter);
+        if (strpos($index, $delimiter) !== false) {
+            return Arr::indexGet($this->accessor(), $index, $else, $delimiter);
+        }
+
+        return $this->get($index, $else);
     }
 
     public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::indexDel($this->storage, $index, $delimiter);
+        if (strpos($index, $delimiter) !== false) {
+            return Arr::indexDel($this->accessor(), $index, $delimiter);
+        }
+
+        return $this->del($index);
     }
 
     /* Magic methods for ArrayAccess interface */
 
     public function offsetExists($index)
     {
-        return call_user_func_array([$this, 'has'], func_get_args());
+        return $this->has($index);
     }
 
     public function offsetSet($index, $value)
     {
-        return call_user_func_array([$this, 'set'], func_get_args());
+        return $this->set($index, $value);
     }
 
     public function &offsetGet($index)
     {
-        return $this->storage[$index];
+        return $this->accessor()[$index];
     }
 
     public function offsetUnset($index)
     {
-        return call_user_func_array([$this, 'del'], func_get_args());
+        return $this->del($index);
     }
 }

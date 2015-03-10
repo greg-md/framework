@@ -2,18 +2,15 @@
 
 namespace Greg\Event;
 
+use Greg\Application\Runner;
 use Greg\Support\Str;
 
 trait SubscriberTrait
 {
     abstract public function subscribe(Listener $listener);
 
-    public function fire($event, $_ = null)
+    public function fire($event, ...$args)
     {
-        $args = func_get_args();
-
-        array_shift($args);
-
         return $this->fireArgs($event, $args);
     }
 
@@ -22,14 +19,15 @@ trait SubscriberTrait
         $method = lcfirst(Str::phpName($event));
 
         if (method_exists($this, $method)) {
-            $this->app()->binder()->call([$this, $method], $param);
+            $this->app()->binder()->callArgs([$this, $method], $param);
         }
 
         return $this;
     }
 
     /**
-     * @return \Greg\Application\Runner
+     * @param Runner $app
+     * @return Runner
      */
-    abstract public function app();
+    abstract public function app(Runner $app = null);
 }

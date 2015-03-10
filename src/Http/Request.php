@@ -3,14 +3,14 @@
 namespace Greg\Http;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Server\Info;
+use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 
-class Request implements \ArrayAccess, InternalInterface
+class Request implements \ArrayAccess
 {
-    use ArrayAccess, Internal;
+    use Accessor, ArrayAccess, Internal;
 
     static public function &protocol()
     {

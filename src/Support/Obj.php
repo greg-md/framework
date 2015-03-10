@@ -2,26 +2,19 @@
 
 namespace Greg\Support;
 
-use Closure;
-use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Storage\ArrayObject;
 
 class Obj
 {
-    const VAR_APPEND = 'append';
+    const PROP_APPEND = 'append';
 
-    const VAR_PREPEND = 'prepend';
+    const PROP_PREPEND = 'prepend';
 
-    const VAR_REPLACE = 'replace';
+    const PROP_REPLACE = 'replace';
 
-    static public function instance($className, $_ = null)
+    static public function newInstance($className, ...$args)
     {
-        $args = func_get_args();
-
-        array_shift($args);
-
-        return static::instanceArgs($className, $args);
+        return static::newInstanceArgs($className, $args);
     }
 
     /**
@@ -29,11 +22,21 @@ class Obj
      * @param array $args
      * @return object
      */
-    static public function instanceArgs($className, array $args = [])
+    static public function newInstanceArgs($className, array $args = [])
     {
         $class = new \ReflectionClass($className);
 
-        return $class->newInstanceArgs($class->hasMethod('__construct') ? $args : []);
+        $self = $class->newInstanceWithoutConstructor();
+
+        if (method_exists($self, '__bind')) {
+            $self->__bind();
+        }
+
+        if ($constructor = $class->getConstructor()) {
+            $constructor->invokeArgs($self, $args);
+        }
+
+        return $self;
     }
 
     /**
@@ -65,18 +68,18 @@ class Obj
         if ($args) {
             $value = static::fetchScalar(array_shift($args), $unsigned);
 
-            $addType = $args ? array_shift($args) : static::VAR_REPLACE;
+            $addType = $args ? array_shift($args) : static::PROP_REPLACE;
 
             switch ($addType) {
-                case static::VAR_APPEND:
+                case static::PROP_APPEND:
                     $var .= $value;
 
                     break;
-                case static::VAR_PREPEND:
+                case static::PROP_PREPEND:
                     $var = $value . $var;
 
                     break;
-                case static::VAR_REPLACE:
+                case static::PROP_REPLACE:
                     $var = $value;
 
                     break;
@@ -90,11 +93,7 @@ class Obj
 
     static public function fetchScalar($var)
     {
-        if (!is_scalar($var)) {
-            $var = (string)$var;
-        }
-
-        return $var;
+        return is_scalar($var) ? $var : (string)$var;
     }
 
     /**
@@ -108,18 +107,18 @@ class Obj
         if ($args) {
             $value = (string)array_shift($args);
 
-            $addType = $args ? array_shift($args) : static::VAR_REPLACE;
+            $addType = $args ? array_shift($args) : static::PROP_REPLACE;
 
             switch ($addType) {
-                case static::VAR_APPEND:
+                case static::PROP_APPEND:
                     $var .= $value;
 
                     break;
-                case static::VAR_PREPEND:
+                case static::PROP_PREPEND:
                     $var = $value . $var;
 
                     break;
-                case static::VAR_REPLACE:
+                case static::PROP_REPLACE:
                     $var = $value;
 
                     break;
@@ -162,13 +161,7 @@ class Obj
 
     static public function fetchInt($var, $unsigned = false)
     {
-        $var = (int)$var;
-
-        if ($unsigned and $var < 0) {
-            $var = 0;
-        }
-
-        return $var;
+        return (int)(($unsigned and $var < 0) ? 0 : $var);
     }
 
     /**
@@ -191,13 +184,7 @@ class Obj
 
     static public function fetchFloat($var, $unsigned = false)
     {
-        $var = (float)$var;
-
-        if ($unsigned and $var < 0) {
-            $var = 0;
-        }
-
-        return $var;
+        return (float)(($unsigned and $var < 0) ? 0 : $var);
     }
 
     /**
@@ -221,57 +208,49 @@ class Obj
 
     static public function fetchEnum($var, array $stack = [], $default = null)
     {
-        if (!in_array($var, $stack)) {
-            $var = $default;
-        }
-
-        return $var;
+        return in_array($var, $stack) ? $var : $default;
     }
 
     /**
      * @param $obj
      * @param $var
      * @param array $args
-     * @param callable $callback
+     * @param callable $callable
      * @return mixed|$this
      */
-    static public function &fetchCallbackVar($obj, &$var, array $args = [], Closure $callback = null)
+    static public function &fetchCallbackVar($obj, &$var, array $args = [], callable $callable = null)
     {
         if ($args) {
-            $var = static::fetchCallback(array_shift($args), $callback);
+            $var = static::fetchCallback(array_shift($args), $callable);
 
             return $obj;
         }
 
-        $var = static::fetchCallback($var, $callback); return $var;
+        $var = static::fetchCallback($var, $callable); return $var;
     }
 
-    static public function &fetchCallback($value, Closure $callback = null)
+    static public function &fetchCallback($value, callable $callable = null)
     {
-        if (($callback instanceof Closure)) {
-            $value = $callback($value);
-        }
-
-        return $value;
+        return $callable ? call_user_func_array($callable, [$value]) : $value;
     }
 
-    static public function &fetchArrayObjVar(InternalInterface $obj, &$var, array $args = [])
+    static public function &fetchArrayObjVar($obj, &$var, array $args = [])
     {
         if (!($var instanceof ArrayObject)) {
-            $var = ArrayObject::create($obj->appName());
+            $var = new ArrayObject($var);
         }
 
         if ($args) {
             $key = array_shift($args);
 
             if (is_array($key)) {
-                $addType = $args ? array_shift($args) : static::VAR_APPEND;
+                $addType = $args ? array_shift($args) : static::PROP_APPEND;
 
                 if ($addType === true) {
-                    $addType = static::VAR_REPLACE;
+                    $addType = static::PROP_REPLACE;
                 }
 
-                if ($addType == static::VAR_REPLACE) {
+                if ($addType == static::PROP_REPLACE) {
                     $var->exchange($key);
 
                     return $obj;
@@ -281,23 +260,23 @@ class Obj
 
                 if ($replace) {
                     switch ($addType) {
-                        case static::VAR_APPEND:
-                            $var->selfReplace($key);
+                        case static::PROP_APPEND:
+                            $var->replaceMe($key);
 
                             break;
-                        case static::VAR_PREPEND:
-                            $var->selfReplacePrepend($key);
+                        case static::PROP_PREPEND:
+                            $var->replacePrependMe($key);
 
                             break;
                     }
                 } else {
                     switch ($addType) {
-                        case static::VAR_APPEND:
-                            $var->selfMerge($key);
+                        case static::PROP_APPEND:
+                            $var->mergeMe($key);
 
                             break;
-                        case static::VAR_PREPEND:
-                            $var->selfMergePrepend($key);
+                        case static::PROP_PREPEND:
+                            $var->mergePrependMe($key);
 
                             break;
                     }
@@ -312,11 +291,7 @@ class Obj
                 return $obj;
             }
 
-            if (array_key_exists($key, $var)) {
-                return $var[$key];
-            }
-
-            $return = null; return $return;
+            return $var->get($key);
         }
 
         return $var;
@@ -336,13 +311,13 @@ class Obj
             $key = array_shift($args);
 
             if (is_array($key)) {
-                $addType = $args ? array_shift($args) : static::VAR_APPEND;
+                $addType = $args ? array_shift($args) : static::PROP_APPEND;
 
                 if ($addType === true) {
-                    $addType = static::VAR_REPLACE;
+                    $addType = static::PROP_REPLACE;
                 }
 
-                if ($addType == static::VAR_REPLACE) {
+                if ($addType == static::PROP_REPLACE) {
                     $var = $key;
 
                     return $obj;
@@ -355,22 +330,22 @@ class Obj
                 if ($replace) {
                     if ($recursive) {
                         switch ($addType) {
-                            case static::VAR_APPEND:
+                            case static::PROP_APPEND:
                                 $var = array_replace_recursive($var, $key);
 
                                 break;
-                            case static::VAR_PREPEND:
+                            case static::PROP_PREPEND:
                                 $var = array_replace_recursive($key, $var);
 
                                 break;
                         }
                     } else {
                         switch ($addType) {
-                            case static::VAR_APPEND:
+                            case static::PROP_APPEND:
                                 $var = array_replace($var, $key);
 
                                 break;
-                            case static::VAR_PREPEND:
+                            case static::PROP_PREPEND:
                                 $var = array_replace($key, $var);
 
                                 break;
@@ -379,22 +354,22 @@ class Obj
                 } else {
                     if ($recursive) {
                         switch ($addType) {
-                            case static::VAR_APPEND:
+                            case static::PROP_APPEND:
                                 $var = array_merge_recursive($var, $key);
 
                                 break;
-                            case static::VAR_PREPEND:
+                            case static::PROP_PREPEND:
                                 $var = array_merge_recursive($key, $var);
 
                                 break;
                         }
                     } else {
                         switch ($addType) {
-                            case static::VAR_APPEND:
+                            case static::PROP_APPEND:
                                 $var = array_merge($var, $key);
 
                                 break;
-                            case static::VAR_PREPEND:
+                            case static::PROP_PREPEND:
                                 $var = array_merge($key, $var);
 
                                 break;
@@ -412,7 +387,6 @@ class Obj
             }
 
             if (array_key_exists($key, $var)) {
-
                 return $var[$key];
             }
 

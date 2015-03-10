@@ -4,7 +4,6 @@ namespace Greg\Component;
 
 use Greg\Application\Runner;
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
@@ -14,7 +13,7 @@ use Greg\Router\Dispatcher;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
-class Layout implements SubscriberInterface, InternalInterface
+class Layout implements SubscriberInterface
 {
     use SubscriberTrait, Internal;
 
@@ -49,7 +48,7 @@ class Layout implements SubscriberInterface, InternalInterface
         if (!$this->disabled()) {
             $this->request($request = Request::create($this->appName(), $router->param()));
 
-            $this->view($view = $this->app()->viewCreate($request));
+            $this->view($view = $this->app()->newView($request));
 
             $listener->fire(static::EVENT_STARTUP);
         }
@@ -74,12 +73,12 @@ class Layout implements SubscriberInterface, InternalInterface
         return $this;
     }
 
-    public function body($value = null, $type = Obj::VAR_REPLACE)
+    public function body($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function renderName($value = null, $type = Obj::VAR_REPLACE)
+    public function renderName($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }

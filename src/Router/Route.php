@@ -3,10 +3,9 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
-use Greg\Engine\InternalInterface;
 use Greg\Support\Obj;
 
-abstract class Route implements RouteInterface, InternalInterface
+abstract class Route implements RouteInterface
 {
     use Internal;
 
@@ -88,17 +87,17 @@ abstract class Route implements RouteInterface, InternalInterface
             . '` is required in router `' . $this->name() . '`.');
     }
 
-    public function name($value = null, $type = Obj::VAR_REPLACE)
+    public function name($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function format($value = null, $type = Obj::VAR_REPLACE)
+    public function format($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
-    public function param($key = null, $value = null, $type = Obj::VAR_APPEND, $replace = false, $recursive = false)
+    public function param($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
