@@ -1,5 +1,6 @@
-# Greg Framework
-Under construction...
+# Greg Framework - Under construction...
+
+**Let's make it happen**
 
 ```php
 // Start a new application
