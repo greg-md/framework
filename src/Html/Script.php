@@ -3,11 +3,13 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Storage\Accessor;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Script
 {
-    use Internal;
+    use Accessor, Internal;
 
     const APPEND = 'append';
 
@@ -19,9 +21,7 @@ class Script
 
     const ADD_AFTER = 'after';
 
-    protected $order = [self::ADD_BEFORE, self::ADD_INNER, self::ADD_AFTER];
-
-    protected $storage = [];
+    const ORDER = [self::ADD_BEFORE, self::ADD_INNER, self::ADD_AFTER];
 
     public function appendSrc($src, $condition = null, array $attr = [])
     {
@@ -83,17 +83,23 @@ class Script
         return $this->addSrc(self::ADD_AFTER, static::PREPEND, $text, $condition, $attr);
     }
 
-    protected function addSrc($where, $type, $src, $condition = null, array $attr = [])
+    protected function addSrc($where, $type, $sources, $condition = null, array $attr = [])
     {
-        foreach((array)($sources = $src) as $src) {
+        Arr::bringRef($sources);
+
+        foreach($sources as $src) {
             $thisAttr = $attr;
+
             $thisAttr['src'] = $src;
+
             $param = [
+                'inner' => null,
                 'condition' => $condition,
                 'attr' => $thisAttr,
             ];
+
             if ($type == static::PREPEND) {
-                $this->storage[$where] = array_merge([$param], $this->storage['inner']);
+                $this->storage[$where] = array_merge([$param], $this->storage[$where]);
             } else {
                 $this->storage[$where][] = $param;
             }
@@ -102,16 +108,18 @@ class Script
         return $this;
     }
 
-    protected function addText($where, $type, $text, $condition = null, array $attr = [])
+    protected function addText($where, $type, $texts, $condition = null, array $attr = [])
     {
-        foreach((array)($texts = $text) as $text) {
+        Arr::bringRef($texts);
+
+        foreach($texts as $text) {
             $param = [
                 'inner' => $text,
                 'condition' => $condition,
                 'attr' => $attr,
             ];
             if ($type == static::PREPEND) {
-                $this->storage[$where] = array_merge([$param], $this->storage['inner']);
+                $this->storage[$where] = array_merge([$param], $this->storage[$where]);
             } else {
                 $this->storage[$where][] = $param;
             }
@@ -120,22 +128,11 @@ class Script
         return $this;
     }
 
-    public function order($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
-    }
-
     public function fetchItem($item)
     {
-        $attr = isset($item['attr']) ? $item['attr'] : [];
+        $element = Element::create($this->appName(), 'script', Arr::bring($item['attr']), $item['condition']);
 
-        $condition = isset($item['condition']) ? $item['condition'] : null;
-
-        $element = Element::create($this->appName(), 'script', $attr, $condition);
-
-        if (isset($item['inner']) and $item['inner']) {
-            $element->inner($item['inner']);
-        }
+        $element->inner($item['inner']);
 
         return $element;
     }
@@ -144,8 +141,8 @@ class Script
     {
         $html = [];
 
-        foreach($this->order() as $type) {
-            if (isset($this->storage[$type])) {
+        foreach(static::ORDER as $type) {
+            if (Arr::has($this->storage, $type)) {
                 foreach($this->storage[$type] as $item) {
                     $html[] = $this->fetchItem($item);
                 }

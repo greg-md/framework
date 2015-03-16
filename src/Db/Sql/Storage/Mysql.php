@@ -20,7 +20,7 @@ class Mysql extends Storage
 
     protected $options = [];
 
-    protected $adapterClass = '\Greg\Db\Sql\Storage\Mysql\Adapter\Pdo';
+    protected $adapterClass = Mysql\Adapter\Pdo::class;
 
     protected $adapter = null;
 
@@ -41,9 +41,14 @@ class Mysql extends Storage
         return $this;
     }
 
+    static public function create($appName, $dns = null, $username = null, $password = null, $options = [], $adapterClass = null)
+    {
+        return static::newInstanceRef($appName, $dns, $username, $password, $options, $adapterClass);
+    }
+
     public function init()
     {
-        /* @var $class \Greg\Db\Sql\Storage\Mysql\Adapter\Pdo */
+        /* @var $class Mysql\Adapter\Pdo */
         $class = $this->adapterClass();
 
         $this->adapter($class::create($this->appName(), $this->dns(), $this->username(), $this->password(), $this->options()));
@@ -63,7 +68,7 @@ class Mysql extends Storage
             $columns = func_get_args();
         }
 
-        $query = Select::create($this->appName(), $this);
+        $query = Select::newInstance($this->appName(), $this);
 
         if ($columns) {
             $query->columns($columns);
@@ -79,7 +84,7 @@ class Mysql extends Storage
      */
     public function insert($into = null)
     {
-        $query = Insert::create($this->appName(), $this);
+        $query = Insert::newInstance($this->appName(), $this);
 
         if ($into !== null) {
             $query->into($into);
@@ -95,7 +100,7 @@ class Mysql extends Storage
      */
     public function delete($from = null)
     {
-        $query = Delete::create($this->appName(), $this);
+        $query = Delete::newInstance($this->appName(), $this);
 
         if ($from !== null) {
             $query->from($from);
@@ -111,7 +116,7 @@ class Mysql extends Storage
      */
     public function update($table = null)
     {
-        $query = Update::create($this->appName(), $this);
+        $query = Update::newInstance($this->appName(), $this);
 
         if ($table !== null) {
             $query->table($table);
@@ -192,27 +197,27 @@ class Mysql extends Storage
 
     public function dns($value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function username($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function password($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     protected function options($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -221,11 +226,11 @@ class Mysql extends Storage
      */
     public function adapter(AdapterInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function __call($method, array $args = [])
     {
-        return $this->adapter()->{$method}(...$args);
+        return $this->adapter()->$method(...$args);
     }
 }

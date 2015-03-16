@@ -26,8 +26,13 @@ abstract class RowAbstract extends ArrayObject
         return $this;
     }
 
+    static public function create($appName, $tableName, $data = [])
+    {
+        return static::newInstanceRef($appName, $tableName, $data);
+    }
+
     public function tableName($value = null)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

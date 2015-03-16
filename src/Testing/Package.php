@@ -12,7 +12,7 @@ class Package
 
         foreach(get_class_methods($this) as $method) {
             if (substr($method, 0, 4) == 'test') {
-                $this->{$method}($tester);
+                $this->$method($tester);
             }
         }
 

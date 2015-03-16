@@ -10,8 +10,12 @@ trait Manager
 
     public function __construct($storage)
     {
+        if (is_scalar($storage)) {
+            $storage = [$storage];
+        }
+
         if (is_array($storage)) {
-            $storage = $this->app()->newInstance(...$storage);
+            $storage = $this->app()->loadInstance(...$storage);
         }
 
         $this->storage($storage);
@@ -19,7 +23,7 @@ trait Manager
 
     public function __call($method, $args)
     {
-        return $this->storage()->{$method}(...$args);
+        return $this->storage()->$method(...$args);
     }
 
     /**

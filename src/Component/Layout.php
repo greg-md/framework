@@ -75,17 +75,17 @@ class Layout implements SubscriberInterface
 
     public function body($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function renderName($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function disabled($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -94,7 +94,7 @@ class Layout implements SubscriberInterface
      */
     public function request(Request $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -103,6 +103,6 @@ class Layout implements SubscriberInterface
      */
     public function view(Viewer $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

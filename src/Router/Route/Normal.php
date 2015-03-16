@@ -13,7 +13,7 @@ class Normal extends Route
     {
         switch($key) {
             case 'strict':
-                $this->{$key}($value);
+                $this->$key($value);
 
                 break;
             default:
@@ -172,6 +172,6 @@ class Normal extends Route
 
     public function strict($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

@@ -12,77 +12,89 @@ class Request implements \ArrayAccess
 {
     use Accessor, ArrayAccess, Internal;
 
-    static public function &protocol()
+    public function __construct(array $param = [])
+    {
+        $this->storage($param);
+
+        return $this;
+    }
+
+    static public function create($appName, array $param = [])
+    {
+        return static::newInstanceRef($appName, $param);
+    }
+
+    static public function protocol()
     {
         return Info::get('SERVER_PROTOCOL');
     }
 
-    static public function &clientHost()
+    static public function clientHost()
     {
         return Info::get('HTTP_HOST');
     }
 
-    static public function &serverHost()
+    static public function serverHost()
     {
         return Info::get('SERVER_NAME');
     }
 
-    static public function &serverAdmin()
+    static public function serverAdmin()
     {
         return Info::get('SERVER_ADMIN');
     }
 
-    static public function &secured()
+    static public function secured()
     {
         return Info::get('HTTPS');
     }
 
-    static public function &with()
+    static public function with()
     {
         return Info::get('HTTP_X_REQUESTED_WITH');
     }
 
-    static public function &port()
+    static public function port()
     {
         return Info::get('SERVER_PORT');
     }
 
-    static public function &agent()
+    static public function agent()
     {
         return Info::get('HTTP_USER_AGENT');
     }
 
-    static public function &ip()
+    static public function ip()
     {
         return Info::get('REMOTE_ADDR');
     }
 
-    static public function &uri()
+    static public function uri()
     {
         return Info::get('REQUEST_URI');
     }
 
-    static public function &referrer()
+    static public function referrer()
     {
         return Info::get('HTTP_REFERER');
     }
 
-    static public function &modifiedSince()
+    static public function modifiedSince()
     {
         return Info::get('HTTP_IF_MODIFIED_SINCE');
     }
 
-    static public function &match()
+    static public function match()
     {
         return Info::get('HTTP_IF_NONE_MATCH');
     }
 
-    static public function &time()
+    static public function time()
     {
         return Info::requestTime();
     }
 
-    static public function &microTime()
+    static public function microTime()
     {
         return Info::requestMicroTime();
     }
@@ -92,14 +104,69 @@ class Request implements \ArrayAccess
         return static::with() == 'XMLHttpRequest';
     }
 
-    static public function isRequest()
-    {
-        return (bool)$_REQUEST;
-    }
-
     static public function isGet()
     {
         return (bool)$_GET;
+    }
+
+    static public function hasGet($key, ...$keys)
+    {
+        return Arr::has($_GET, $key, ...$keys);
+    }
+
+    static public function hasIndexGet($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::hasIndex($_GET, $index, $delimiter);
+    }
+
+    static public function setGet($key, $value)
+    {
+        return Arr::set($_GET, $key, $value);
+    }
+
+    static public function setRefGet($key, &$value)
+    {
+        return Arr::set($_GET, $key, $value);
+    }
+
+    static public function setIndexGet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::setIndex($_GET, $index, $value, $delimiter);
+    }
+
+    static public function setIndexRefGet($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::setIndex($_GET, $index, $value, $delimiter);
+    }
+
+    static public function &getGet($key, $else = null)
+    {
+        return Arr::get($_GET, $key, $else);
+    }
+
+    static public function &getRefGet($key, $else = null)
+    {
+        return Arr::getRef($_GET, $key, $else);
+    }
+
+    static public function &getIndexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndex($_GET, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexRefGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexRef($_GET, $index, $else, $delimiter);
+    }
+
+    static public function delGet($key, ...$keys)
+    {
+        return Arr::del($_GET, $key, ...$keys);
+    }
+
+    static public function indexDelGet($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::delIndex($_GET, $index, $delimiter);
     }
 
     static public function isPost()
@@ -107,150 +174,128 @@ class Request implements \ArrayAccess
         return (bool)$_POST;
     }
 
-    static public function &paramRequest()
+    static public function hasPost($key, ...$keys)
     {
-        return $_REQUEST;
+        return Arr::has($_POST, $key, ...$keys);
     }
 
-    static public function &paramGet()
+    static public function hasIndexPost($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return $_GET;
+        return Arr::hasIndex($_POST, $index, $delimiter);
     }
 
-    static public function &paramPost()
+    static public function setPost($key, $value)
     {
-        return $_POST;
+        return Arr::set($_POST, $key, $value);
     }
 
-    static public function hasRequest($index)
+    static public function setRefPost($key, &$value)
     {
-        return array_key_exists($index, $_REQUEST);
+        return Arr::set($_POST, $key, $value);
     }
 
-    static public function hasGet($index)
+    static public function setIndexPost($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return array_key_exists($index, $_GET);
+        return Arr::setIndex($_POST, $index, $value, $delimiter);
     }
 
-    static public function hasPost($index)
+    static public function setIndexRefPost($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return array_key_exists($index, $_POST);
+        return Arr::setIndex($_POST, $index, $value, $delimiter);
     }
 
-    static public function &getRequest($index, $else = null)
+    static public function &getPost($key, $else = null)
     {
-        if (static::hasRequest($index)) return $_REQUEST[$index]; return $else;
+        return Arr::get($_POST, $key, $else);
     }
 
-    static public function &getGet($index, $else = null)
+    static public function &getRefPost($key, $else = null)
     {
-        if (static::hasGet($index)) return $_GET[$index]; return $else;
+        return Arr::getRef($_POST, $key, $else);
     }
 
-    static public function &getPost($index, $else = null)
+    static public function &getIndexPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (static::hasPost($index)) return $_POST[$index]; return $else;
+        return Arr::getIndex($_POST, $index, $else, $delimiter);
     }
 
-    static public function setRequest($index, $value)
+    static public function &getIndexRefPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        $_REQUEST[$index] = $value;
-
-        return true;
+        return Arr::getIndexRef($_POST, $index, $else, $delimiter);
     }
 
-    static public function setGet($index, $value)
+    static public function delPost($key, ...$keys)
     {
-        $_GET[$index] = $value;
-
-        return true;
-    }
-
-    static public function setPost($index, $value)
-    {
-        $_POST[$index] = $value;
-
-        return true;
-    }
-
-    static public function delRequest($index)
-    {
-        unset($_REQUEST[$index]);
-
-        return true;
-    }
-
-    static public function delGet($index)
-    {
-        unset($_GET[$index]);
-
-        return true;
-    }
-
-    static public function delPost($index)
-    {
-        unset($_POST[$index]);
-
-        return true;
-    }
-
-    static public function indexHasRequest($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexHas($_REQUEST, $index, $delimiter);
-    }
-
-    static public function indexHasGet($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexHas($_GET, $index, $delimiter);
-    }
-
-    static public function indexHasPost($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexHas($_POST, $index, $delimiter);
-    }
-
-    static public function &indexGetRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexGet($_REQUEST, $index, $else, $delimiter);
-    }
-
-    static public function &indexGetGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexGet($_GET, $index, $else, $delimiter);
-    }
-
-    static public function &indexGetPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexGet($_POST, $index, $else, $delimiter);
-    }
-
-    static public function indexSetRequest($index, $value, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexSet($_REQUEST, $index, $value, $delimiter);
-    }
-
-    static public function indexSetGet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexSet($_GET, $index, $value, $delimiter);
-    }
-
-    static public function indexSetPost($index, $value, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexSet($_POST, $index, $value, $delimiter);
-    }
-
-    static public function indexDelRequest($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexDel($_REQUEST, $index, $delimiter);
-    }
-
-    static public function indexDelGet($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        return Arr::indexDel($_GET, $index, $delimiter);
+        return Arr::del($_POST, $key, ...$keys);
     }
 
     static public function indexDelPost($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::indexDel($_POST, $index, $delimiter);
+        return Arr::delIndex($_POST, $index, $delimiter);
+    }
+
+    static public function isRequest()
+    {
+        return (bool)$_REQUEST;
+    }
+
+    static public function hasRequest($key, ...$keys)
+    {
+        return Arr::has($_REQUEST, $key, ...$keys);
+    }
+
+    static public function hasIndexRequest($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::hasIndex($_REQUEST, $index, $delimiter);
+    }
+
+    static public function setRequest($key, $value)
+    {
+        return Arr::set($_REQUEST, $key, $value);
+    }
+
+    static public function setRefRequest($key, &$value)
+    {
+        return Arr::set($_REQUEST, $key, $value);
+    }
+
+    static public function setIndexRequest($index, $value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::setIndex($_REQUEST, $index, $value, $delimiter);
+    }
+
+    static public function setIndexRefRequest($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::setIndex($_REQUEST, $index, $value, $delimiter);
+    }
+
+    static public function &getRequest($key, $else = null)
+    {
+        return Arr::get($_REQUEST, $key, $else);
+    }
+
+    static public function &getRefRequest($key, $else = null)
+    {
+        return Arr::getRef($_REQUEST, $key, $else);
+    }
+
+    static public function &getIndexRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndex($_REQUEST, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexRefRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexRef($_REQUEST, $index, $else, $delimiter);
+    }
+
+    static public function delRequest($key, ...$keys)
+    {
+        return Arr::del($_REQUEST, $key, ...$keys);
+    }
+
+    static public function indexDelRequest($index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::delIndex($_REQUEST, $index, $delimiter);
     }
 }

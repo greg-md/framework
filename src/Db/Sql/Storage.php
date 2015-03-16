@@ -6,6 +6,8 @@ use Greg\Engine\Internal;
 
 abstract class Storage implements StorageInterface
 {
+    use StorageTrait, Internal;
+
     const PARAM_BOOL = 5;
 
     const PARAM_NULL = 0;
@@ -19,6 +21,4 @@ abstract class Storage implements StorageInterface
     const PARAM_STMT = 4;
 
     const FETCH_ORI_NEXT = 0;
-
-    use StorageTrait, Internal;
 }

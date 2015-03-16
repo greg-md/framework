@@ -55,6 +55,7 @@ class Delete
         ];
 
         $delete = $this->delete();
+
         if ($delete) {
             $data = [];
 
@@ -68,11 +69,13 @@ class Delete
         }
 
         $from = $this->fromToString();
+
         if ($from) {
             $query[] = $from;
         }
 
         $where = $this->whereToString();
+
         if ($where) {
             $query[] = $where;
         }

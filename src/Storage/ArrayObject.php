@@ -19,19 +19,26 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
         return $this;
     }
 
-    protected function fixArray($array)
+    protected function &fixArray(&$array)
     {
-        return Arr::bring($array);
+        return Arr::bringRef($array);
     }
 
-    static public function newInstance($input)
+    static public function newArrayObject($input, $iteratorClass = null)
     {
-        return new ArrayObject($input);
+        return new ArrayObject($input, $iteratorClass);
     }
 
     public function exchange($input)
     {
-        return $this->storage = $this->fixArray($input);
+        return $this->exchangeRef($input);
+    }
+
+    public function exchangeRef(&$input)
+    {
+        $this->storage = &$this->fixArray($input);
+
+        return $this;
     }
 
     public function toArray()
@@ -39,16 +46,63 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
         return $this->storage;
     }
 
-    public function append($value)
+    public function toArrayObject()
     {
-        $this->storage[] = $value;
+        return $this->newArrayObject($this->storage);
+    }
+
+    public function append($value = null, ...$values)
+    {
+        Arr::append($this->storage, $value, ...$values);
 
         return $this;
     }
 
-    public function prepend($value, $index = null)
+    public function appendRef(&$value = null, &...$values)
     {
-        Arr::prepend($this->storage, $value, $index);
+        Arr::appendRef($this->storage, $value, ...$values);
+
+        return $this;
+    }
+
+    public function appendKey($value = null, ...$values)
+    {
+        Arr::appendKey($this->storage, $value, ...$values);
+
+        return $this;
+    }
+
+    public function appendKeyRef(&$value = null, &...$values)
+    {
+        Arr::appendKeyRef($this->storage, $value, ...$values);
+
+        return $this;
+    }
+
+    public function prepend($value = null, ...$values)
+    {
+        Arr::prepend($this->storage, $value, ...$values);
+
+        return $this;
+    }
+
+    public function prependRef(&$value, &...$values)
+    {
+        Arr::prependRef($this->storage, $value, ...$values);
+
+        return $this;
+    }
+
+    public function prependKey($value = null, $index = null)
+    {
+        Arr::prependKey($this->storage, $value, $index);
+
+        return $this;
+    }
+
+    public function prependKeyRef(&$value = null, $index = null)
+    {
+        Arr::prependKeyRef($this->storage, $value, $index);
 
         return $this;
     }
@@ -127,7 +181,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function merge(array $array, array ...$arrays)
     {
-        return $this->newInstance(array_merge($this->storage, $array, ...$arrays));
+        return $this->newArrayObject(array_merge($this->storage, $array, ...$arrays));
     }
 
     public function mergeMe(array $array, array ...$arrays)
@@ -139,7 +193,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function mergeRecursive(array $array, array ...$arrays)
     {
-        return $this->newInstance(array_merge_recursive($this->toArray(), $array, ...$arrays));
+        return $this->newArrayObject(array_merge_recursive($this->toArray(), $array, ...$arrays));
     }
 
     public function mergeRecursiveMe(array $array, array ...$arrays)
@@ -155,7 +209,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
         $arrays[] = $this->storage;
 
-        return $this->newInstance(array_merge(...$arrays));
+        return $this->newArrayObject(array_merge(...$arrays));
     }
 
     public function mergePrependMe(array $array, array ...$arrays)
@@ -175,7 +229,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
         $arrays[] = $this->toArray();
 
-        return $this->newInstance(array_merge_recursive(...$arrays));
+        return $this->newArrayObject(array_merge_recursive(...$arrays));
     }
 
     public function mergePrependRecursiveMe(array $array, array ...$arrays)
@@ -191,7 +245,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function mergeValues()
     {
-        return $this->newInstance(array_merge(...$this->storage));
+        return $this->newArrayObject(array_merge(...$this->storage));
     }
 
     public function mergeValuesMe()
@@ -203,7 +257,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function replace($array, array ...$arrays)
     {
-        return $this->newInstance(array_replace($this->storage, $array, ...$arrays));
+        return $this->newArrayObject(array_replace($this->storage, $array, ...$arrays));
     }
 
     public function replaceMe($array, array ...$arrays)
@@ -215,7 +269,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function replaceRecursive($array, array ...$arrays)
     {
-        return $this->newInstance(array_replace_recursive($this->toArray(), $array, ...$arrays));
+        return $this->newArrayObject(array_replace_recursive($this->toArray(), $array, ...$arrays));
     }
 
     public function replaceRecursiveMe($array, array ...$arrays)
@@ -231,7 +285,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
         $arrays[] = $this->storage;
 
-        return $this->newInstance(array_replace(...$arrays));
+        return $this->newArrayObject(array_replace(...$arrays));
     }
 
     public function replacePrependMe($array, array ...$arrays)
@@ -251,7 +305,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
         $arrays[] = $this->toArray();
 
-        return $this->newInstance(array_replace_recursive(...$arrays));
+        return $this->newArrayObject(array_replace_recursive(...$arrays));
     }
 
     public function replacePrependRecursiveMe($array, array ...$arrays)
@@ -267,7 +321,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function replaceValues()
     {
-        return $this->newInstance(array_replace(...$this->storage));
+        return $this->newArrayObject(array_replace(...$this->storage));
     }
 
     public function replaceValuesMe()
@@ -279,7 +333,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function diff($array, array ...$arrays)
     {
-        return $this->newInstance(array_diff($this->storage, $array, ...func_get_args()));
+        return $this->newArrayObject(array_diff($this->storage, $array, ...func_get_args()));
     }
 
     public function diffMe($array, array ...$arrays)
@@ -291,7 +345,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function map(callable $callable = null, array ...$arrays)
     {
-        return $this->newInstance(array_map($callable, $this->storage, ...$arrays));
+        return $this->newArrayObject(array_map($callable, $this->storage, ...$arrays));
     }
 
     public function mapMe(callable $callable = null, array ...$arrays)
@@ -303,7 +357,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function mapRecursive(callable $callable = null, array ...$arrays)
     {
-        return $this->newInstance(Arr::mapRecursive($callable, $this->toArray(), ...$arrays));
+        return $this->newArrayObject(Arr::mapRecursive($callable, $this->toArray(), ...$arrays));
     }
 
     public function mapRecursiveMe(callable $callable = null, array ...$arrays)
@@ -320,7 +374,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function filter(callable $callable = null, $flag = 0)
     {
-        return $this->newInstance(array_filter($this->storage, ...func_get_args()));
+        return $this->newArrayObject(array_filter($this->storage, ...func_get_args()));
     }
 
     public function filterMe(callable $callable = null, $flag = 0)
@@ -332,7 +386,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function filterRecursive(callable $callable = null, $flag = 0)
     {
-        return $this->newInstance(Arr::filterRecursive($this->toArray(), ...func_get_args()));
+        return $this->newArrayObject(Arr::filterRecursive($this->toArray(), ...func_get_args()));
     }
 
     public function filterRecursiveMe(callable $callable = null, $flag = 0)
@@ -344,7 +398,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function reverse($preserveKeys = false)
     {
-        return $this->newInstance(array_reverse($this->storage, $preserveKeys));
+        return $this->newArrayObject(array_reverse($this->storage, $preserveKeys));
     }
 
     public function reverseMe($preserveKeys = false)
@@ -356,7 +410,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function chunk($size, $preserveKeys = false)
     {
-        return $this->newInstance(array_chunk($this->storage, $size, $preserveKeys));
+        return $this->newArrayObject(array_chunk($this->storage, $size, $preserveKeys));
     }
 
     public function chunkMe($size, $preserveKeys = false)
@@ -410,7 +464,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function group($maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
     {
-        return $this->newInstance(Arr::group($this->toArray(), $maxLevel, $replaceLast, $removeGroupedKey));
+        return $this->newArrayObject(Arr::group($this->toArray(), $maxLevel, $replaceLast, $removeGroupedKey));
     }
 
     public function groupMe($maxLevel = 1, $replaceLast = true, $removeGroupedKey = false)
@@ -422,7 +476,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function column($key, $indexKey = null)
     {
-        return $this->newInstance(array_column($this->toArray(), ...func_get_args()));
+        return $this->newArrayObject(array_column($this->toArray(), ...func_get_args()));
     }
 
     public function walk(callable $callable, $data = null)
@@ -462,11 +516,11 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function keys()
     {
-        return $this->newInstance(array_keys($this->storage));
+        return $this->newArrayObject(array_keys($this->storage));
     }
 
     public function values()
     {
-        return $this->newInstance(array_values($this->storage));
+        return $this->newArrayObject(array_values($this->storage));
     }
 }

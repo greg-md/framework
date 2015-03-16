@@ -7,7 +7,7 @@ use Greg\Support\Obj;
 
 class Pdo extends \PDO implements AdapterInterface
 {
-    protected $stmtClass = '\Greg\Db\Sql\Storage\Adapter\Pdo\Stmt';
+    protected $stmtClass = Pdo\Stmt::class;
 
     use Internal;
 
@@ -26,7 +26,7 @@ class Pdo extends \PDO implements AdapterInterface
 
     public function stmtClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function errorCheck()
@@ -35,7 +35,7 @@ class Pdo extends \PDO implements AdapterInterface
 
         // Note: Ignoring error - bind or column index out of range
         if ($errorInfo[1] and $errorInfo[1] != 25) {
-            throw Exception::create($this->appName(), $errorInfo[2]);
+            throw Exception::newInstance($this->appName(), $errorInfo[2]);
         }
 
         return $this;

@@ -70,10 +70,11 @@ class Update
         ];
 
         if (!$this->tables) {
-            throw Exception::create($this->appName(), 'Undefined update tables.');
+            throw Exception::newInstance($this->appName(), 'Undefined update tables.');
         }
 
         $tables = [];
+
         foreach($this->tables as $name) {
             $tables[] = $this->quoteAliasExpr($name);
         }
@@ -81,7 +82,7 @@ class Update
         $query[] = implode(', ', $tables);
 
         if (!$this->set) {
-            throw Exception::create($this->appName(), 'Undefined update set.');
+            throw Exception::newInstance($this->appName(), 'Undefined update set.');
         }
 
         $query[] = 'SET';
@@ -93,6 +94,7 @@ class Update
         $this->bindParams(array_values($this->set));
 
         $where = $this->whereToString();
+
         if ($where) {
             $query[] = $where;
         }

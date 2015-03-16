@@ -3,6 +3,7 @@
 namespace Greg\Support;
 
 use Greg\Storage\ArrayObject;
+use Greg\Storage\ArrayReference;
 
 class Obj
 {
@@ -12,9 +13,9 @@ class Obj
 
     const PROP_REPLACE = 'replace';
 
-    static public function newInstance($className, ...$args)
+    static public function loadInstance($className, ...$args)
     {
-        return static::newInstanceArgs($className, $args);
+        return static::loadInstanceArgs($className, $args);
     }
 
     /**
@@ -22,7 +23,7 @@ class Obj
      * @param array $args
      * @return object
      */
-    static public function newInstanceArgs($className, array $args = [])
+    static public function loadInstanceArgs($className, array $args = [])
     {
         $class = new \ReflectionClass($className);
 
@@ -39,38 +40,39 @@ class Obj
         return $self;
     }
 
+    static public function fetchRef($value)
+    {
+        return ($value instanceof ArrayReference) ? $value->get() : $value;
+    }
+
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
+     * @param $value
      * @return mixed|$this
      */
-    static public function &fetchVar($obj, &$var, array $args = [])
+    static public function &fetchVar($return, &$var, $value = null)
     {
-        if ($args) {
-            $var = array_shift($args);
+        if (func_num_args() > 2) {
+            $var = $value;
 
-            return $obj;
+            return $return;
         }
 
         return $var;
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
-     * @param bool $unsigned
+     * @param null $value
+     * @param string $type
      * @return int|float|bool|string|$this
      */
-    static public function &fetchScalarVar($obj, &$var, array $args = [], $unsigned = false)
+    static public function &fetchScalarVar($return, &$var, $value = null, $type = self::PROP_REPLACE)
     {
-        if ($args) {
-            $value = static::fetchScalar(array_shift($args), $unsigned);
-
-            $addType = $args ? array_shift($args) : static::PROP_REPLACE;
-
-            switch ($addType) {
+        if (func_num_args() > 2) {
+            switch ($type) {
                 case static::PROP_APPEND:
                     $var .= $value;
 
@@ -80,36 +82,30 @@ class Obj
 
                     break;
                 case static::PROP_REPLACE:
-                    $var = $value;
+                    $var = is_scalar($value) ? $value : (string)$value;
 
                     break;
             }
 
-            return $obj;
+            return $return;
         }
 
-        $var = static::fetchScalar($var, $unsigned); return $var;
-    }
+        $var = is_scalar($var) ? $var : (string)$var;
 
-    static public function fetchScalar($var)
-    {
-        return is_scalar($var) ? $var : (string)$var;
+        return $var;
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
+     * @param $value
+     * @param string $type
      * @return string|$this
      */
-    static public function &fetchStrVar($obj, &$var, array $args = [])
+    static public function &fetchStrVar($return, &$var, $value = null, $type = self::PROP_REPLACE)
     {
-        if ($args) {
-            $value = (string)array_shift($args);
-
-            $addType = $args ? array_shift($args) : static::PROP_REPLACE;
-
-            switch ($addType) {
+        if (func_num_args() > 2) {
+            switch ($type) {
                 case static::PROP_APPEND:
                     $var .= $value;
 
@@ -119,44 +115,50 @@ class Obj
 
                     break;
                 case static::PROP_REPLACE:
-                    $var = $value;
+                    $var = (string)$value;
 
                     break;
             }
 
-            return $obj;
+            return $return;
         }
 
-        $var = (string)$var; return $var;
+        $var = (string)$var;
+
+        return $var;
     }
 
-    static public function &fetchBoolVar($obj, &$var, array $args = [])
+    static public function &fetchBoolVar($return, &$var, $value = null)
     {
-        if ($args) {
-            $var = (bool)array_shift($args);
+        if (func_num_args() > 2) {
+            $var = (bool)$value;
 
-            return $obj;
+            return $return;
         }
 
-        $var = (bool)$var; return $var;
+        $var = (bool)$var;
+
+        return $var;
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
      * @param bool $unsigned
+     * @param $value
      * @return int|$this
      */
-    static public function &fetchIntVar($obj, &$var, array $args = [], $unsigned = false)
+    static public function &fetchIntVar($return, &$var, $unsigned = false, $value = null)
     {
-        if ($args) {
-            $var = static::fetchInt(array_shift($args), $unsigned);
+        if (func_num_args() > 3) {
+            $var = static::fetchInt($value, $unsigned);
 
-            return $obj;
+            return $return;
         }
 
-        $var = static::fetchInt($var, $unsigned); return $var;
+        $var = static::fetchInt($var, $unsigned);
+
+        return $var;
     }
 
     static public function fetchInt($var, $unsigned = false)
@@ -165,21 +167,23 @@ class Obj
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
      * @param bool $unsigned
+     * @param $value
      * @return float|$this
      */
-    static public function &fetchFloatVar($obj, &$var, array $args = [], $unsigned = false)
+    static public function &fetchFloatVar($return, &$var, $unsigned = false, $value = null)
     {
-        if ($args) {
-            $var = static::fetchFloat(array_shift($args), $unsigned);
+        if (func_num_args() > 3) {
+            $var = static::fetchFloat($value, $unsigned);
 
-            return $obj;
+            return $return;
         }
 
-        $var = static::fetchFloat($var, $unsigned); return $var;
+        $var = static::fetchFloat($var, $unsigned);
+
+        return $var;
     }
 
     static public function fetchFloat($var, $unsigned = false)
@@ -188,209 +192,241 @@ class Obj
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
      * @param array $stack
+     * @param $value
      * @param null $default
      * @return mixed|$this
      */
-    static public function &fetchEnumVar($obj, &$var, array $args = [], array $stack = [], $default = null)
+    static public function &fetchEnumVar($return, &$var, array $stack, $default = null, $value = null)
     {
-        if ($args) {
-            $var = static::fetchEnum(array_shift($args), $stack, $default);
+        if (func_num_args() > 4) {
+            $var = static::fetchEnum($value, $stack, $default);
 
-            return $obj;
+            return $return;
         }
 
-        $var = static::fetchEnum($var, $stack, $default); return $var;
+        $var = static::fetchEnum($var, $stack, $default);
+
+        return $var;
     }
 
-    static public function fetchEnum($var, array $stack = [], $default = null)
+    static public function fetchEnum($var, array $stack, $default = null)
     {
         return in_array($var, $stack) ? $var : $default;
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
      * @param callable $callable
+     * @param $value
      * @return mixed|$this
      */
-    static public function &fetchCallbackVar($obj, &$var, array $args = [], callable $callable = null)
+    static public function &fetchCallableVar($return, &$var, callable $callable, $value = null)
     {
-        if ($args) {
-            $var = static::fetchCallback(array_shift($args), $callable);
+        if (func_num_args() > 3) {
+            $var = call_user_func_array($callable, [$value]);
 
-            return $obj;
+            return $return;
         }
 
-        $var = static::fetchCallback($var, $callable); return $var;
+        $var = call_user_func_array($callable, [$var]);
+
+        return $var;
     }
 
-    static public function &fetchCallback($value, callable $callable = null)
-    {
-        return $callable ? call_user_func_array($callable, [$value]) : $value;
-    }
-
-    static public function &fetchArrayObjVar($obj, &$var, array $args = [])
+    /**
+     * @param $return
+     * @param $var
+     * @param null $key
+     * @param null $value
+     * @param string $type
+     * @param bool $replace
+     * @param bool $recursive
+     * @return mixed|$this
+     */
+    static public function &fetchArrayObjVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $replace = false, $recursive = false)
     {
         if (!($var instanceof ArrayObject)) {
             $var = new ArrayObject($var);
         }
 
-        if ($args) {
-            $key = array_shift($args);
-
+        if (($num = func_num_args()) > 2) {
             if (is_array($key)) {
-                $addType = $args ? array_shift($args) : static::PROP_APPEND;
+                $recursive = $replace;
+                $replace = $type;
+                $type = $value;
 
-                if ($addType === true) {
-                    $addType = static::PROP_REPLACE;
+                if ($type === true) {
+                    $type = static::PROP_REPLACE;
                 }
 
-                if ($addType == static::PROP_REPLACE) {
-                    $var->exchange($key);
+                switch($type) {
+                    case static::PROP_REPLACE:
+                        $var->exchange($key);
 
-                    return $obj;
+                        break;
+                    case static::PROP_APPEND:
+                        if ($replace) {
+                            if ($recursive) {
+                                $var->replaceRecursiveMe($key);
+                            } else {
+                                $var->replaceMe($key);
+                            }
+                        } else {
+                            if ($recursive) {
+                                $var->mergeRecursiveMe($key);
+                            } else {
+                                $var->mergeMe($key);
+                            }
+                        }
+                        break;
+                    case static::PROP_PREPEND:
+                        if ($replace) {
+                            if ($recursive) {
+                                $var->replacePrependRecursiveMe($key);
+                            } else {
+                                $var->replacePrependMe($key);
+                            }
+                        } else {
+                            if ($recursive) {
+                                $var->mergePrependRecursiveMe($key);
+                            } else {
+                                $var->mergePrependMe($key);
+                            }
+                        }
+                        break;
                 }
 
-                $replace = (bool)array_shift($args);
-
-                if ($replace) {
-                    switch ($addType) {
-                        case static::PROP_APPEND:
-                            $var->replaceMe($key);
-
-                            break;
-                        case static::PROP_PREPEND:
-                            $var->replacePrependMe($key);
-
-                            break;
-                    }
-                } else {
-                    switch ($addType) {
-                        case static::PROP_APPEND:
-                            $var->mergeMe($key);
-
-                            break;
-                        case static::PROP_PREPEND:
-                            $var->mergePrependMe($key);
-
-                            break;
-                    }
-                }
-
-                return $obj;
+                return $return;
             }
 
-            if ($args) {
-                $var[$key] = array_shift($args);
+            if ($num > 3) {
+                switch($type) {
+                    case static::PROP_REPLACE:
+                        $var->set($key, $value);
 
-                return $obj;
+                        break;
+                    case static::PROP_PREPEND:
+                        $var->prependKey($value, $key);
+
+                        break;
+                    case static::PROP_APPEND:
+                        $var->appendKey($value, $key);
+
+                        break;
+                }
+
+                return $return;
             }
 
-            return $var->get($key);
+            if ($var->has($key)) {
+                return $var[$key];
+            }
+
+            $return = null;
+
+            return $return;
         }
 
         return $var;
     }
 
     /**
-     * @param $obj
+     * @param $return
      * @param $var
-     * @param array $args
+     * @param null $key
+     * @param null $value
+     * @param string $type
+     * @param bool $replace
+     * @param bool $recursive
      * @return mixed|$this
      */
-    static public function &fetchArrayVar($obj, &$var, array $args = [])
+    static public function &fetchArrayVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $replace = false, $recursive = false)
     {
-        $var = Arr::bring($var);
+        Arr::bringRef($var);
 
-        if ($args) {
-            $key = array_shift($args);
-
+        if (($num = func_num_args() > 2)) {
             if (is_array($key)) {
-                $addType = $args ? array_shift($args) : static::PROP_APPEND;
-
-                if ($addType === true) {
-                    $addType = static::PROP_REPLACE;
+                $recursive = $replace;
+                $replace = $type;
+                $type = $value;
+                if ($type === null) {
+                    $type = static::PROP_APPEND;
                 }
 
-                if ($addType == static::PROP_REPLACE) {
-                    $var = $key;
-
-                    return $obj;
+                if ($type === true) {
+                    $type = static::PROP_REPLACE;
                 }
 
-                $replace = (bool)array_shift($args);
+                switch($type) {
+                    case static::PROP_REPLACE:
+                        $var = $key;
 
-                $recursive = (bool)array_shift($args);
-
-                if ($replace) {
-                    if ($recursive) {
-                        switch ($addType) {
-                            case static::PROP_APPEND:
+                        break;
+                    case static::PROP_APPEND:
+                        if ($replace) {
+                            if ($recursive) {
                                 $var = array_replace_recursive($var, $key);
-
-                                break;
-                            case static::PROP_PREPEND:
-                                $var = array_replace_recursive($key, $var);
-
-                                break;
-                        }
-                    } else {
-                        switch ($addType) {
-                            case static::PROP_APPEND:
+                            } else {
                                 $var = array_replace($var, $key);
-
-                                break;
-                            case static::PROP_PREPEND:
-                                $var = array_replace($key, $var);
-
-                                break;
-                        }
-                    }
-                } else {
-                    if ($recursive) {
-                        switch ($addType) {
-                            case static::PROP_APPEND:
+                            }
+                        } else {
+                            if ($recursive) {
                                 $var = array_merge_recursive($var, $key);
-
-                                break;
-                            case static::PROP_PREPEND:
-                                $var = array_merge_recursive($key, $var);
-
-                                break;
-                        }
-                    } else {
-                        switch ($addType) {
-                            case static::PROP_APPEND:
+                            } else {
                                 $var = array_merge($var, $key);
-
-                                break;
-                            case static::PROP_PREPEND:
-                                $var = array_merge($key, $var);
-
-                                break;
+                            }
                         }
-                    }
+                        break;
+                    case static::PROP_PREPEND:
+                        if ($replace) {
+                            if ($recursive) {
+                                $var = array_replace_recursive($key, $var);
+                            } else {
+                                $var = array_replace($key, $var);
+                            }
+                        } else {
+                            if ($recursive) {
+                                $var = array_merge_recursive($key, $var);
+                            } else {
+                                $var = array_merge($key, $var);
+                            }
+                        }
+                        break;
                 }
 
-                return $obj;
+                return $return;
             }
 
-            if ($args) {
-                $var[$key] = array_shift($args);
+            if ($num > 3) {
+                switch($type) {
+                    case static::PROP_REPLACE:
+                        $var[$key] = $value;
 
-                return $obj;
+                        break;
+                    case static::PROP_PREPEND:
+                        Arr::prependKey($var, $value, $key);
+
+                        break;
+                    case static::PROP_APPEND:
+                        Arr::appendKey($var, $value, $key);
+
+                        break;
+                }
+
+                return $return;
             }
 
             if (array_key_exists($key, $var)) {
                 return $var[$key];
             }
 
-            $return = null; return $return;
+            $return = null;
+
+            return $return;
         }
 
         return $var;

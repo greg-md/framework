@@ -4,12 +4,11 @@ namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
 use Greg\Html\Element;
+use Greg\Storage\Accessor;
 
 class Link
 {
-    use Internal;
-
-    protected $storage = [];
+    use Accessor, Internal;
 
     public function set($rel, $href, array $attr = [], $id = null)
     {

@@ -6,6 +6,7 @@ use Greg\Engine\Internal;
 use Greg\Http\Request;
 use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
@@ -21,15 +22,22 @@ class Viewer implements \ArrayAccess
 
     protected $paths = [];
 
-    public function __construct(Request $request, $paths = null, $param = [])
+    public function __construct(Request $request, $paths = [], array $param = [])
     {
         $this->request($request);
 
+        Arr::bringRef($paths);
+
         $this->paths($paths);
 
-        $this->storage = $param;
+        $this->storage($param);
 
         return $this;
+    }
+
+    static public function create($appName, Request $request, $paths = [], array $param = [])
+    {
+        return static::newInstanceRef($appName, $request, $paths, $param);
     }
 
     public function renderView($name, $controllerName = null)
@@ -44,7 +52,7 @@ class Viewer implements \ArrayAccess
             $controller = current($this->controllers());
 
             if (!$controller) {
-                throw Exception::create($this->appName(), 'No render view controller defined.');
+                throw Exception::newInstance($this->appName(), 'No render view controller defined.');
             }
 
             $controllerName = $controller->name();
@@ -66,48 +74,50 @@ class Viewer implements \ArrayAccess
         return $this->render($this->nameToFile($name), $include);
     }
 
-    public function render($file, $include = true)
+    public function render($fileName, $include = true)
     {
         $paths = $this->paths();
 
         if (!$paths) {
-            throw Exception::create($this->appName(), 'Undefined view paths.');
+            throw Exception::newInstance($this->appName(), 'Undefined view paths.');
         }
 
         $data = null;
 
         foreach ($paths as $path) {
-            $data = $this->renderPath($path, $file, $include);
-
-            if ($data !== false) {
-                break;
+            if (!is_dir($path)) {
+                continue;
             }
+
+            $file = $path . DIRECTORY_SEPARATOR . ltrim($fileName, '\/');
+
+            if (!is_file($file)) {
+                return false;
+            }
+
+            $data = $this->renderFile($file, $include);
+
+            break;
         }
 
         if ($data === false) {
-            throw Exception::create($this->appName(), 'View file `' . $file . '` does not exist in view paths.');
+            throw Exception::newInstance($this->appName(), 'View file `' . $fileName . '` does not exist in view paths.');
         }
 
         return $data;
     }
 
-    public function renderPath($path, $file, $include = true)
+    public function renderFile($file, $include = true)
     {
-        if (!is_dir($path)) {
-            return false;
-        }
-
-        $fullPath = $path . DIRECTORY_SEPARATOR . ltrim($file, '\/');
-
-        if (!file_exists($fullPath)) {
-            return false;
+        if (!is_file($file)) {
+            throw Exception::newInstance($this->appName(), 'You can render only from files.');
         }
 
         if ($include) {
             ob_start();
 
             try {
-                include $fullPath;
+                $this->includeFile($file);
 
                 $data = ob_get_clean();
             } catch (Exception $e) {
@@ -116,10 +126,17 @@ class Viewer implements \ArrayAccess
                 throw $e;
             }
         } else {
-            $data = file_get_contents($fullPath);
+            $data = file_get_contents($file);
         }
 
         return (string)$data;
+    }
+
+    public function includeFile($file)
+    {
+        include $file;
+
+        return $this;
     }
 
     public function nameToFile($name)
@@ -129,13 +146,7 @@ class Viewer implements \ArrayAccess
 
     public function assign($key, $value = null)
     {
-        if (is_array($key)) {
-            $this->replace($key);
-        } else {
-            $this->set($key, $value);
-        }
-
-        return $this;
+        return $this->storage(...func_num_args());
     }
 
     public function __set($key, $value)
@@ -150,34 +161,32 @@ class Viewer implements \ArrayAccess
 
     public function request(Request $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function controllers($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
+    public function controllers($name = null, $controller = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function extension($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function paths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
+    public function paths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function __call($method, array $args = [])
     {
-        $app = $this->app();
-
-        $components = $app->components();
+        $components = $this->app()->components();
 
         if ($components->has($method)) {
             return $components->get($method);
         }
 
-        throw Exception::create($this->appName(), 'Component `' . $method . '` not found!');
+        throw Exception::newInstance($this->appName(), 'Component `' . $method . '` not found!');
     }
 }

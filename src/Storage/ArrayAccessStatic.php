@@ -6,125 +6,65 @@ use Greg\Support\Arr;
 
 trait ArrayAccessStatic
 {
-    abstract protected function &accessor(array $accessor = []);
+    abstract protected function &accessor(array $storage = []);
 
-    static public function has($index)
+    static public function has($key, ...$keys)
     {
-        if (is_array($index)) {
-            foreach(($indexes = $index) as $index) {
-                if (!array_key_exists($index, static::accessor())) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return array_key_exists($index, static::accessor());
+        return Arr::has(static::accessor(), $key, ...$keys);
     }
 
-    static public function set($index, $value)
+    static public function hasIndex($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if ($value instanceof ArrayReference) {
-            $value = &$value->get();
-        }
-
-        return static::setRef($index, $value);
+        return Arr::hasIndex(static::accessor(), $index, $delimiter);
     }
 
-    static public function setRef($index, &$value)
+    static public function set($key, $value)
     {
-        if ($index !== null) {
-            static::accessor()[$index] = &$value;
-        } else {
-            static::accessor()[] = &$value;
-        }
-
-        return true;
+        return Arr::set(static::accessor(), $key, $value);
     }
 
-    static public function &get($index, $else = null)
+    static public function setRef($key, &$value)
     {
-        if (is_array($index)) {
-            $return = [];
-
-            $else = Arr::bring($else);
-
-            foreach(($indexes = $index) as $index) {
-                if (static::has($index)) {
-                    $return[$index] = static::accessor()[$index];
-                } elseif (array_key_exists($index, $else)) {
-                    $return[$index] = $else[$index];
-                } else {
-                    $return[$index] = null;
-                }
-            }
-
-            return $return;
-        }
-
-        if (static::has($index)) return static::accessor()[$index]; return $else;
+        return Arr::setRef(static::accessor(), $key, $value);
     }
 
-    static public function del($index)
+    static public function setIndex($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        unset(static::accessor()[$index]);
-
-        return true;
+        return Arr::setIndex(static::accessor(), $index, $value, $delimiter);
     }
 
-    /* May be split index methods in another trait in the future */
-
-    static public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
+    static public function setIndexRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexHas(static::accessor(), $index, $delimiter);
-        }
-
-        return static::has($index);
+        return Arr::setIndexRef(static::accessor(), $index, $value, $delimiter);
     }
 
-    static public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &get($key, $else = null)
     {
-        if ($value instanceof ArrayReference) {
-            $value = &$value->get();
-        }
-
-        if (strpos($index, $delimiter) !== false) {
-            Arr::indexSet(static::accessor(), $index, $value, $delimiter);
-        } else {
-            static::set($index, $value);
-        }
-
-        return true;
+        return Arr::get(static::accessor(), $key, $else);
     }
 
-    static public function indexSetRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &getRef($key, $else = null)
     {
-        if (strpos($index, $delimiter) !== false) {
-            Arr::indexSetRef(static::accessor(), $index, $value, $delimiter);
-        } else {
-            static::setRef($index, $value);
-        }
-
-        return true;
+        return Arr::getRef(static::accessor(), $key, $else);
     }
 
-    static public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexGet(static::accessor(), $index, $else, $delimiter);
-        }
+        return Arr::getIndex(static::accessor(), $index, $else, $delimiter);
+    }
 
-        return static::get($index, $else);
+    static public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexRef(static::accessor(), $index, $else, $delimiter);
+    }
+
+    static public function del($key, ...$keys)
+    {
+        return Arr::del(static::accessor(), $key, ...$keys);
     }
 
     static public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexDel(static::accessor(), $index, $delimiter);
-        }
-
-        return static::del($index);
+        return Arr::delIndex(static::accessor(), $index, $delimiter);
     }
 }

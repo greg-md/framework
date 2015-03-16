@@ -6,6 +6,7 @@ use Greg\Application\Binder\Adapter;
 use Greg\Engine\Internal;
 use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Binder implements \ArrayAccess
@@ -16,9 +17,21 @@ class Binder implements \ArrayAccess
 
     protected $instancesPrefixes = [];
 
-    public function addAdapter($name, callable $callable, $storage)
+    public function __construct(array $objects = [])
     {
-        $this->adapters[$name] = new Adapter($callable, $storage);
+        $this->storage($objects);
+
+        return $this;
+    }
+
+    static public function create($appName, array $objects = [])
+    {
+        return static::newInstanceRef($appName, $objects);
+    }
+
+    public function addAdapter($name, callable $caller, $storage)
+    {
+        $this->adapters[$name] = new Adapter($caller, $storage);
 
         return $this;
     }
@@ -35,17 +48,30 @@ class Binder implements \ArrayAccess
         return false;
     }
 
-    public function add($class)
+    /* We enabled to set and strings which will get an instance of the objects
+    public function set($name, $object)
     {
-        return $this->set(get_class($class), $class);
+        if (!is_object($object)) {
+            throw Exception::newInstance($this->appName(), 'You can set only objects in binder.');
+        }
+
+        Arr::set($this->accessor(), $name, $object);
+
+        return $this;
+    }
+    */
+
+    public function setObject($object)
+    {
+        return $this->set(get_class($object), $object);
     }
 
-    public function newInstance($className, ...$args)
+    public function loadInstance($className, ...$args)
     {
-        return $this->newInstanceArgs($className, $args);
+        return $this->loadInstanceArgs($className, $args);
     }
 
-    public function newInstanceArgs($className, array $args = [])
+    public function loadInstanceArgs($className, array $args = [])
     {
         $class = new \ReflectionClass($className);
 
@@ -68,30 +94,28 @@ class Binder implements \ArrayAccess
         return $self;
     }
 
-    public function call($function, ...$args)
+    public function call(callable $callable, ...$args)
     {
-        return $this->callArgs($function, $args);
+        return $this->callArgs($callable, $args);
     }
 
-    public function callArgs($function, array $args = [])
+    public function callArgs(callable $callable, array $args = [])
     {
-        if (is_scalar($function) and strpos($function, '::')) {
-            $function = explode('::', $function, 2);
+        if (is_scalar($callable) and strpos($callable, '::')) {
+            $callable = explode('::', $callable, 2);
         }
 
-        if (is_array($function)) {
-            $expectedArgs = (new \ReflectionMethod($function[0], $function[1]))->getParameters();
-        } elseif (is_callable($function) or is_scalar($function)) {
-            $expectedArgs = (new \ReflectionFunction($function))->getParameters();
+        if (is_array($callable)) {
+            $expectedArgs = (new \ReflectionMethod($callable[0], $callable[1]))->getParameters();
         } else {
-            $expectedArgs = [];
+            $expectedArgs = (new \ReflectionFunction($callable))->getParameters();
         }
 
         if ($expectedArgs) {
             $args = $this->addExpectedArgs($args, $expectedArgs);
         }
 
-        return call_user_func_array($function, $args);
+        return call_user_func_array($callable, $args);
     }
 
     public function addExpectedArgs($args, $expectedArgs)
@@ -133,27 +157,27 @@ class Binder implements \ArrayAccess
                 $found = false;
 
                 if (($adapter = $this->findInAdapters($className))) {
-                    $arg = $this->callArgs($adapter->caller(), (array)$adapter->get($className));
+                    $arg = $this->callArgs($adapter->caller(), $adapter->getArray($className));
 
                     $found = true;
-                }
-
-                if (!$found and $this->instancesPrefixes()->has(function($value) use ($className) {
-                    return strpos($className, $value) === 0;
-                })) {
+                } elseif ($this->isInstancePrefix($className)) {
                     /* @var $className string|Internal */
-                    $arg = $className::instance();
+                    $arg = $className::instance($this->appName());
 
                     $found = true;
                 }
 
                 if (!$found) {
-                    throw Exception::create($this->appName(), '`' . $className . '` is not registered in binder.');
+                    throw Exception::newInstance($this->appName(), '`' . $className . '` is not registered in binder.');
                 }
+            }
+
+            if (!is_object($arg)) {
+                $arg = $arg::instance($this->appName());
             }
         } else {
             if (!$expectedArg->isOptional()) {
-                throw Exception::create($this->appName(), 'Argument `' . $expectedArg->getName() . '` is required in `'
+                throw Exception::newInstance($this->appName(), 'Argument `' . $expectedArg->getName() . '` is required in `'
                     . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
             }
 
@@ -163,8 +187,15 @@ class Binder implements \ArrayAccess
         return $arg;
     }
 
+    public function isInstancePrefix($className)
+    {
+        return Arr::has($this->instancesPrefixes, function($value) use ($className) {
+            return strpos($className, $value) === 0;
+        });
+    }
+
     public function instancesPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

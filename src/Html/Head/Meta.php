@@ -4,43 +4,65 @@ namespace Greg\Html\Head;
 
 use Greg\Engine\Internal;
 use Greg\Html\Element;
-use Greg\Support\Obj;
+use Greg\Storage\Accessor;
+use Greg\Support\Arr;
 
 class Meta
 {
-    use Internal;
-
-    protected $storage = [];
+    use Accessor, Internal;
 
     public function name($name, $content = null)
     {
-        return func_num_args() > 1 ? $this->storage($name, [
+        return $this->storage($name, ...(func_num_args() > 1 ? [[
             'name' => $name,
             'content' => $this->clear($content),
-        ]) : $this->storage($name);
+        ]] : []));
+        /*
+        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
+            'name' => $name,
+            'content' => $this->clear($content),
+        ], $this) : Arr::get($this->storage, $name);
+        */
     }
 
     public function property($name, $content = null)
     {
-        return func_num_args() > 1 ? $this->storage($name, [
+        return $this->storage($name, ...(func_num_args() > 1 ? [[
             'property' => $name,
             'content' => $this->clear($content),
-        ]) : $this->storage($name);
+        ]] : []));
+        /*
+        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
+            'property' => $name,
+            'content' => $this->clear($content),
+        ], $this) : Arr::get($this->storage, $name);
+        */
     }
 
     public function httpEquiv($name, $content = null)
     {
-        return func_num_args() > 1 ? $this->storage($name, [
+        return $this->storage($name, ...(func_num_args() > 1 ? [[
             'http-equiv' => $name,
             'content' => $this->clear($content),
-        ]) : $this->storage($name);
+        ]] : []));
+        /*
+        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
+            'http-equiv' => $name,
+            'content' => $this->clear($content),
+        ], $this) : Arr::get($this->storage, $name);
+        */
     }
 
     public function charset($charset = null)
     {
-        return func_num_args() ? $this->storage('charset', [
+        return $this->storage('charset', ...(func_num_args() ? [[
             'charset' => $charset,
-        ]) : $this->storage('charset');
+        ]] : []));
+        /*
+        return func_num_args() ? Arr::set($this->storage, 'charset', [
+            'charset' => $charset,
+        ], $this) : Arr::get($this->storage, 'charset');
+        */
     }
 
     public function refresh($timeout = 0, $url = null)
@@ -106,11 +128,6 @@ class Meta
     public function fetchItem($attr)
     {
         return Element::create($this->appName(), 'meta', $attr);
-    }
-
-    protected function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
     }
 
     public function __toString()

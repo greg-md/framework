@@ -62,7 +62,7 @@ trait Where
         $where = [];
 
         foreach($this->where as $info) {
-            if (isset($info['expr'])) {
+            if ($info['expr']) {
                 $where[] = ($where ? ' ' . $info['logic'] . ' ' : '') . $this->quoteExpr($info['expr']);
 
                 $this->bindParams($info['params']);

@@ -36,6 +36,11 @@ abstract class Route implements RouteInterface
         return $this;
     }
 
+    static public function create($appName, $name, $format, $options = [])
+    {
+        return static::newInstanceRef($appName, $name, $format, $options);
+    }
+
     public function setOptions($options)
     {
         foreach($options as $key => $value) {
@@ -51,7 +56,8 @@ abstract class Route implements RouteInterface
             case 'param':
             case 'extend':
             case 'callback':
-                $this->{$key}($value);
+                $this->$key($value);
+
                 break;
         }
 
@@ -83,28 +89,28 @@ abstract class Route implements RouteInterface
 
     protected function paramException($param)
     {
-        throw Exception::create($this->appName(), 'Parameter `' . $param
+        throw Exception::newInstance($this->appName(), 'Parameter `' . $param
             . '` is required in router `' . $this->name() . '`.');
     }
 
     public function name($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function format($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function param($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function extend($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -113,6 +119,6 @@ abstract class Route implements RouteInterface
      */
     public function callback(\Closure $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

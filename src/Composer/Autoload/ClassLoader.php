@@ -68,6 +68,11 @@ class ClassLoader
         return $this;
     }
 
+    static public function create($appName, array $psr4 = [])
+    {
+        return static::newInstanceRef($appName, $psr4);
+    }
+
     public function getPrefixes()
     {
         if (!empty($this->prefixesPsr0)) {
@@ -190,7 +195,7 @@ class ClassLoader
             // Register directories for a new namespace.
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw Exception::create($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw Exception::newInstance($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -247,7 +252,7 @@ class ClassLoader
         } else {
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw Exception::create($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw Exception::newInstance($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -288,7 +293,7 @@ class ClassLoader
      */
     public function loadClass($class)
     {
-        if ($file = $this->findFile($class)) {
+        if ($file = $this->findFile($class) and is_file($file)) {
             includeFile($file);
 
             return true;
@@ -404,7 +409,7 @@ class ClassLoader
      */
     public function useIncludePath($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }
 
@@ -416,6 +421,6 @@ class ClassLoader
 if (!function_exists('includeFile')) {
     function includeFile($file)
     {
-        include $file;
+        return include $file;
     }
 }

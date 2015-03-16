@@ -2,30 +2,32 @@
 
 namespace Greg\Server;
 
+use Greg\Support\Arr;
+
 class Info
 {
-    static public function &scriptName()
+    static public function scriptName()
     {
         return static::get('SCRIPT_NAME');
     }
 
-    static public function &requestTime()
+    static public function requestTime()
     {
         return static::get('REQUEST_TIME');
     }
 
-    static public function &requestMicroTime()
+    static public function requestMicroTime()
     {
         return static::get('REQUEST_TIME_FLOAT');
     }
 
-    static public function has($index)
+    static public function has($key, ...$keys)
     {
-        return array_key_exists($index, $_SERVER);
+        return Arr::has($_SERVER, $key, ...$keys);
     }
 
-    static public function &get($index, $else = null)
+    static public function get($key, $else = null)
     {
-        if (static::has($index)) return $_SERVER[$index]; return $else;
+        return Arr::get($_SERVER, $key, $else);
     }
 }

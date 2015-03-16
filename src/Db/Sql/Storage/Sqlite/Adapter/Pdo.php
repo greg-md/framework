@@ -4,12 +4,17 @@ namespace Greg\Db\Sql\Storage\Sqlite\Adapter;
 
 class Pdo extends \Greg\Db\Sql\Storage\Adapter\Pdo
 {
-    protected $stmtClass = '\Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo\Stmt';
+    protected $stmtClass = Pdo\Stmt::class;
 
     public function __construct($path)
     {
         parent::__construct('sqlite:' . $path);
 
         return $this;
+    }
+
+    static public function create($appName, $path)
+    {
+        return static::newInstanceRef($appName, $path);
     }
 }

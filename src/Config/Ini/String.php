@@ -11,6 +11,11 @@ class String extends Ini
         return parent::__construct($string ? parse_ini_string($string, true) : null, $section, $indexDelimiter);
     }
 
+    static public function create($appName, $string = null, $section = null, $indexDelimiter = null)
+    {
+        return static::newInstanceRef($appName, $string, $section, $indexDelimiter);
+    }
+
     static public function fetch($string, $section = null, $indexDelimiter = false)
     {
         return parent::fetchContents(parse_ini_string($string, true), $section, $indexDelimiter);

@@ -3,12 +3,24 @@
 namespace Greg\Application;
 
 use Greg\Engine\Internal;
+use Greg\Storage\Accessor;
+use Greg\Support\Arr;
 
 class Resources
 {
-    use Internal;
+    use Accessor, Internal;
 
-    protected $storage = [];
+    public function __construct(array $resources = [])
+    {
+        $this->addMore($resources);
+
+        return $this;
+    }
+
+    static public function create($appName, array $resources = [])
+    {
+        return static::newInstanceRef($appName, $resources);
+    }
 
     public function addMore(array $resources)
     {
@@ -21,7 +33,7 @@ class Resources
 
     public function add($name, $class)
     {
-        $this->storage[$name] = (array)$class;
+        $this->storage[$name] = Arr::bring($class);
 
         return $this;
     }
@@ -42,11 +54,11 @@ class Resources
         $resource = $this->memory('resource/' . $name);
 
         if (!$resource) {
-            if (!isset($this->storage[$name])) {
-                throw Exception::create($this->appName(), 'Undefined resource `' . $name . '`.');
+            if (!Arr::has($this->storage, $name)) {
+                throw Exception::newInstance($this->appName(), 'Undefined resource `' . $name . '`.');
             }
 
-            $resource = $this->app()->newInstance(...$this->storage[$name]);
+            $resource = $this->app()->loadInstance(...$this->storage[$name]);
 
             $this->memory('resource/' . $name, $resource);
         }

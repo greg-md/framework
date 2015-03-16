@@ -5,8 +5,10 @@ namespace Greg\Cache\Storage;
 use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
+use Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo;
 use Greg\Engine\Internal;
 use Greg\Http\Request;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Sqlite implements StorageInterface
@@ -15,7 +17,7 @@ class Sqlite implements StorageInterface
 
     protected $path = null;
 
-    protected $adapterClass = '\Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo';
+    protected $adapterClass = Pdo::class;
 
     protected $storage = null;
 
@@ -30,6 +32,11 @@ class Sqlite implements StorageInterface
         }
 
         return $this;
+    }
+
+    static public function create($appName, $adapterClass = null)
+    {
+        return static::newInstanceRef($appName, $adapterClass);
     }
 
     public function init()
@@ -48,7 +55,7 @@ class Sqlite implements StorageInterface
                 $this->buildStructure();
 
                 if (!$this->checkStructure()) {
-                    throw Exception::create($this->appName(), 'Impossible to build SQLite structure.');
+                    throw Exception::newInstance($this->appName(), 'Impossible to build SQLite structure.');
                 }
             }
 
@@ -139,7 +146,8 @@ class Sqlite implements StorageInterface
 
         $query = $storage->delete('Cache');
 
-        $ids = (array)$ids;
+        Arr::bringRef($ids);
+
         if ($ids) {
             foreach($ids as &$id) {
                 $id = md5($id);
@@ -154,12 +162,12 @@ class Sqlite implements StorageInterface
 
     public function path($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -168,11 +176,11 @@ class Sqlite implements StorageInterface
      */
     public function storage(\Greg\Db\Sql\Storage\Sqlite $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function structureChecked($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

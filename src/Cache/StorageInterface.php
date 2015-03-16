@@ -4,7 +4,7 @@ namespace Greg\Cache;
 
 interface StorageInterface
 {
-    public function fetch($id, $callback, $expire = 0);
+    public function fetch($id, callable $callable, $expire = 0);
 
     public function save($id, $data = null);
 

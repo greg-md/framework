@@ -13,6 +13,7 @@ use Greg\Server\Ini;
 use Greg\Server\Session;
 use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 use Greg\Translation\Translator;
@@ -40,7 +41,7 @@ class Runner implements \ArrayAccess
 
     protected $extended = [];
 
-    public function __construct($settings = [], $appName = null)
+    public function __construct(array $settings = [], $appName = null)
     {
         if ($appName !== null) {
             $this->appName($appName);
@@ -48,7 +49,7 @@ class Runner implements \ArrayAccess
 
         $this->memory('app', $this);
 
-        $this->storage = $settings;
+        $this->storage($settings);
 
         return $this;
     }
@@ -85,11 +86,11 @@ class Runner implements \ArrayAccess
 
     public function initConfig()
     {
-        $this->viewPaths((array)$this->indexGet('view.paths'));
+        $this->viewPaths($this->getIndexArray('view.paths'));
 
-        $this->controllersPrefixes((array)$this->indexGet('controllers.prefixes'));
+        $this->controllersPrefixes($this->getIndexArray('controllers.prefixes'));
 
-        $this->extended((array)$this->get('extended'));
+        $this->extended($this->getArray('extended'));
 
         return $this;
     }
@@ -97,23 +98,23 @@ class Runner implements \ArrayAccess
     public function initServer()
     {
         // Server ini
-        if ($serverIni = (array)$this->indexGet('server.ini')) {
+        if ($serverIni = $this->getIndexArray('server.ini')) {
             Ini::param($serverIni);
         }
 
         // Server config
-        if ($serverConfig = (array)$this->indexGet('server.config')) {
+        if ($serverConfig = $this->getIndexArray('server.config')) {
             Config::param($serverConfig);
         }
 
         // Session ini
-        if ($sessionIni = (array)$this->indexGet('session.ini')) {
+        if ($sessionIni = $this->getIndexArray('session.ini')) {
             Session::ini($sessionIni);
         }
 
         // Session persistent
-        if ($this->indexHas('session.persistent')) {
-            Session::persistent((bool)$this->indexGet('session.persistent'));
+        if ($this->hasIndex('session.persistent')) {
+            Session::persistent((bool)$this->getIndex('session.persistent'));
         }
 
         return $this;
@@ -122,16 +123,16 @@ class Runner implements \ArrayAccess
     public function initBinder()
     {
         // Load Binder
-        $this->binder($binder = Binder::create($this->appName()));
+        $this->binder($binder = Binder::create($this->appName()), $this->getIndexArray('binder'));
 
         // Add Binder to Binder
-        $binder->add($binder);
+        $binder->setObject($binder);
 
         // Add myself to Binder
-        $binder->add($this);
+        $binder->setObject($this);
 
         // Register instances prefixes
-        $binder->instancesPrefixes((array)$this->indexGet('binder.instances_prefixes'));
+        $binder->instancesPrefixes($this->getIndexArray('binder.instances_prefixes'));
 
         return $this;
     }
@@ -139,13 +140,13 @@ class Runner implements \ArrayAccess
     public function initLoader()
     {
         // Load ClassLoader
-        $this->loader($loader = ClassLoader::create($this->appName(), $this->indexGet('loader.paths')));
+        $this->loader($loader = ClassLoader::create($this->appName(), $this->getIndexArray('loader.paths')));
 
         // Register the ClassLoader to autoload
         $loader->register(true);
 
         // Add ClassLoader to Binder
-        $this->binder()->add($loader);
+        $this->binder()->setObject($loader);
 
         return $this;
     }
@@ -153,10 +154,10 @@ class Runner implements \ArrayAccess
     public function initListener()
     {
         // Load Listener
-        $this->listener($listener = Listener::create($this->appName()));
+        $this->listener($listener = Listener::create($this->appName(), $this->getIndexArray('listener')));
 
         // Add Listener to Binder
-        $this->binder()->add($listener);
+        $this->binder()->setObject($listener);
 
         return $this;
     }
@@ -167,7 +168,7 @@ class Runner implements \ArrayAccess
         $this->response($response = Response::create($this->appName()));
 
         // Add Response to Binder
-        $this->binder()->add($response);
+        $this->binder()->setObject($response);
 
         return $this;
     }
@@ -175,10 +176,12 @@ class Runner implements \ArrayAccess
     public function initTranslator()
     {
         // Load Translator
-        $this->translator($translator = Translator::create($this->appName()));
+        $this->translator($translator = Translator::create($this->appName(),
+                            $this->getIndexArray('translator.languages'),
+                            $this->getIndexArray('translator.translates')));
 
         // Add Translator to Binder
-        $this->binder()->add($translator);
+        $this->binder()->setObject($translator);
 
         return $this;
     }
@@ -186,13 +189,10 @@ class Runner implements \ArrayAccess
     public function initResources()
     {
         // Load Resources Manager
-        $this->resources($resources = Resources::create($this->appName()));
+        $this->resources($resources = Resources::create($this->appName(), $this->getIndexArray('resources')));
 
         // Add Resources Manager to Binder
-        $this->binder()->add($resources);
-
-        // Add Resources to Manager
-        $resources->addMore((array)$this->get('resources'));
+        $this->binder()->setObject($resources);
 
         // Register Resources Manager to Binder adapters
         $this->binder()->addAdapter('resources', [$resources, 'get'], array_flip($resources->getClasses()));
@@ -203,10 +203,10 @@ class Runner implements \ArrayAccess
     public function initRouter()
     {
         // Load Subscribers
-        $this->router($router = Dispatcher::create($this->appName()));
+        $this->router($router = Dispatcher::newInstance($this->appName(), $this->getArray('router.routes')));
 
         // Add Subscribers to Binder
-        $this->binder()->add($router);
+        $this->binder()->setObject($router);
 
         return $this;
     }
@@ -214,7 +214,7 @@ class Runner implements \ArrayAccess
     public function initSubscribers()
     {
         // Load subscribers
-        if ($subscribers = (array)$this->get('subscribers')) {
+        if ($subscribers = $this->getArray('subscribers')) {
             $this->listener()->addSubscribers($subscribers);
         }
 
@@ -224,28 +224,24 @@ class Runner implements \ArrayAccess
     public function initComponents()
     {
         // Load Components Manager
-        $this->components($components = Components::create($this->appName()));
+        $this->components($components = Components::create($this->appName(), $this->getArray('components')));
 
         // Add Components Manager to Binder
-        $this->binder()->add($components);
-
-        // Add Components to Manager
-        $components->addMore((array)$this->get('components'));
+        $this->binder()->setObject($components);
 
         return $this;
     }
 
-    //public function new
-
-    public function newInstance($className, ...$args)
+    public function loadInstance($className, ...$args)
     {
-        return $this->newInstanceArgs($className, $args);
+        return $this->loadInstanceArgs($className, $args);
     }
 
-    public function newInstanceArgs($className, array $args = [])
+    public function loadInstanceArgs($className, array $args = [])
     {
         if (is_bool($className)) {
             $loadExtended = $className;
+
             $className = array_shift($args);
         } else {
             $loadExtended = true;
@@ -256,7 +252,7 @@ class Runner implements \ArrayAccess
         $binder = $this->binder();
 
         /* @var $class Internal */
-        $class = $binder ? $binder->newInstanceArgs($className, $args) : Obj::newInstanceArgs($className, $args);
+        $class = $binder ? $binder->loadInstanceArgs($className, $args) : Obj::loadInstanceArgs($className, $args);
 
         $class->appName($this->appName());
 
@@ -271,6 +267,7 @@ class Runner implements \ArrayAccess
     {
         if (is_bool($className)) {
             $loadExtended = $className;
+
             $className = array_shift($args);
         } else {
             $loadExtended = true;
@@ -279,11 +276,12 @@ class Runner implements \ArrayAccess
         $className = $loadExtended ? $this->getExtended($className) : $className;
 
         $instance = $this->memory('instances/' . $className);
+
         if (!$instance) {
             $binder = $this->binder();
 
             /* @var $instance Internal */
-            $instance = $binder ? $binder->newInstance($className) : Obj::newInstance($className);
+            $instance = $binder ? $binder->loadInstance($className) : Obj::loadInstance($className);
 
             $instance->appName($this->appName());
 
@@ -299,12 +297,12 @@ class Runner implements \ArrayAccess
 
     public function getExtended($class)
     {
-        return $this->extended()->get($class, $class);
+        return Arr::get($this->extended, $class, $class);
     }
 
     public function run($path = '/')
     {
-        if (!func_num_args() and $requestRouteParam = $this->indexGet('request.route_param')) {
+        if (!func_num_args() and $requestRouteParam = $this->getIndex('request.route_param')) {
             $path = Request::getRequest($requestRouteParam);
         }
 
@@ -358,17 +356,17 @@ class Runner implements \ArrayAccess
      * @return Viewer
      * @throws \Exception
      */
-    public function newView($request, array $param = [])
+    public function newView(Request $request, array $param = [])
     {
-        return Viewer::create($this->appName(), $request, $this->viewPaths()->toArray(), $param);
+        return Viewer::create($this->appName(), $request, $this->viewPaths(), $param);
     }
 
     public function loadController($name, Request $request, Viewer $view)
     {
         $name = Str::phpName($name);
 
-        $prefixes = array_merge([''], $this->controllersPrefixes()->toArray());
-        //$prefixes = $this->controllersPrefixes()->toArray();
+        $prefixes = array_merge([''], $this->controllersPrefixes());
+        //$prefixes = $this->controllersPrefixes();
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
@@ -384,18 +382,18 @@ class Runner implements \ArrayAccess
 
     public function loadModel($name)
     {
-        $prefixes = array_merge([''], $this->modelsPrefixes()->toArray());
+        $prefixes = array_merge([''], $this->modelsPrefixes());
 
         foreach($prefixes as $prefix) {
-            /* @var $class Controller */
+            /* @var $class Internal */
             $class = $prefix . 'Model\\' . $name;
 
             if (class_exists($class)) {
-                return $class::create($this->appName());
+                return $class::newInstance($this->appName());
             }
         }
 
-        throw Exception::create('Model `' . $name . '` not found.');
+        throw Exception::newInstance($this->appName(), 'Model `' . $name . '` not found.');
     }
 
     /**
@@ -472,21 +470,21 @@ class Runner implements \ArrayAccess
 
     public function viewPaths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function modelsPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function extended($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

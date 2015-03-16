@@ -4,7 +4,7 @@ namespace Greg\Storage;
 
 trait Serializable
 {
-    abstract protected function &accessor(array $accessor = []);
+    abstract protected function &accessor(array $storage = []);
 
     public function serialize()
     {

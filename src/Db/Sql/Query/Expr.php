@@ -16,9 +16,14 @@ class Expr
         $this->data($data);
     }
 
+    static public function create($appName, $data)
+    {
+        return static::newInstanceRef($appName, $data);
+    }
+
     public function data($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function __toString()

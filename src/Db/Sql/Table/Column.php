@@ -3,33 +3,44 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Engine\Internal;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Column
 {
     use Internal;
 
-    const TYPE_TINYINT = 1;
+    const TYPE_TINYINT = 'tinyint';
 
-    const TYPE_SMALLINT = 2;
+    const TYPE_SMALLINT = 'smallint';
 
-    const TYPE_MEDIUMINT = 3;
+    const TYPE_MEDIUMINT = 'mediumint';
 
-    const TYPE_INT = 4;
+    const TYPE_INT = 'int';
 
-    const TYPE_BIGINT = 8;
+    const TYPE_BIGINT = 'bigint';
 
-    static protected $numericTypes = [
-        'tinyint' => self::TYPE_TINYINT,
-        'smallint' => self::TYPE_SMALLINT,
-        'mediumint' => self::TYPE_MEDIUMINT,
-        'int' => self::TYPE_INT,
-        'bigint' => self::TYPE_BIGINT,
+    const TINYINT_LENGTH = 1;
+
+    const SMALLINT_LENGTH = 2;
+
+    const MEDIUMINT_LENGTH = 3;
+
+    const INT_LENGTH = 4;
+
+    const BIGINT_LENGTH = 8;
+
+    const NUMERIC_TYPES = [
+        self::TYPE_TINYINT => self::TINYINT_LENGTH,
+        self::TYPE_SMALLINT => self::SMALLINT_LENGTH,
+        self::TYPE_MEDIUMINT => self::MEDIUMINT_LENGTH,
+        self::TYPE_INT => self::INT_LENGTH,
+        self::TYPE_BIGINT => self::BIGINT_LENGTH,
     ];
 
     protected $name = null;
 
-    protected $type = 'int';
+    protected $type = self::TYPE_INT;
 
     protected $length = null;
 
@@ -78,9 +89,16 @@ class Column
         return $this;
     }
 
+    static public function create($appName, $name, $type = null, $length = null, $isUnsigned = null, $allowNull = null, $def = null, $comment = null)
+    {
+        return static::newInstanceRef($appName, $name, $type, $length, $isUnsigned, $allowNull, $def, $comment);
+    }
+
     static public function getNumericLength($type)
     {
-        return isset(static::$numericTypes[$type]) ? static::$numericTypes[$type] : null;
+        // phpStorm bug fix
+        return Arr::get($types = static::NUMERIC_TYPES, $type);
+        //return array_key_exists($type, static::NUMERIC_TYPES) ? static::NUMERIC_TYPES[$type] : null;
     }
 
     static public function isNumeric($type)
@@ -139,41 +157,41 @@ class Column
 
     public function name($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function type($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function length($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
     public function isUnsigned($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function allowNull($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function def($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchScalarVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchScalarVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function comment($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

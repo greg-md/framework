@@ -56,7 +56,7 @@ class Select
     {
         if (func_num_args()) {
             if ($type and !in_array($type, [static::ORDER_ASC, static::ORDER_DESC])) {
-                throw Exception::create($this->appName(), 'Wrong select order type.');
+                throw Exception::newInstance($this->appName(), 'Wrong select order type.');
             }
 
             $this->order[] = [
@@ -166,7 +166,7 @@ class Select
 
     public function distinct($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function stmt($execute = true)
@@ -201,7 +201,7 @@ class Select
 
         $table = $this->table();
         if (!$table) {
-            throw Exception::create($this->appName(), 'Undefined table in SELECT query.');
+            throw Exception::newInstance($this->appName(), 'Undefined table in SELECT query.');
         }
 
         foreach($items as &$item) {
@@ -220,7 +220,7 @@ class Select
      */
     public function table(Table $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -229,7 +229,7 @@ class Select
      */
     public function limit($value = null)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args(), true);
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
     /**
@@ -238,7 +238,7 @@ class Select
      */
     public function offset($value = null)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args(), true);
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
     public function __toString()

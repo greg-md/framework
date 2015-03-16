@@ -11,15 +11,20 @@ trait SubscriberTrait
 
     public function fire($event, ...$args)
     {
+        return $this->fireRef($event, ...$args);
+    }
+
+    public function fireRef($event, &...$args)
+    {
         return $this->fireArgs($event, $args);
     }
 
-    public function fireArgs($event, array $param = [])
+    public function fireArgs($event, array $args = [])
     {
         $method = lcfirst(Str::phpName($event));
 
         if (method_exists($this, $method)) {
-            $this->app()->binder()->callArgs([$this, $method], $param);
+            $this->app()->binder()->callArgs([$this, $method], $args);
         }
 
         return $this;

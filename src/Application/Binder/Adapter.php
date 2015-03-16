@@ -13,15 +13,20 @@ class Adapter implements \ArrayAccess
 
     protected $caller = null;
 
-    public function __construct(callable $callable, array $storage = [])
+    public function __construct(callable $caller, array $storage = [])
     {
-        $this->caller($callable);
+        $this->caller($caller);
 
-        $this->storage = $storage;
+        $this->storage($storage);
     }
 
-    public function caller($value = null)
+    static public function create($appName, callable $caller, array $storage = [])
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return static::newInstanceRef($appName, $caller, $storage);
+    }
+
+    public function caller(callable $callable = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

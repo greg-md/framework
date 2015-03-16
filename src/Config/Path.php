@@ -2,6 +2,8 @@
 
 namespace Greg\Config;
 
+use Greg\Support\Arr;
+
 class Path
 {
     static public function fetch($path, $env = null, $ext = '.php')
@@ -9,8 +11,8 @@ class Path
         $config = static::fetchCurrent($path, $ext);
 
         if ($env) {
-            foreach(static::fetchCurrent($path . DIRECTORY_SEPARATOR . $env, $ext) as $key => $config) {
-                $config[$key] = isset($config[$key]) ? array_merge($config[$key], $config) : $config;
+            foreach(static::fetchCurrent($path . DIRECTORY_SEPARATOR . $env, $ext) as $key => $conf) {
+                $config[$key] = array_key_exists($key, $config) ? array_merge($config[$key], $conf) : $conf;
             }
         }
 
@@ -29,10 +31,22 @@ class Path
 
                 $basename = mb_substr($basename, 0, mb_strlen($basename) - $extLen);
 
-                $config[$basename] = require $file;
+                $config[$basename] = includeFile($file);
             }
         }
 
         return $config;
+    }
+}
+
+/**
+ * Scope isolated include.
+ *
+ * Prevents access to $this/self from included files.
+ */
+if (!function_exists('includeFile')) {
+    function includeFile($file)
+    {
+        return require $file;
     }
 }

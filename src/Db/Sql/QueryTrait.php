@@ -4,6 +4,7 @@ namespace Greg\Db\Sql;
 
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
@@ -15,7 +16,7 @@ trait QueryTrait
 
     protected $params = [];
 
-    public function __construct($storage)
+    public function __construct(StorageInterface $storage)
     {
         $this->storage($storage);
     }
@@ -50,6 +51,7 @@ trait QueryTrait
         }
 
         $regex = '([a-z0-9_]+)';
+
         if ($includeAlias) {
             $regex .= '(?:\s+as\s+([a-z0-9_]+))?';
         }
@@ -107,7 +109,7 @@ trait QueryTrait
 
     public function quoteNameWith($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     protected function bindParams(array $params = [])
@@ -126,7 +128,7 @@ trait QueryTrait
         $k = 1;
 
         foreach($this->bindParams() as $key => $param) {
-            $param = (array)$param;
+            Arr::bringRef($param);
 
             array_unshift($param, is_int($key) ? $k++ : $key);
 
@@ -149,6 +151,6 @@ trait QueryTrait
      */
     public function storage(StorageInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

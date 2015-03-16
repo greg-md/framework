@@ -33,15 +33,15 @@ class Html extends Layout
 
     protected $minifyHtml = false;
 
-    public function init()
+    public function __bind()
     {
-        $this->htmlClass(ElementClass::create($this->appName()));
+        $this->htmlClass(ElementClass::newInstance($this->appName()));
 
-        $this->head(Head::create($this->appName()));
+        $this->head(Head::newInstance($this->appName()));
 
-        $this->bodyClass(ElementClass::create($this->appName()));
+        $this->bodyClass(ElementClass::newInstance($this->appName()));
 
-        $this->script(Script::create($this->appName()));
+        $this->script(Script::newInstance($this->appName()));
 
         return $this;
     }
@@ -70,7 +70,7 @@ class Html extends Layout
      */
     public function htmlClass(ElementClass $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -79,17 +79,17 @@ class Html extends Layout
      */
     public function head(Head $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function headOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function headClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -98,17 +98,17 @@ class Html extends Layout
      */
     public function bodyClass(ElementClass $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function bodyOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function bodyClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayObjVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -117,16 +117,16 @@ class Html extends Layout
      */
     public function script(Script $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function subLayout($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function minifyHtml($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

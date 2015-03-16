@@ -22,11 +22,11 @@ class Head
 
     public function init()
     {
-        $this->meta(Meta::create($this->appName()));
+        $this->meta(Meta::newInstance($this->appName()));
 
-        $this->link(Link::create($this->appName()));
+        $this->link(Link::newInstance($this->appName()));
 
-        $this->style(Style::create($this->appName()));
+        $this->style(Style::newInstance($this->appName()));
 
         return $this;
     }
@@ -37,7 +37,7 @@ class Head
      */
     public function meta(Meta $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -46,7 +46,7 @@ class Head
      */
     public function link(Link $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -55,11 +55,11 @@ class Head
      */
     public function style(Style $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function title($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

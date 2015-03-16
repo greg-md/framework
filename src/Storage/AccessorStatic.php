@@ -8,14 +8,13 @@ trait AccessorStatic
 {
     static protected $storage = [];
 
-    static protected function &accessor(array $accessor = [])
+    static protected function &storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        if (func_num_args()) {
-            static::$storage = $accessor;
+        return Obj::fetchArrayVar(true, static::$storage, ...func_get_args());
+    }
 
-            return true;
-        }
-
-        return static::$storage;
+    static protected function &accessor(array $storage = [])
+    {
+        return Obj::fetchVar(true, static::$storage, ...func_get_args());
     }
 }

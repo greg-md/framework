@@ -51,21 +51,6 @@ class Insert
         return $stmt->execute();
     }
 
-    public function columns($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
-    }
-
-    public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
-    }
-
-    public function select($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
-    }
-
     public function toString()
     {
         $query = [
@@ -74,7 +59,7 @@ class Insert
 
         $into = $this->into();
         if (!$into) {
-            throw Exception::create($this->appName(), 'Undefined insert table.');
+            throw Exception::newInstance($this->appName(), 'Undefined insert table.');
         }
 
         $query[] = $into;
@@ -86,7 +71,7 @@ class Insert
         }, $columns);
 
         if (!$quoteColumns) {
-            throw Exception::create($this->appName(), 'Undefined insert columns.');
+            throw Exception::newInstance($this->appName(), 'Undefined insert columns.');
         }
 
         $query[] = '(' . implode(', ', $quoteColumns) . ')';
@@ -113,5 +98,20 @@ class Insert
     public function __toString()
     {
         return $this->toString();
+    }
+
+    public function columns($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function select($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

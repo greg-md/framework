@@ -32,9 +32,14 @@ class Ini implements \ArrayAccess
             $this->indexDelimiter($indexDelimiter);
         }
 
-        $this->replace(static::fetchContents($contents, $section, $indexDelimiter));
+        $this->storage = static::fetchContents($contents, $section, $indexDelimiter);
 
         return $this;
+    }
+
+    static public function create($appName, $contents, $section = null, $indexDelimiter = null)
+    {
+        return static::newInstanceRef($appName, $contents, $section, $indexDelimiter);
     }
 
     static protected function fetchContents($contents, $section = null, $indexDelimiter = null)
@@ -43,15 +48,20 @@ class Ini implements \ArrayAccess
         if ($contents) {
             if ($section) {
                 $partsParam = [];
+
                 foreach ($contents as $key => $value) {
                     $parts = array_map('trim', explode(':', $key));
+
                     $partsParam[$key] = $parts;
+
                     $primary = array_shift($parts);
+
                     $return[$primary] = $indexDelimiter ? static::fetchIndexes($value, $indexDelimiter) : $value;
                 }
 
                 foreach ($partsParam as $parts) {
                     $primary = array_shift($parts);
+
                     foreach ($parts as $part) {
                         $return[$primary] = array_replace_recursive($return[$part], $return[$primary]);
                     }
@@ -59,10 +69,12 @@ class Ini implements \ArrayAccess
             } else {
                 $return = $indexDelimiter ? static::fetchIndexes($contents, $indexDelimiter) : $contents;
             }
+
             if ($section) {
-                if (!isset($return[$section])) {
+                if (!array_key_exists($section, $return)) {
                     throw new \Exception('Config ini section `' . $section . '` not found.');
                 }
+
                 $return = $return[$section];
             }
         }
@@ -75,7 +87,9 @@ class Ini implements \ArrayAccess
         $fetchedSection = [];
         foreach ($contents as $key => $value) {
             $keys = explode($indexDelimiter, $key);
+
             $contentsLevel = &$fetchedSection;
+
             foreach ($keys as $part) {
                 if ($part == '') {
                     $contentsLevel = &$contentsLevel[];
@@ -83,9 +97,11 @@ class Ini implements \ArrayAccess
                     $contentsLevel = &$contentsLevel[$part];
                 }
             }
+
             if (is_array($value)) {
                 $value = static::fetchIndexes($value, $indexDelimiter);
             }
+
             $contentsLevel = $value;
         }
 
@@ -94,16 +110,16 @@ class Ini implements \ArrayAccess
 
     public function contents($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function section($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function indexDelimiter($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

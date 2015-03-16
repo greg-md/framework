@@ -29,27 +29,17 @@ class Table
 
     protected $dependencies = [];
 
-    protected $rowClass = 'Greg\Db\Sql\Table\Row';
+    protected $rowClass = Table\Row::class;
 
-    protected $rowFullClass = 'Greg\Db\Sql\Table\RowFull';
+    protected $rowFullClass = Table\RowFull::class;
 
-    protected $rowSetClass = 'Greg\Db\Sql\Table\RowSet';
-
-    //protected $rowTreeClass = 'Greg\Db\Sql\Table\RowTree';
-
-    //protected $rowSetTreeClass = 'Greg\Db\Sql\Table\RowSetTree';
-
-    //protected $rowSetPaginationClass = 'Greg\Db\Sql\Table\RowSetPagination';
+    protected $rowSetClass = Table\RowSet::class;
 
     protected $scaffolding = [];
 
     protected $nameColumn = null;
 
     protected $label = null;
-
-    //protected $treeColumns = null;
-
-    //protected $treeParentColumns = null;
 
     protected $storage = null;
 
@@ -58,6 +48,11 @@ class Table
         $this->storage($storage);
 
         return $this;
+    }
+
+    static public function create($appName, StorageInterface $storage)
+    {
+        return static::newInstanceRef($appName, $storage);
     }
 
     public function init()
@@ -93,7 +88,7 @@ class Table
         $class = $this->rowClass();
 
         if (!$class) {
-            throw Exception::create($this->appName(), 'Undefined table row class.');
+            throw Exception::newInstance($this->appName(), 'Undefined table row class.');
         }
 
         if ($reset) {
@@ -107,7 +102,7 @@ class Table
             $data = array_merge($rowData, $data);
         }
 
-        return $this->app()->binder()->newInstance($class, $this, $data);
+        return $this->app()->binder()->loadInstance($class, $this, $data);
     }
 
     public function createRowSet($data)
@@ -115,90 +110,90 @@ class Table
         $class = $this->rowSetClass();
 
         if (!$class) {
-            throw Exception::create($this->appName(), 'Undefined table row set class.');
+            throw Exception::newInstance($this->appName(), 'Undefined table row set class.');
         }
 
-        return $this->app()->binder()->newInstance($class, $this, $data);
+        return $this->app()->binder()->loadInstance($class, $this, $data);
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function name($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function alias($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function columns($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function autoIncrement($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function primary($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function unique($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function references($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function relationships($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function dependencies($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function rowClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function rowFullClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function rowSetClass($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function scaffolding($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
+    public function scaffolding($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function nameColumn($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function label($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -207,6 +202,6 @@ class Table
      */
     public function storage(StorageInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

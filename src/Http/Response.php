@@ -3,6 +3,7 @@
 namespace Greg\Http;
 
 use Greg\Engine\Internal;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Type;
 
@@ -15,6 +16,18 @@ class Response
     protected $charset = 'UTF-8';
 
     protected $body = null;
+
+    public function __construct($body = null)
+    {
+        $this->body($body);
+
+        return $this;
+    }
+
+    static public function create($appName, $body = null)
+    {
+        return static::newInstanceRef($appName, $body);
+    }
 
     public function send()
     {
@@ -39,22 +52,22 @@ class Response
         return $this;
     }
 
-    public function &contentType($value = null, $type = Obj::PROP_REPLACE)
+    public function contentType($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function &charset($value = null, $type = Obj::PROP_REPLACE)
+    public function charset($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function &body($value = null, $type = Obj::PROP_REPLACE)
+    public function body($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    static protected $codes = [
+    const CODES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',            // RFC2518
@@ -119,8 +132,8 @@ class Response
 
     static public function code($code)
     {
-        if (Type::isNaturalNumber($code) and isset(static::$codes[$code])) {
-            $code .= ' ' . static::$codes[$code];
+        if (Type::isNaturalNumber($code) and Arr::has($codes = static::CODES, $code)) {
+            $code .= ' ' . $codes[$code];
         }
 
         header('HTTP/1.1 ' . $code);
@@ -238,9 +251,12 @@ class Response
 
         if ($maxAge > 0) {
             $serverTime = Request::time();
+
             if ($modifiedSince) {
                 $modifiedSinceTime = new \DateTime($modifiedSince, new \DateTimeZone('UTC'));
+
                 $modifiedSinceTime = strtotime($modifiedSinceTime->format('Y-m-d H:i:s'));
+
                 if ($modifiedSinceTime < $serverTime - $maxAge) {
                     $timestamp = $serverTime;
                 } elseif ($timestamp < $modifiedSinceTime) {
@@ -252,28 +268,27 @@ class Response
         }
 
         $lastModified = substr(date('r', $timestamp), 0, -5) . 'GMT';
+
         $eTag = '"' . md5($lastModified) . '"';
 
         // Send the headers
         header('Last-Modified: ' . $lastModified);
+
         header('ETag: ' . $eTag);
 
         $match = Request::match();
 
         // See if the client has provided the required headers
         if (!$modifiedSince && !$match) {
-
             return false;
         }
 
         // At least one of the headers is there - check them
         if ($match && $match != $eTag) {
-
             return false; // eTag is there but doesn't match
         }
 
         if ($modifiedSince && $modifiedSince != $lastModified) {
-
             return false; // if-modified-since is there but doesn't match
         }
 

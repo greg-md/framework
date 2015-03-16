@@ -3,6 +3,7 @@
 namespace Greg\Server;
 
 use Greg\Support\Arr;
+use Greg\Support\Obj;
 
 class Session
 {
@@ -51,7 +52,7 @@ class Session
 
     static public function persistent($value = null)
     {
-        return func_num_args() ? (static::$persistent = $value) : static::$persistent;
+        return Obj::fetchBoolVar(true, static::$persistent, ...func_get_args());
     }
 
     static public function name($name = null)
@@ -145,68 +146,90 @@ class Session
         return static::$handler;
     }
 
-    static public function has($index)
+    static public function has($key, ...$keys)
     {
         static::start();
 
-        return array_key_exists($index, $_SESSION);
+        return Arr::has($_SESSION, $key, ...$keys);
     }
 
-    static public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
+    static public function hasIndex($index, $delimiter = Arr::INDEX_DELIMITER)
     {
         static::start();
 
-        return Arr::indexHas($_SESSION, $index, $delimiter);
+        return Arr::hasIndex($_SESSION, $index, $delimiter);
     }
 
-    static public function &get($index, $else = null)
+    static public function set($key, $value)
     {
         static::start();
 
-        if (static::has($index)) return $_SESSION[$index]; return $else;
+        return Arr::set($_SESSION, $key, $value);
     }
 
-    static public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    static public function setRef($key, &$value)
     {
         static::start();
 
-        return Arr::indexGet($_SESSION, $index, $else, $delimiter);
+        return Arr::set($_SESSION, $key, $value);
     }
 
-    static public function set($index, $value)
+    static public function setIndex($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
         static::start();
 
-        $_SESSION[$index] = $value;
-
-        return true;
+        return Arr::setIndex($_SESSION, $index, $value, $delimiter);
     }
 
-    static public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
+    static public function setIndexRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
         static::start();
 
-        return Arr::indexSet($_SESSION, $index, $value, $delimiter);
+        return Arr::setIndex($_SESSION, $index, $value, $delimiter);
     }
 
-    static public function del($index)
+    static public function &get($key, $else = null)
     {
         static::start();
 
-        $_SESSION[$index] = null;
+        return Arr::get($_SESSION, $key, $else);
+    }
 
-        unset($_SESSION[$index]);
+    static public function &getRef($key, $else = null)
+    {
+        static::start();
 
-        return true;
+        return Arr::getRef($_SESSION, $key, $else);
+    }
+
+    static public function &getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        static::start();
+
+        return Arr::getIndex($_SESSION, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        static::start();
+
+        return Arr::getIndexRef($_SESSION, $index, $else, $delimiter);
+    }
+
+    static public function del($key, ...$keys)
+    {
+        static::start();
+
+        return Arr::del($_SESSION, $key, ...$keys);
     }
 
     static public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
     {
         static::start();
 
-        return Arr::indexDel($_SESSION, $index, $delimiter);
+        return Arr::delIndex($_SESSION, $index, $delimiter);
     }
-
+    
     static public function destroy()
     {
         static::start();
@@ -214,12 +237,5 @@ class Session
         session_destroy();
 
         return true;
-    }
-
-    static public function &storage()
-    {
-        static::start();
-
-        return $_SESSION;
     }
 }

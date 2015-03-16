@@ -6,142 +6,88 @@ use Greg\Support\Arr;
 
 trait ArrayAccess
 {
-    abstract protected function &accessor(array $accessor = []);
+    abstract protected function &accessor(array $storage = []);
 
-    public function has($index)
+    public function has($key, ...$keys)
     {
-        if (is_array($index)) {
-            foreach(($indexes = $index) as $index) {
-                if (!array_key_exists($index, $this->accessor())) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (($index instanceof \Closure)) {
-            foreach($this->accessor() as $key => $value) {
-                if ($index($value, $key) === true) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        return array_key_exists($index, $this->accessor());
+        return Arr::has($this->accessor(), $key, ...$keys);
     }
 
-    public function set($index, $value)
+    public function hasIndex($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if ($value instanceof ArrayReference) {
-            $value = &$value->get();
-        }
-
-        return $this->setRef($index, $value);
+        return Arr::hasIndex($this->accessor(), $index, $delimiter);
     }
 
-    public function setRef($index, &$value)
+    public function set($key, $value)
     {
-        if ($index !== null) {
-            $this->accessor()[$index] = &$value;
-        } else {
-            $this->accessor()[] = &$value;
-        }
+        Arr::set($this->accessor(), $key, $value);
 
         return $this;
     }
 
-    public function &get($index, $else = null)
+    public function setRef($key, &$value)
     {
-        if (is_array($index)) {
-            $return = [];
-
-            $else = Arr::bring($else);
-
-            foreach(($indexes = $index) as $index) {
-                if ($this->has($index)) {
-                    $return[$index] = $this->accessor()[$index];
-                } elseif (array_key_exists($index, $else)) {
-                    $return[$index] = $else[$index];
-                } else {
-                    $return[$index] = null;
-                }
-            }
-
-            return $return;
-        }
-
-        if ($this->has($index)) return $this->accessor()[$index]; return $else;
-    }
-
-    public function del($index)
-    {
-        if (is_array($index)) {
-            foreach(($indexes = $index) as $index) {
-                unset($this->accessor()[$index]);
-            }
-        } else {
-            unset($this->accessor()[$index]);
-        }
+        Arr::setRef($this->accessor(), $key, $value);
 
         return $this;
     }
 
-    /* May be split index methods in another trait in the future */
-
-    public function indexHas($index, $delimiter = Arr::INDEX_DELIMITER)
+    public function setIndex($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexHas($this->accessor(), $index, $delimiter);
-        }
-
-        return $this->has($index);
-    }
-
-    public function indexSet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        if ($value instanceof ArrayReference) {
-            $value = &$value->get();
-        }
-
-        if (strpos($index, $delimiter) !== false) {
-            Arr::indexSet($this->accessor(), $index, $value, $delimiter);
-        } else {
-            $this->set($index, $value);
-        }
+        Arr::setIndex($this->accessor(), $index, $value, $delimiter);
 
         return $this;
     }
 
-    public function indexSetRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
+    public function setIndexRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            Arr::indexSetRef($this->accessor(), $index, $value, $delimiter);
-        } else {
-            $this->setRef($index, $value);
-        }
+        Arr::setIndexRef($this->accessor(), $index, $value, $delimiter);
 
         return $this;
     }
 
-    public function &indexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    public function &get($key, $else = null)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexGet($this->accessor(), $index, $else, $delimiter);
-        }
+        return Arr::get($this->accessor(), $key, $else);
+    }
 
-        return $this->get($index, $else);
+    public function &getRef($key, $else = null)
+    {
+        return Arr::getRef($this->accessor(), $key, $else);
+    }
+
+    public function getArray($key, $else = null)
+    {
+        return Arr::getArray($this->accessor(), $key, $else);
+    }
+
+    public function &getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndex($this->accessor(), $index, $else, $delimiter);
+    }
+
+    public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexRef($this->accessor(), $index, $else, $delimiter);
+    }
+
+    public function getIndexArray($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexArray($this->accessor(), $index, $else, $delimiter);
+    }
+
+    public function del($key, ...$keys)
+    {
+        Arr::del($this->accessor(), $key, ...$keys);
+
+        return $this;
     }
 
     public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        if (strpos($index, $delimiter) !== false) {
-            return Arr::indexDel($this->accessor(), $index, $delimiter);
-        }
+        Arr::delIndex($this->accessor(), $index, $delimiter);
 
-        return $this->del($index);
+        return $this;
     }
 
     /* Magic methods for ArrayAccess interface */
@@ -158,6 +104,8 @@ trait ArrayAccess
 
     public function &offsetGet($index)
     {
+        // Leave this alone! It should return direct reference of accessor to be able to add recursive values.
+        // It may return a warning of undefined key.
         return $this->accessor()[$index];
     }
 

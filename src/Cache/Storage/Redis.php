@@ -6,6 +6,7 @@ use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
 use Greg\Http\Request;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Redis extends \Redis implements StorageInterface
@@ -39,6 +40,11 @@ class Redis extends \Redis implements StorageInterface
         }
 
         return $this;
+    }
+
+    static public function create($appName, $host = null, $port = null, $prefix = null, $timeout = null)
+    {
+        return static::newInstanceRef($appName, $host, $port, $prefix, $timeout);
     }
 
     public function init()
@@ -80,7 +86,7 @@ class Redis extends \Redis implements StorageInterface
     public function delete($ids = [])
     {
         if (func_num_args()) {
-            $ids = (array)$ids;
+            Arr::bringRef($ids);
 
             parent::delete($ids);
         } else {
@@ -98,21 +104,21 @@ class Redis extends \Redis implements StorageInterface
 
     public function host($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function port($value = null)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function timeout($value = null)
     {
-        return Obj::fetchFloatVar($this, $this->{__FUNCTION__}, func_get_args(), true);
+        return Obj::fetchFloatVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 }

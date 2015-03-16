@@ -18,6 +18,11 @@ class File
         return $this;
     }
 
+    static public function create($appName, $file)
+    {
+        return static::newInstanceRef($appName, $file);
+    }
+
     public function ext()
     {
         return \Greg\Support\File::ext($this->file());
@@ -30,7 +35,7 @@ class File
 
     public function file($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
 }

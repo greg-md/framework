@@ -8,8 +8,13 @@ trait Accessor
 {
     protected $storage = [];
 
-    protected function &accessor(array $accessor = [])
+    protected function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchVar($this, $this->storage, func_get_args());
+        return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
+    }
+
+    protected function &accessor(array $storage = [])
+    {
+        return Obj::fetchVar($this, $this->storage, ...func_get_args());
     }
 }

@@ -6,7 +6,9 @@ interface SubscriberInterface
 {
     public function subscribe(Listener $listener);
 
-    public function fire($event, $_ = null);
+    public function fire($event, ...$args);
 
-    public function fireArgs($event, array $param = []);
+    public function fireRef($event, &...$args);
+
+    public function fireArgs($event, array $args = []);
 }

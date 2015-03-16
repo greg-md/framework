@@ -2,6 +2,8 @@
 
 namespace Greg\Server;
 
+use Greg\Support\Arr;
+
 class IncludePath
 {
     const APPEND_PATH = 'append';
@@ -20,9 +22,11 @@ class IncludePath
 
     static public function add($path, $type = self::APPEND_PATH)
     {
+        Arr::bringRef($path);
+
         $incPaths = explode(PATH_SEPARATOR, get_include_path());
 
-        $path = array_values((array)$path);
+        $path = array_values($path);
 
         $path = $type == static::APPEND_PATH ? array_merge($incPaths, $path) : array_merge($path, $incPaths);
 

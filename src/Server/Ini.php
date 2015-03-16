@@ -11,24 +11,20 @@ class Ini
 
     static public function param($key = null, $value = null)
     {
-        $args = func_get_args();
-
-        if ($args) {
-            $var = array_shift($args);
-
-            if (is_array($var)) {
-                foreach($var as $key => $value) {
+        if ($num = func_num_args()) {
+            if (is_array($key)) {
+                foreach(($keys = $key) as $key => $value) {
                     static::set($key, $value);
                 }
 
                 return true;
             }
 
-            if ($args) {
-                return static::set($var, array_shift($args));
+            if ($num > 1) {
+                return static::set($key, $value);
             }
 
-            return static::get($var);
+            return static::get($key);
         }
 
         return static::all();

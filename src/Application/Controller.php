@@ -28,6 +28,11 @@ abstract class Controller
         return $this;
     }
 
+    static public function create($appName, $name, Request $request, Viewer $view)
+    {
+        return static::newInstanceRef($appName, $name, $request, $view);
+    }
+
     public function init()
     {
         $this->view()->controllers($this->name(), $this);
@@ -37,7 +42,7 @@ abstract class Controller
 
     public function name($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -46,7 +51,7 @@ abstract class Controller
      */
     public function request(Request $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
@@ -55,6 +60,6 @@ abstract class Controller
      */
     public function view(Viewer $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

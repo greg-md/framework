@@ -11,7 +11,7 @@ use Greg\Support\Obj;
  *
  * Call methods
  *
- * @method fetch($id, $callback, $expire = 0);
+ * @method fetch($id, callable $callable, $expire = 0);
  * @method save($id, $data = null);
  * @method has($id);
  * @method load($id);
@@ -25,6 +25,6 @@ class Manager
 
     public function storage(StorageInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

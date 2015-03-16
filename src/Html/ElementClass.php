@@ -3,12 +3,11 @@
 namespace Greg\Html;
 
 use Greg\Engine\Internal;
+use Greg\Storage\Accessor;
 
 class ElementClass
 {
-    use Internal;
-
-    protected $storage = [];
+    use Accessor, Internal;
 
     public function add($class, $id = null)
     {

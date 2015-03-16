@@ -30,7 +30,7 @@ class Element implements \ArrayAccess
         }
 
         if ($attr) {
-            $this->attr($attr);
+            $this->storage($attr);
         }
 
         if ($condition !== null) {
@@ -40,54 +40,34 @@ class Element implements \ArrayAccess
         return $this;
     }
 
-    public function &attr($key = null, $value = null)
+    static public function create($appName, $name = null, array $attr = [], $condition = null)
     {
-        $numArgs = func_num_args();
-
-        if ($numArgs > 0) {
-            if (is_array($key)) {
-                foreach(($attr = $key) as $key => $value) {
-                    $this->set($key, $value);
-                }
-
-                return $this;
-            }
-
-            if ($numArgs > 1) {
-                $this->set($key, $value);
-
-                return $this;
-            }
-
-            return $this->get($key);
-        }
-
-        return $this->storage;
+        return static::newInstanceRef($appName, $name, $attr, $condition);
     }
 
     public function name($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function inner($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function before($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function after($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function condition($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function startTag()
@@ -124,7 +104,7 @@ class Element implements \ArrayAccess
         $name = $this->name();
 
         if (!$name) {
-            throw Exception::create($this->appName(), 'Undefined tag name.');
+            throw Exception::newInstance($this->appName(), 'Undefined tag name.');
         }
 
         return $name;
@@ -146,9 +126,9 @@ class Element implements \ArrayAccess
         return $this->before() . $string . $this->after();
     }
 
-    public function &__call($method, $args)
+    public function __call($method, $args)
     {
-        return $args ? $this->attr($method, current($args)) : $this->attr($method);
+        return $this->storage($method, ...$args);
     }
 
     public function __toString()
