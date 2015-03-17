@@ -116,7 +116,7 @@ class Listener
         $subscriber->subscribe($this);
 
         if ($callback) {
-            call_user_func_array($callback, [&$subscriber]);
+            $this->app()->binder()->call($callback, $subscriber);
         }
 
         return $this;

@@ -101,7 +101,7 @@ class Dispatcher
             $callback = $route->callback();
 
             if ($callback) {
-                $data = call_user_func_array($callback, [$this->param()]);
+                $data = $this->app()->binder()->call($callback, $this->param());
             } else {
                 $data = $this->app()->action($this->param('action'), $this->param('controller'), $this->param());
             }

@@ -14,34 +14,22 @@ class Sqlite extends Storage
 {
     protected $path = null;
 
-    protected $adapterClass = Sqlite\Adapter\Pdo::class;
+    protected $adapter = Sqlite\Adapter\Pdo::class;
 
-    protected $adapter = null;
-
-    public function __construct($path, $adapterClass = null)
+    public function __construct($path, $adapter = null)
     {
         $this->path($path);
 
-        if ($adapterClass !== null) {
-            $this->adapterClass($adapterClass);
+        if ($adapter !== null) {
+            $this->adapter($adapter);
         }
 
         return $this;
     }
 
-    static public function create($appName, $path, $adapterClass = null)
+    static public function create($appName, $path, $adapter = null)
     {
-        return static::newInstanceRef($appName, $path, $adapterClass);
-    }
-
-    public function init()
-    {
-        /* @var $class Sqlite\Adapter\Pdo */
-        $class = $this->adapterClass();
-
-        $this->adapter($class::create($this->appName(), $this->path()));
-
-        return $this;
+        return static::newInstanceRef($appName, $path, $adapter);
     }
 
     /**
@@ -188,18 +176,20 @@ class Sqlite extends Storage
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
     /**
      * @param AdapterInterface $value
      * @return AdapterInterface|null
      */
     public function adapter(AdapterInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchCallableVar($this, $this->{__FUNCTION__}, function($adapter) {
+            if (!is_object($adapter)) {
+                /* @var $adapter \Greg\Engine\Internal */
+                $adapter = $adapter::newInstance($this->appName(), $this->path());
+            }
+
+            return $adapter;
+        }, ...func_get_args());
     }
 
     public function __call($method, array $args = [])

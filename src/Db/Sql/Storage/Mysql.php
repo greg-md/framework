@@ -20,11 +20,9 @@ class Mysql extends Storage
 
     protected $options = [];
 
-    protected $adapterClass = Mysql\Adapter\Pdo::class;
+    protected $adapter = Mysql\Adapter\Pdo::class;
 
-    protected $adapter = null;
-
-    public function __construct($dns, $username = null, $password = null, $options = [], $adapterClass = null)
+    public function __construct($dns, $username = null, $password = null, $options = [], $adapter = null)
     {
         $this->dns($dns);
 
@@ -34,26 +32,16 @@ class Mysql extends Storage
 
         $this->options($options);
 
-        if ($adapterClass !== null) {
-            $this->adapterClass($adapterClass);
+        if ($adapter !== null) {
+            $this->adapter($adapter);
         }
 
         return $this;
     }
 
-    static public function create($appName, $dns = null, $username = null, $password = null, $options = [], $adapterClass = null)
+    static public function create($appName, $dns = null, $username = null, $password = null, $options = [], $adapter = null)
     {
-        return static::newInstanceRef($appName, $dns, $username, $password, $options, $adapterClass);
-    }
-
-    public function init()
-    {
-        /* @var $class Mysql\Adapter\Pdo */
-        $class = $this->adapterClass();
-
-        $this->adapter($class::create($this->appName(), $this->dns(), $this->username(), $this->password(), $this->options()));
-
-        return $this;
+        return static::newInstanceRef($appName, $dns, $username, $password, $options, $adapter);
     }
 
     /**
@@ -215,18 +203,20 @@ class Mysql extends Storage
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
     /**
      * @param AdapterInterface $value
      * @return AdapterInterface|null
      */
     public function adapter(AdapterInterface $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchCallableVar($this, $this->{__FUNCTION__},function($adapter) {
+            if (!is_object($adapter)) {
+                /* @var $adapter \Greg\Engine\Internal */
+                $adapter = $adapter::newInstance($this->appName(), $this->dns(), $this->username(), $this->password(), $this->options());
+            }
+
+            return $adapter;
+        }, ...func_get_args());
     }
 
     public function __call($method, array $args = [])

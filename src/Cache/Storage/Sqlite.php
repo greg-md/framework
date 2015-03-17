@@ -6,43 +6,18 @@ use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo;
-use Greg\Engine\Internal;
 use Greg\Http\Request;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
-class Sqlite implements StorageInterface
+class Sqlite extends \Greg\Db\Sql\Storage\Sqlite implements StorageInterface
 {
-    use StorageTrait, Internal;
-
-    protected $path = null;
-
-    protected $adapterClass = Pdo::class;
-
-    protected $storage = null;
+    use StorageTrait;
 
     protected $structureChecked = false;
 
-    public function __construct($path, $adapterClass = null)
-    {
-        $this->path($path);
-
-        if ($adapterClass !== null) {
-            $this->adapterClass($adapterClass);
-        }
-
-        return $this;
-    }
-
-    static public function create($appName, $adapterClass = null)
-    {
-        return static::newInstanceRef($appName, $adapterClass);
-    }
-
     public function init()
     {
-        $this->storage(\Greg\Db\Sql\Storage\Sqlite::create($this->appName(), $this->path(), $this->adapterClass()));
-
         $this->checkAndBuildStructure();
 
         return $this;
@@ -67,7 +42,7 @@ class Sqlite implements StorageInterface
 
     protected function checkStructure()
     {
-        return $this->storage()->select($this->storage()->expr('1'))
+        return $this->select($this->expr('1'))
                     ->from('sqlite_master')
                     ->whereCol('type', 'table')
                     ->whereCol('name', 'Cache')
@@ -77,32 +52,28 @@ class Sqlite implements StorageInterface
 
     protected function buildStructure()
     {
-        $adapter = $this->storage();
+        $this->exec('CREATE TABLE Cache (Id VARCHAR(32) PRIMARY KEY, Content BLOB, LastModified INTEGER)');
 
-        $adapter->exec('CREATE TABLE Cache (Id VARCHAR(32) PRIMARY KEY, Content BLOB, LastModified INTEGER)');
-
-        $adapter->exec('CREATE INDEX CacheLastModified ON Cache(LastModified)');
+        $this->exec('CREATE INDEX CacheLastModified ON Cache(LastModified)');
 
         return $this;
     }
 
     public function save($id, $data = null)
     {
-        $storage = $this->storage();
-
         if ($this->has($id)) {
-            $storage->update('Cache')
+            $this->update('Cache')
                 ->set([
-                    'Content' => [serialize($data), $storage::PARAM_LOB],
+                    'Content' => [serialize($data), static::PARAM_LOB],
                     'LastModified' => Request::time(),
                 ])
                 ->whereCol('Id', md5($id))
                 ->exec();
         } else {
-            $storage->insert('Cache')
+            $this->insert('Cache')
                 ->data([
                     'Id' => md5($id),
-                    'Content' => [serialize($data), $storage::PARAM_LOB],
+                    'Content' => [serialize($data), static::PARAM_LOB],
                     'LastModified' => Request::time(),
                 ])
                 ->exec();
@@ -113,7 +84,7 @@ class Sqlite implements StorageInterface
 
     public function has($id)
     {
-        return $this->storage()->select($this->storage()->expr('1'))
+        return $this->select($this->expr('1'))
             ->from('Cache')
             ->whereCol('Id', md5($id))
             ->limit(1)
@@ -122,7 +93,7 @@ class Sqlite implements StorageInterface
 
     public function load($id)
     {
-        $content = $this->storage()->select()
+        $content = $this->select()
             ->from('Cache', 'Content')
             ->whereCol('Id', md5($id))
             ->limit(1)
@@ -133,7 +104,7 @@ class Sqlite implements StorageInterface
 
     public function modified($id)
     {
-        return $this->storage()->select()
+        return $this->select()
             ->from('Cache', 'LastModified')
             ->whereCol('Id', md5($id))
             ->limit(1)
@@ -142,9 +113,7 @@ class Sqlite implements StorageInterface
 
     public function delete($ids = [])
     {
-        $storage = $this->storage();
-
-        $query = $storage->delete('Cache');
+        $query = $this->delete('Cache');
 
         Arr::bringRef($ids);
 
@@ -158,25 +127,6 @@ class Sqlite implements StorageInterface
         }
 
         return $query->exec();
-    }
-
-    public function path($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function adapterClass($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    /**
-     * @param \Greg\Db\Sql\Storage\Sqlite $value
-     * @return \Greg\Db\Sql\Storage\Sqlite|$this|null
-     */
-    public function storage(\Greg\Db\Sql\Storage\Sqlite $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function structureChecked($value = null)

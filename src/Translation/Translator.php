@@ -45,7 +45,7 @@ class Translator implements \ArrayAccess
 
     public function translate($key, ...$args)
     {
-        return sprintf($this->get($key, $key), ...$args);
+        return $this->translateKey($key, $key, ...$args);
     }
 
     public function translateKey($key, $text, ...$args)

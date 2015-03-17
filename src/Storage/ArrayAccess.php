@@ -92,25 +92,25 @@ trait ArrayAccess
 
     /* Magic methods for ArrayAccess interface */
 
-    public function offsetExists($index)
+    public function offsetExists($key)
     {
-        return $this->has($index);
+        return $this->has($key);
     }
 
-    public function offsetSet($index, $value)
+    public function offsetSet($key, $value)
     {
-        return $this->set($index, $value);
+        return $this->set($key, $value);
     }
 
-    public function &offsetGet($index)
+    public function &offsetGet($key)
     {
         // Leave this alone! It should return direct reference of accessor to be able to add recursive values.
         // It may return a warning of undefined key.
-        return $this->accessor()[$index];
+        return $this->accessor()[$key];
     }
 
-    public function offsetUnset($index)
+    public function offsetUnset($key)
     {
-        return $this->del($index);
+        return $this->del($key);
     }
 }

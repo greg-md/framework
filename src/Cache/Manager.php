@@ -2,6 +2,7 @@
 
 namespace Greg\Cache;
 
+use Greg\Engine\Adapter;
 use Greg\Engine\Internal;
 use Greg\Support\Obj;
 
@@ -21,10 +22,12 @@ use Greg\Support\Obj;
  */
 class Manager
 {
-    use \Greg\Engine\Manager, Internal;
+    use Adapter, Internal;
 
-    public function storage(StorageInterface $value = null)
+    public function __construct($adapter)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->adapter($adapter);
+
+        return $this;
     }
 }

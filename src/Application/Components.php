@@ -48,7 +48,7 @@ class Components
         }
 
         if ($callback) {
-            call_user_func_array($callback, [&$component]);
+            $this->app()->binder()->call($callback, $component);
         }
 
         return $this;

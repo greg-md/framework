@@ -96,6 +96,11 @@ class Binder implements \ArrayAccess
 
     public function call(callable $callable, ...$args)
     {
+        return $this->callRef($callable, ...$args);
+    }
+
+    public function callRef(callable $callable, &...$args)
+    {
         return $this->callArgs($callable, $args);
     }
 

@@ -109,13 +109,17 @@ class Arr
 
         $myRef = &$array;
 
-        foreach(explode($delimiter, $index) as $index) {
+        $indexes = explode($delimiter, $index);
+
+        $lastIndex = array_pop($indexes);
+
+        foreach($indexes as $index) {
             Arr::bringRef($myRef);
 
             $myRef = &$myRef[$index];
         }
 
-        $myRef = &$value;
+        $myRef[$lastIndex] = &$value;
 
         return true;
     }

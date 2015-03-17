@@ -37,8 +37,6 @@ class Runner implements \ArrayAccess
 
     protected $controllersPrefixes = [];
 
-    protected $modelsPrefixes = [];
-
     protected $extended = [];
 
     public function __construct(array $settings = [], $appName = null)
@@ -380,20 +378,40 @@ class Runner implements \ArrayAccess
         return false;
     }
 
-    public function loadModel($name)
+    public function once($name, callable $callable)
     {
-        $prefixes = array_merge([''], $this->modelsPrefixes());
+        $this->setIndex('once.' . $name, $callable);
 
-        foreach($prefixes as $prefix) {
-            /* @var $class Internal */
-            $class = $prefix . 'Model\\' . $name;
+        return $this;
+    }
 
-            if (class_exists($class)) {
-                return $class::newInstance($this->appName());
-            }
+    public function loadOnce($name)
+    {
+        $callable = $this->getIndex('once.' . $name);
+
+        if ($callable) {
+            $this->set($name, $this->binder()->call($callable));
         }
 
-        throw Exception::newInstance($this->appName(), 'Model `' . $name . '` not found.');
+        return $this;
+    }
+
+    public function &get($key, $else = null)
+    {
+        if (!$this->has($key)) {
+            $this->loadOnce($key);
+        }
+
+        return Arr::get($this->accessor(), $key, $else);
+    }
+
+    public function &offsetGet($key)
+    {
+        if (!$this->has($key)) {
+            $this->loadOnce($key);
+        }
+
+        return $this->accessor()[$key];
     }
 
     /**
@@ -474,11 +492,6 @@ class Runner implements \ArrayAccess
     }
 
     public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function modelsPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
