@@ -140,7 +140,7 @@ class Select
         if ($columns) {
             $cols = [];
             foreach($columns as $column) {
-                $cols[] = $this->quoteAliasExpr($column);
+                $cols[] = $this->quoteExpr($column);
             }
             $query[] = implode(', ', $cols);
         } else {

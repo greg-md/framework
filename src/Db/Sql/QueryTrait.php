@@ -93,6 +93,10 @@ trait QueryTrait
 
     protected function quoteExpr($expr)
     {
+        if (($expr instanceof Expr)) {
+            return $expr;
+        }
+
         $expr = $this->quoteNamedExpr($expr);
 
         $expr = preg_replace_callback('#".*\![a-z0-9_\.\*]+.*"|\!([a-z0-9_\.\*]+)#i', function($matches) {
