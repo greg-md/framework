@@ -3,99 +3,175 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
+use Greg\Support\Arr;
 use Greg\Support\Obj;
+use Greg\Support\Regex;
+use Greg\Support\Regex\InNamespace;
+use Greg\Support\Str;
 
-abstract class Route implements RouteInterface
+class Route
 {
     use Internal;
 
-    protected $name = null;
-
     protected $format = null;
-
-    protected $param = [];
-
-    protected $extend = true;
 
     protected $callback = null;
 
-    public function __construct($name, $format, $options = [])
-    {
-        $this->name($name);
+    protected $compiled = null;
 
+    protected $strict = true;
+
+    protected $delimiter = '/';
+
+    protected $params = [];
+
+    protected $defaults = [];
+
+    public function __construct($format, callable $callback = null)
+    {
+        $this->compileFormat($format);
+
+        $this->callback($callback);
+
+        return $this;
+    }
+
+    public function compileFormat($format)
+    {
         $this->format($format);
 
-        if (is_array($options)) {
-            $this->setOptions($options);
-        }
+        list($compiled, $params, $defaults) = $this->compile($format);
 
-        if (($options instanceof \Closure)) {
-            $this->callback($options);
-        }
+        $this->compiled($compiled);
 
-        return $this;
-    }
+        $this->params($params);
 
-    static public function create($appName, $name, $format, $options = [])
-    {
-        return static::newInstanceRef($appName, $name, $format, $options);
-    }
-
-    public function setOptions($options)
-    {
-        foreach($options as $key => $value) {
-            $this->setOption($key, $value);
-        }
+        $this->defaults($defaults);
 
         return $this;
     }
 
-    public function setOption($key, $value = null)
+    protected function compile($format)
     {
-        switch($key) {
-            case 'param':
-            case 'extend':
-            case 'callback':
-                $this->$key($value);
+        $curlyBrR = new InNamespace('{', '}', false);
 
-                break;
+        $squareBrR = new InNamespace('[', ']');
+
+        $findRegex = "(?:{$curlyBrR}(\\?)?)|(?:{$squareBrR}(\\?)?)";
+
+        $compiled = null;
+
+        $params = [];
+
+        $defaults = [];
+
+        // find all "{param}?" and "[format]?"
+        if (preg_match_all(Regex::pattern($findRegex), $format, $matches)) {
+            $paramKey = 1;
+            $paramRK = 2;
+
+            $subFormatKey = 3;
+            $subFormatRK = 4;
+
+            // split remain string
+            $parts = preg_split(Regex::pattern($findRegex), $format);
+
+            foreach($parts as $key => $remain) {
+                if ($remain) {
+                    $compiled .= Regex::quote($remain);
+                }
+
+                if (array_key_exists($key, $matches[0])) {
+                    if ($param = $matches[$paramKey][$key]) {
+                        list($paramName, $paramDefault, $paramRegex) = $this->fetchParam($param);
+
+                        $params[] = $paramName;
+
+                        if ($paramDefault) {
+                            $defaults[$paramName] = $paramDefault;
+                        }
+
+                        $paramRegex = $paramRegex ?: '.+';
+
+                        $compiled .= "({$paramRegex})" . $matches[$paramRK][$key];
+                    } elseif ($subFormat = $matches[$subFormatKey][$key]) {
+                        list($subCompiled, $subParams, $subDefaults) = $this->compile($subFormat);
+
+                        $compiled .= "(?:{$subCompiled})" . $matches[$subFormatRK][$key];
+
+                        $params = array_merge($params, $subParams);
+
+                        $defaults = array_merge($defaults, $subDefaults);
+                    }
+                }
+            }
+        } else {
+            $compiled = Regex::quote($format);
         }
 
-        return $this;
+        return [$compiled, $params, $defaults];
     }
 
-    static public function getPathParts($path, $limit = false)
+    protected function fetchParam($param)
     {
-        $path = trim($path, '/');
+        $name = $param;
 
-        return $path ? ($limit !== false ? explode('/', $path, $limit) : explode('/', $path)) : [];
-    }
+        $default = $regex = null;
 
-    static public function pathToParam($path)
-    {
-        return static::partsToParam(static::getPathParts($path));
-    }
-
-    static public function partsToParam($parts)
-    {
-        $param = [];
-
-        foreach (array_chunk($parts, 2) as $value) {
-            $param[$value[0]] = array_key_exists(1, $value) ? $value[1] : null;
+        // extract from var:default|regex
+        if (preg_match(Regex::pattern('^((?:\\\:|\\\||[^\:])+?)(?:\:((?:|\\\||[^\|])+?))?(?:\|(.+?))?$'), $param, $matches)) {
+            $name = $matches[1];
+            $default = $matches[2];
+            $regex = $matches[3] ? Regex::disableGroups($matches[3]) : null;
         }
 
-        return $param;
+        return [$name, $default, $regex];
     }
 
-    protected function paramException($param)
+    public function dispatch($path)
     {
-        throw Exception::newInstance($this->appName(), 'Parameter `' . $param
-            . '` is required in router `' . $this->name() . '`.');
+        if ($this->match($path, $param)) {
+            $callback = $this->callback();
+
+            if ($callback) {
+                return $this->app()->binder()->call($callback, $param);
+            }
+        }
+
+        return false;
     }
 
-    public function name($value = null, $type = Obj::PROP_REPLACE)
+    public function match($path, &$params = [])
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $pattern = '^' . $this->compiled() . ($this->strict() ? '' : '(.*)') . '$';
+
+        if (preg_match(Regex::pattern($pattern), $path, $matches)) {
+            array_shift($matches);
+
+            $params = $this->defaults();
+
+            foreach($this->params() as $key => $param) {
+                if (array_key_exists($key, $matches)) {
+                    $params[$param] = $matches[$key];
+                }
+            }
+
+            if (!$this->strict()) {
+                $remain = array_pop($matches);
+
+                $remain = Str::splitPath($remain, $this->delimiter());
+
+                $remain = array_chunk($remain, 2);
+
+                foreach($remain as $param) {
+                    $params[$param[0]] = Arr::get($param, 1);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public function format($value = null, $type = Obj::PROP_REPLACE)
@@ -103,22 +179,33 @@ abstract class Route implements RouteInterface
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function param($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
+    public function callback(callable $value = null)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function extend($value = null)
+    public function compiled($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function strict($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    /**
-     * @param callable $value
-     * @return \Closure|null
-     */
-    public function callback(\Closure $value = null)
+    public function delimiter($value = null, $type = Obj::PROP_REPLACE)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function params($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function defaults($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

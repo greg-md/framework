@@ -3,19 +3,11 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
-use Greg\Router\Route\Normal;
 use Greg\Support\Arr;
-use Greg\Support\Obj;
 
 class Dispatcher
 {
     use Internal;
-
-    public $path = '/';
-
-    public $route = null;
-
-    public $param = [];
 
     public $routes = [];
 
@@ -26,113 +18,56 @@ class Dispatcher
         return $this;
     }
 
-    public function fetch($path)
+    static public function create($appName, array $routes = [])
     {
-        $this->path($path);
-
-        $route = null;
-
-        foreach($this->routes() as $name => $info) {
-            $route = $this->newRouter($name, $info);
-
-            $param = $route->fetch($path);
-
-            if ($param !== false) {
-                $this->route($route);
-
-                $this->param($param);
-
-                break;
-            }
-        }
-
-        if (!$route) {
-            $this->param(Route::pathToParam($path));
-        }
-
-        return $this;
+        return static::newInstanceRef($appName, $routes);
     }
 
     public function addMore(array $routes)
     {
         foreach($routes as $route) {
-            $name = array_shift($route);
-
-            if (!$name) {
-                throw Exception::newInstance($this->appName(), 'Route name is required in router.');
-            }
-
-            $format = array_shift($route);
-
-            if (!$format) {
-                throw Exception::newInstance($this->appName(), 'Route format is required in listener.');
-            }
-
-            $this->add($name, $format, Arr::bring(array_shift($event)));
+            $this->any(...Arr::bring($route));
         }
 
         return $this;
     }
 
-    public function add($name, $format, array $options = [])
+    public function any($name, $format, $settings = null)
     {
-        return $this->routes($name, [
-            'type' => 'normal',
-            'format' => $format,
-            'options' => $options,
-        ]);
-    }
+        $route = new Route($format);
 
-    protected function newRouter($name, $info)
-    {
-        switch($info['type']) {
-            case 'normal':
-                return Normal::create($this->appName(), $name, $info['format'], $info['options']);
+        if (is_callable($settings)) {
+            $route->callback($settings);
         }
 
-        throw Exception::newInstance($this->appName(), 'Wrong type of router `' . $name . '`');
-    }
+        if (is_array($settings)) {
+            foreach($settings as $key => $value) {
+                switch($key) {
+                    case 'strict':
+                    case 'callback':
+                        $route->$key($value);
 
-    public function dispatch()
-    {
-        $route = $this->route();
-
-        if ($route) {
-            $callback = $route->callback();
-
-            if ($callback) {
-                $data = $this->app()->binder()->call($callback, $this->param());
-            } else {
-                $data = $this->app()->action($this->param('action'), $this->param('controller'), $this->param());
+                        break;
+                }
             }
-        } else {
-            $data = $this->app()->action($this->param('action'), $this->param('controller'), $this->param());
         }
 
-        return $data;
+        $this->routes[$name] = $route;
+
+        return $route;
     }
 
-    public function path($value = null, $type = Obj::PROP_REPLACE)
+    public function dispatch($path)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
+        /* @var $route Route */
+        foreach($this->routes as $name => $route) {
+            $data = $route->dispatch($path);
 
-    /**
-     * @param Route $value
-     * @return Route|$this|null
-     */
-    public function route(Route $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
+            if ($data !== false) {
+                return $data;
+            }
+        }
 
-    public function param($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function routes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return null;
     }
 }

@@ -100,4 +100,22 @@ class Str
     {
         return $with . $str . $with;
     }
+
+    static public function splitPath($string, $delimiter = '/', $limit = null)
+    {
+        $string = trim($string, $delimiter);
+
+        return static::split($string, $delimiter, $limit);
+    }
+
+    static public function split($string, $delimiter = '', $limit = null)
+    {
+        $args = [$delimiter, $string];
+
+        if ($limit !== null) {
+            $args[] = $limit;
+        }
+
+        return explode(...$args);
+    }
 }

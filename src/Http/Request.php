@@ -298,4 +298,15 @@ class Request implements \ArrayAccess
     {
         return Arr::delIndex($_REQUEST, $index, $delimiter);
     }
+
+    static public function delAll($key, ...$keys)
+    {
+        Arr::del($_GET, $key, ...$keys);
+
+        Arr::del($_POST, $key, ...$keys);
+
+        Arr::del($_REQUEST, $key, ...$keys);
+
+        return true;
+    }
 }

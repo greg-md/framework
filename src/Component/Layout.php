@@ -19,9 +19,9 @@ class Layout implements SubscriberInterface
 
     const EVENT_STARTUP = 'layout.startup';
 
-    const EVENT_BEFORE_DISPATCH = 'layout.before.dispatch';
+    const EVENT_DISPATCHING = 'layout.dispatching';
 
-    const EVENT_AFTER_DISPATCH = 'layout.after.dispatch';
+    const EVENT_DISPATCHED = 'layout.dispatched';
 
     protected $body = null;
 
@@ -36,30 +36,30 @@ class Layout implements SubscriberInterface
     public function subscribe(Listener $listener)
     {
         $listener->register([
-            Runner::EVENT_STARTUP,
-            Runner::EVENT_DISPATCH,
+            Runner::EVENT_DISPATCHING,
+            Runner::EVENT_DISPATCHED,
         ], $this);
 
         return $this;
     }
 
-    public function appStartup(Dispatcher $router, Listener $listener)
+    public function appDispatching(Dispatcher $router, Listener $listener)
     {
         if (!$this->disabled()) {
-            $this->request($request = Request::create($this->appName(), $router->param()));
+            $this->request($request = Request::create($this->appName()/*, $router->param()*/));
 
             $this->view($view = $this->app()->newView($request));
 
-            $listener->fire(static::EVENT_STARTUP);
+            $listener->fire(static::EVENT_DISPATCHING);
         }
 
         return $this;
     }
 
-    public function appDispatch(Listener $listener, Response $response)
+    public function appDispatched(Listener $listener, Response $response)
     {
         if (!$this->disabled()) {
-            $listener->fire(static::EVENT_BEFORE_DISPATCH);
+            $listener->fire(static::EVENT_DISPATCHING);
 
             $this->body($response->body());
 
@@ -67,7 +67,7 @@ class Layout implements SubscriberInterface
 
             $response->body($data);
 
-            $listener->fire(static::EVENT_AFTER_DISPATCH);
+            $listener->fire(static::EVENT_DISPATCHED);
         }
 
         return $this;

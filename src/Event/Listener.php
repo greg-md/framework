@@ -64,6 +64,10 @@ class Listener
         foreach(Arr::bring($event) as $event) {
             $method = lcfirst(Str::phpName($event));
 
+            if (!method_exists($class, $method)) {
+                throw new Exception('Method `' . $method . '` not found in class `' . get_class($class) . '`.');
+            }
+
             $this->on($event, [$class, $method], get_class($class) . '::' . $method);
         }
 

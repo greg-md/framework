@@ -27,11 +27,11 @@ class Runner implements \ArrayAccess
 
     const EVENT_RUN = 'app.run';
 
-    const EVENT_STARTUP = 'app.startup';
+    const EVENT_DISPATCHING = 'app.dispatching';
 
-    const EVENT_DISPATCH = 'app.dispatch';
+    const EVENT_DISPATCHED = 'app.dispatched';
 
-    const EVENT_FINISH = 'app.finish';
+    const EVENT_SENT = 'app.sent';
 
     protected $viewPaths = [];
 
@@ -41,6 +41,9 @@ class Runner implements \ArrayAccess
 
     public function __construct(array $settings = [], $appName = null)
     {
+        // tre de modificat view adapterul să fie unul global și din el să fie apelate fișierele cu parametri
+        // de rescris routerul ca să nu știe de controlere și să aibă doar un singur route format, ca și în laravel
+        // de adăugat ACL
         if ($appName !== null) {
             $this->appName($appName);
         }
@@ -302,25 +305,29 @@ class Runner implements \ArrayAccess
     {
         if (!func_num_args() and $requestRouteParam = $this->getIndex('request.route_param')) {
             $path = Request::getRequest($requestRouteParam);
+
+            Request::delAll([$requestRouteParam]);
+
+            if ($requestRewriteParam = $this->getIndex('request.rewrite_param')) {
+                Request::delAll([$requestRewriteParam]);
+            }
         }
 
         $path = $path ?: '/';
 
-        $this->listener()->fireArgs(static::EVENT_RUN, [&$path]);
+        $this->listener()->fireRef(static::EVENT_RUN, $path);
 
-        $this->router()->fetch($path);
+        $this->listener()->fire(static::EVENT_DISPATCHING);
 
-        $this->listener()->fire(static::EVENT_STARTUP);
-
-        $content = $this->router()->dispatch();
+        $content = $this->router()->dispatch($path);
 
         $this->response()->body($content);
 
-        $this->listener()->fire(static::EVENT_DISPATCH);
+        $this->listener()->fire(static::EVENT_DISPATCHED);
 
         $this->response()->send();
 
-        $this->listener()->fire(static::EVENT_FINISH);
+        $this->listener()->fire(static::EVENT_SENT);
 
         return $this;
     }
@@ -341,7 +348,7 @@ class Runner implements \ArrayAccess
             $actionName = Str::phpName($name) . 'Action';
 
             if (method_exists($controller, $actionName)) {
-                $controller->$actionName();
+                $controller->$actionName($param);
             }
         }
 
