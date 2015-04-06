@@ -110,6 +110,10 @@ class Str
 
     static public function split($string, $delimiter = '', $limit = null)
     {
+        if (static::isEmpty($string)) {
+            return [];
+        }
+
         $args = [$delimiter, $string];
 
         if ($limit !== null) {
@@ -117,5 +121,10 @@ class Str
         }
 
         return explode(...$args);
+    }
+
+    static public function isEmpty($string)
+    {
+        return $string === null or $string === '';
     }
 }

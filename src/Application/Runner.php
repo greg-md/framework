@@ -33,16 +33,12 @@ class Runner implements \ArrayAccess
 
     const EVENT_SENT = 'app.sent';
 
-    protected $viewPaths = [];
-
     protected $controllersPrefixes = [];
 
     protected $extended = [];
 
     public function __construct(array $settings = [], $appName = null)
     {
-        // tre de modificat view adapterul să fie unul global și din el să fie apelate fișierele cu parametri
-        // de rescris routerul ca să nu știe de controlere și să aibă doar un singur route format, ca și în laravel
         // de adăugat ACL
         if ($appName !== null) {
             $this->appName($appName);
@@ -71,6 +67,8 @@ class Runner implements \ArrayAccess
 
         $this->initTranslator();
 
+        $this->initViewer();
+
         $this->initResources();
 
         $this->initRouter();
@@ -87,8 +85,6 @@ class Runner implements \ArrayAccess
 
     public function initConfig()
     {
-        $this->viewPaths($this->getIndexArray('view.paths'));
-
         $this->controllersPrefixes($this->getIndexArray('controllers.prefixes'));
 
         $this->extended($this->getArray('extended'));
@@ -183,6 +179,19 @@ class Runner implements \ArrayAccess
 
         // Add Translator to Binder
         $this->binder()->setObject($translator);
+
+        return $this;
+    }
+
+    public function initViewer()
+    {
+        // Load Translator
+        $this->viewer($viewer = Viewer::create($this->appName(),
+                        $this->getIndexArray('viewer.paths'),
+                        $this->getIndexArray('viewer.params')));
+
+        // Add Viewer to Binder
+        $this->binder()->setObject($viewer);
 
         return $this;
     }
@@ -319,11 +328,11 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fire(static::EVENT_DISPATCHING);
 
-        $content = $this->router()->dispatch($path);
+        $content = $this->router()->dispatch($path, $route);
 
         $this->response()->body($content);
 
-        $this->listener()->fire(static::EVENT_DISPATCHED);
+        $this->listener()->fire(static::EVENT_DISPATCHED, $route);
 
         $this->response()->send();
 
@@ -336,53 +345,37 @@ class Runner implements \ArrayAccess
     {
         $name = $name ?: 'index';
 
-        $controllerName = $controllerName ?: 'index';
+        $controllerName = $controllerName ?: 'home';
+
+        $controller = $this->loadController($controllerName);
+
+        $actionName = Str::phpName($name) . 'Action';
+
+        if (!method_exists($controller, $actionName)) {
+            throw new Exception('Action `' . $name . '` not found in controller `' . $controllerName . '`.');
+        }
 
         $request = Request::create($this->appName(), $param);
 
-        $view = $this->newView($request, $param);
-
-        $controller = $this->loadController($controllerName, $request, $view);
-
-        if ($controller) {
-            $actionName = Str::phpName($name) . 'Action';
-
-            if (method_exists($controller, $actionName)) {
-                $controller->$actionName($param);
-            }
-        }
-
-        return $view->renderName($controllerName . '/' . $name . '.action');
+        return $controller->$actionName($request);
     }
 
-    /**
-     * @param $request
-     * @param array $param
-     * @return Viewer
-     * @throws \Exception
-     */
-    public function newView(Request $request, array $param = [])
-    {
-        return Viewer::create($this->appName(), $request, $this->viewPaths(), $param);
-    }
-
-    public function loadController($name, Request $request, Viewer $view)
+    public function loadController($name)
     {
         $name = Str::phpName($name);
 
         $prefixes = array_merge([''], $this->controllersPrefixes());
-        //$prefixes = $this->controllersPrefixes();
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
             $class = $prefix . 'Controllers\\' . $name . '\Controller';
 
             if (class_exists($class)) {
-                return $class::create($this->appName(), $name, $request, $view);
+                return $class::newInstance($this->appName());
             }
         }
 
-        return false;
+        throw new Exception('Controller `' . $name . '` not found.');
     }
 
     public function once($name, callable $callable)
@@ -467,6 +460,15 @@ class Runner implements \ArrayAccess
     }
 
     /**
+     * @param Viewer $translator
+     * @return Viewer|bool
+     */
+    public function viewer(Viewer $translator = null)
+    {
+        return $this->memory('viewer', ...func_get_args());
+    }
+
+    /**
      * @param Resources $resources
      * @return Resources|bool
      */
@@ -491,11 +493,6 @@ class Runner implements \ArrayAccess
     public function router(Dispatcher $router = null)
     {
         return $this->memory('router', ...func_get_args());
-    }
-
-    public function viewPaths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)

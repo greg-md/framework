@@ -9,6 +9,12 @@ class Dispatcher
 {
     use Internal;
 
+    const EVENT_DISPATCH = 'router.dispatch';
+
+    const EVENT_DISPATCHING = 'router.dispatching';
+
+    const EVENT_DISPATCHED = 'router.dispatched';
+
     public $routes = [];
 
     public function __construct(array $routes = [])
@@ -34,7 +40,7 @@ class Dispatcher
 
     public function any($name, $format, $settings = null)
     {
-        $route = new Route($format);
+        $route = Route::create($this->appName(), $name, $format);
 
         if (is_callable($settings)) {
             $route->callback($settings);
@@ -57,17 +63,27 @@ class Dispatcher
         return $route;
     }
 
-    public function dispatch($path)
+    public function dispatch($path, &$foundRoute = null)
     {
+        $this->app()->listener()->fireRef(static::EVENT_DISPATCH, $path);
+
+        $content = null;
+
         /* @var $route Route */
         foreach($this->routes as $name => $route) {
-            $data = $route->dispatch($path);
+            if ($route->match($path)) {
+                $foundRoute = $route;
 
-            if ($data !== false) {
-                return $data;
+                $this->app()->listener()->fire(static::EVENT_DISPATCHING, $route);
+
+                $content = $route->dispatch();
+
+                $this->app()->listener()->fire(static::EVENT_DISPATCHED, $route);
+
+                break;
             }
         }
 
-        return null;
+        return $content;
     }
 }

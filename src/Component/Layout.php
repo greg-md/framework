@@ -7,17 +7,13 @@ use Greg\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
-use Greg\Http\Request;
 use Greg\Http\Response;
-use Greg\Router\Dispatcher;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
 class Layout implements SubscriberInterface
 {
     use SubscriberTrait, Internal;
-
-    const EVENT_STARTUP = 'layout.startup';
 
     const EVENT_DISPATCHING = 'layout.dispatching';
 
@@ -29,10 +25,6 @@ class Layout implements SubscriberInterface
 
     protected $disabled = false;
 
-    protected $request = null;
-
-    protected $view = null;
-
     public function subscribe(Listener $listener)
     {
         $listener->register([
@@ -43,29 +35,23 @@ class Layout implements SubscriberInterface
         return $this;
     }
 
-    public function appDispatching(Dispatcher $router, Listener $listener)
+    public function appDispatching(Listener $listener)
     {
         if (!$this->disabled()) {
-            $this->request($request = Request::create($this->appName()/*, $router->param()*/));
-
-            $this->view($view = $this->app()->newView($request));
-
             $listener->fire(static::EVENT_DISPATCHING);
         }
 
         return $this;
     }
 
-    public function appDispatched(Listener $listener, Response $response)
+    public function appDispatched(Viewer $viewer, Listener $listener, Response $response)
     {
         if (!$this->disabled()) {
-            $listener->fire(static::EVENT_DISPATCHING);
-
             $this->body($response->body());
 
-            $data = $this->view()->renderName($this->renderName());
+            $content = $viewer->renderName($this->renderName());
 
-            $response->body($data);
+            $response->body($content);
 
             $listener->fire(static::EVENT_DISPATCHED);
         }
@@ -86,23 +72,5 @@ class Layout implements SubscriberInterface
     public function disabled($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    /**
-     * @param Request $value
-     * @return Request|$this|null
-     */
-    public function request(Request $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    /**
-     * @param Viewer $value
-     * @return Viewer|$this|null
-     */
-    public function view(Viewer $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

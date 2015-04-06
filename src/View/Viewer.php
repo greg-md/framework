@@ -14,18 +14,14 @@ class Viewer implements \ArrayAccess
 {
     use Accessor, ArrayAccess, Internal;
 
-    protected $request = null;
-
     protected $controllers = [];
 
     protected $extension = '.phtml';
 
     protected $paths = [];
 
-    public function __construct(Request $request, $paths = [], array $param = [])
+    public function __construct($paths = [], array $param = [])
     {
-        $this->request($request);
-
         Arr::bringRef($paths);
 
         $this->paths($paths);
@@ -35,9 +31,9 @@ class Viewer implements \ArrayAccess
         return $this;
     }
 
-    static public function create($appName, Request $request, $paths = [], array $param = [])
+    static public function create($appName, $paths = [], array $param = [])
     {
-        return static::newInstanceRef($appName, $request, $paths, $param);
+        return static::newInstanceRef($appName, $paths, $param);
     }
 
     public function renderView($name, $controllerName = null)
@@ -46,7 +42,7 @@ class Viewer implements \ArrayAccess
             $controller = $this->controllers($controllerName);
 
             if (!$controller) {
-                $controller = $this->app()->loadController($controllerName, $this->request(), $this);
+                $controller = $this->app()->loadController($controllerName);
             }
         } else {
             $controller = current($this->controllers());
@@ -157,11 +153,6 @@ class Viewer implements \ArrayAccess
     public function __get($key)
     {
         return $this->get($key);
-    }
-
-    public function request(Request $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function controllers($name = null, $controller = null, $type = Obj::PROP_APPEND, $replace = false)

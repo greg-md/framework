@@ -13,6 +13,8 @@ class Route
 {
     use Internal;
 
+    protected $name = null;
+
     protected $format = null;
 
     protected $callback = null;
@@ -27,13 +29,24 @@ class Route
 
     protected $defaults = [];
 
-    public function __construct($format, callable $callback = null)
+    protected $lastMatchedPath = [];
+
+    protected $lastMatchedParams = [];
+
+    public function __construct($name, $format, callable $callback = null)
     {
+        $this->name($name);
+
         $this->compileFormat($format);
 
         $this->callback($callback);
 
         return $this;
+    }
+
+    static public function create($appName, $name, $format, callable $callback = null)
+    {
+        return static::newInstanceRef($appName, $name, $format, $callback);
     }
 
     public function compileFormat($format)
@@ -51,7 +64,7 @@ class Route
         return $this;
     }
 
-    protected function compile($format)
+    protected function getRegexPattern()
     {
         $curlyBrR = new InNamespace('{', '}', false);
 
@@ -59,14 +72,23 @@ class Route
 
         $findRegex = "(?:{$curlyBrR}(\\?)?)|(?:{$squareBrR}(\\?)?)";
 
+        $pattern = Regex::pattern($findRegex);
+
+        return $pattern;
+    }
+
+    protected function compile($format)
+    {
         $compiled = null;
 
         $params = [];
 
         $defaults = [];
 
+        $pattern = $this->getRegexPattern();
+
         // find all "{param}?" and "[format]?"
-        if (preg_match_all(Regex::pattern($findRegex), $format, $matches)) {
+        if (preg_match_all($pattern, $format, $matches)) {
             $paramKey = 1;
             $paramRK = 2;
 
@@ -74,7 +96,7 @@ class Route
             $subFormatRK = 4;
 
             // split remain string
-            $parts = preg_split(Regex::pattern($findRegex), $format);
+            $parts = preg_split($pattern, $format);
 
             foreach($parts as $key => $remain) {
                 if ($remain) {
@@ -83,7 +105,7 @@ class Route
 
                 if (array_key_exists($key, $matches[0])) {
                     if ($param = $matches[$paramKey][$key]) {
-                        list($paramName, $paramDefault, $paramRegex) = $this->fetchParam($param);
+                        list($paramName, $paramDefault, $paramRegex) = $this->splitParam($param);
 
                         $params[] = $paramName;
 
@@ -112,7 +134,7 @@ class Route
         return [$compiled, $params, $defaults];
     }
 
-    protected function fetchParam($param)
+    protected function splitParam($param)
     {
         $name = $param;
 
@@ -121,29 +143,33 @@ class Route
         // extract from var:default|regex
         if (preg_match(Regex::pattern('^((?:\\\:|\\\||[^\:])+?)(?:\:((?:|\\\||[^\|])+?))?(?:\|(.+?))?$'), $param, $matches)) {
             $name = $matches[1];
+
             $default = $matches[2];
+
             $regex = $matches[3] ? Regex::disableGroups($matches[3]) : null;
         }
 
         return [$name, $default, $regex];
     }
 
-    public function dispatch($path)
+    public function dispatch(array $params = [])
     {
-        if ($this->match($path, $param)) {
-            $callback = $this->callback();
+        $callback = $this->callback();
 
-            if ($callback) {
-                return $this->app()->binder()->call($callback, $param);
-            }
+        $params += $this->lastMatchedParams();
+
+        if ($callback) {
+            return $this->app()->binder()->call($callback, $params);
         }
 
-        return false;
+        return null;
     }
 
-    public function match($path, &$params = [])
+    public function match($path, array &$params = [])
     {
         $pattern = '^' . $this->compiled() . ($this->strict() ? '' : '(.*)') . '$';
+
+        $matched = false;
 
         if (preg_match(Regex::pattern($pattern), $path, $matches)) {
             array_shift($matches);
@@ -151,7 +177,7 @@ class Route
             $params = $this->defaults();
 
             foreach($this->params() as $key => $param) {
-                if (array_key_exists($key, $matches)) {
+                if (array_key_exists($key, $matches) and !Str::isEmpty($matches[$key])) {
                     $params[$param] = $matches[$key];
                 }
             }
@@ -168,10 +194,109 @@ class Route
                 }
             }
 
-            return true;
+            $this->lastMatchedPath($path);
+
+            $this->lastMatchedParams($params, Obj::PROP_REPLACE);
+
+            $matched = true;
         }
 
-        return false;
+        return $matched;
+    }
+
+    public function fetch(array $params = [])
+    {
+        //$path = $this->fetchFormat($this->format(), $params);
+
+        $params = array_diff_assoc($params, $this->defaults());
+
+        $compiled = $this->fetchFormat($this->format(), $params);
+
+        return $compiled;
+    }
+
+    protected function fetchFormat($format, &$params = [], $required = true)
+    {
+        $pattern = $this->getRegexPattern();
+
+        $usedParams = [];
+
+        // find all "{param}?" and "[format]?"
+        if (preg_match_all($pattern, $format, $matches)) {
+            $paramKey = 1;
+            $paramRK = 2;
+
+            $subFormatKey = 3;
+            $subFormatRK = 4;
+
+            // split remain string
+            $parts = preg_split($pattern, $format);
+
+            // start from the last
+            $parts = array_reverse($parts, true);
+
+            $compiled = [];
+
+            foreach($parts as $key => $remain) {
+                if (array_key_exists($key, $matches[0])) {
+                    if ($param = $matches[$paramKey][$key]) {
+                        list($paramName, $paramDefault, $paramRegex) = $this->splitParam($param);
+
+                        $paramRequired = !$matches[$paramRK][$key];
+
+                        $value = Arr::get($params, $paramName, $paramDefault);
+
+                        if ($paramRequired) {
+                            if (Str::isEmpty($value)) {
+                                if (!$required) {
+                                    return null;
+                                }
+                                throw new Exception('Param `' . $paramName . '` is required in route `' . $this->name() . '`.');
+                            }
+
+                            $compiled[] = $value;
+                        } else {
+                            if ((!Str::isEmpty($value) and $value != $paramDefault) or $compiled) {
+                                $compiled[] = $value;
+                            }
+                        }
+
+                        if ($value != $paramDefault) {
+                            $usedParams[] = $paramName;
+                        }
+
+                    } elseif ($subFormat = $matches[$subFormatKey][$key]) {
+                        $subCompiled = $this->fetchFormat($subFormat, $params, !$matches[$subFormatRK][$key]);
+                        if (!Str::isEmpty($subCompiled)) {
+                            $compiled[] = $subCompiled;
+                        }
+                    }
+                }
+
+                if (!Str::isEmpty($remain)) {
+                    $compiled[] = $remain;
+                }
+            }
+
+            $compiled = array_reverse($compiled);
+
+            $compiled = implode('', $compiled);
+        } else {
+            $compiled = $format;
+        }
+
+        if (!$required and !$usedParams) {
+            return null;
+        }
+
+        $usedParams and Arr::del($params, ...$usedParams);
+
+        return $compiled;
+    }
+
+    public function name($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function format($value = null, $type = Obj::PROP_REPLACE)
@@ -205,6 +330,16 @@ class Route
     }
 
     public function defaults($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function lastMatchedPath($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function lastMatchedParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
