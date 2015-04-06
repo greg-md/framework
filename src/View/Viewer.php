@@ -78,7 +78,7 @@ class Viewer implements \ArrayAccess
             throw Exception::newInstance($this->appName(), 'Undefined view paths.');
         }
 
-        $data = null;
+        $data = false;
 
         foreach ($paths as $path) {
             if (!is_dir($path)) {
@@ -88,7 +88,7 @@ class Viewer implements \ArrayAccess
             $file = $path . DIRECTORY_SEPARATOR . ltrim($fileName, '\/');
 
             if (!is_file($file)) {
-                return false;
+                continue;
             }
 
             $data = $this->renderFile($file, $include);

@@ -348,11 +348,20 @@ class Obj
     {
         Arr::bringRef($var);
 
-        if (($num = func_num_args() > 2)) {
+        if (($num = func_num_args()) > 2) {
             if (is_array($key)) {
-                $recursive = $replace;
-                $replace = $type;
-                $type = $value;
+                $value = null;
+
+                if ($num > 3) {
+                    $type = func_get_arg(3);
+                }
+                if ($num > 4) {
+                    $replace = func_get_arg(4);
+                }
+                if ($num > 5) {
+                    $recursive = func_get_arg(5);
+                }
+
                 if ($type === null) {
                     $type = static::PROP_APPEND;
                 }
