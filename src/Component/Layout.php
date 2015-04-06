@@ -8,6 +8,7 @@ use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
 use Greg\Http\Response;
+use Greg\Router\Route;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
 
@@ -44,7 +45,7 @@ class Layout implements SubscriberInterface
         return $this;
     }
 
-    public function appDispatched(Viewer $viewer, Listener $listener, Response $response)
+    public function appDispatched(Route $route, Viewer $viewer, Listener $listener, Response $response)
     {
         if (!$this->disabled()) {
             $this->body($response->body());

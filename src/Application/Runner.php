@@ -364,7 +364,7 @@ class Runner implements \ArrayAccess
     {
         $name = Str::phpName($name);
 
-        $prefixes = array_merge([''], $this->controllersPrefixes());
+        $prefixes = array_merge($this->controllersPrefixes(), ['']);
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
