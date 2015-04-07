@@ -14,8 +14,6 @@ class Viewer implements \ArrayAccess
 {
     use Accessor, ArrayAccess, Internal;
 
-    protected $controllers = [];
-
     protected $extension = '.phtml';
 
     protected $paths = [];
@@ -36,41 +34,12 @@ class Viewer implements \ArrayAccess
         return static::newInstanceRef($appName, $paths, $param);
     }
 
-    public function renderView($name, $controllerName = null)
+    public function renderName($name, $include = true, $throwException = true)
     {
-        if ($controllerName) {
-            $controller = $this->controllers($controllerName);
-
-            if (!$controller) {
-                $controller = $this->app()->loadController($controllerName);
-            }
-        } else {
-            $controller = current($this->controllers());
-
-            if (!$controller) {
-                throw Exception::newInstance($this->appName(), 'No render view controller defined.');
-            }
-
-            $controllerName = $controller->name();
-        }
-
-        if ($controller) {
-            $viewName = Str::phpName($name) . 'View';
-
-            if (method_exists($controller, $viewName)) {
-                $controller->$viewName();
-            }
-        }
-
-        return $this->renderName($controllerName . '/' . $name);
+        return $this->render($this->nameToFile($name), $include, $throwException);
     }
 
-    public function renderName($name, $include = true)
-    {
-        return $this->render($this->nameToFile($name), $include);
-    }
-
-    public function render($fileName, $include = true)
+    public function render($fileName, $include = true, $throwException = true)
     {
         $paths = $this->paths();
 
@@ -96,7 +65,7 @@ class Viewer implements \ArrayAccess
             break;
         }
 
-        if ($data === false) {
+        if ($throwException and $data === false) {
             throw Exception::newInstance($this->appName(), 'View file `' . $fileName . '` does not exist in view paths.');
         }
 
@@ -153,11 +122,6 @@ class Viewer implements \ArrayAccess
     public function __get($key)
     {
         return $this->get($key);
-    }
-
-    public function controllers($name = null, $controller = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function extension($value = null, $type = Obj::PROP_REPLACE)

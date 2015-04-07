@@ -368,7 +368,7 @@ class Runner implements \ArrayAccess
 
         foreach($prefixes as $prefix) {
             /* @var $class Controller */
-            $class = $prefix . 'Controllers\\' . $name . '\Controller';
+            $class = $prefix . 'Controllers\\' . $name;
 
             if (class_exists($class)) {
                 return $class::newInstance($this->appName());
