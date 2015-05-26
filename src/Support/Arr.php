@@ -129,6 +129,12 @@ class Arr
         return static::bring(static::get($array, $key, $else));
     }
 
+    /**
+     * @param array $array
+     * @param $key
+     * @param null $else
+     * @return mixed
+     */
     static public function &get(array &$array, $key, $else = null)
     {
         if (is_array($key)) {
@@ -547,7 +553,7 @@ class Arr
                 } else {
                     Arr::bringRef($maxLevel);
 
-                    foreach($maxLevel as $level) {
+                    foreach((array)$maxLevel as $level) {
                         $current = &$current[$array[$level]];
 
                         if ($removeGroupedKey) {
@@ -576,5 +582,37 @@ class Arr
     static public function ref(&$var)
     {
         return new ArrayReference($var);
+    }
+
+    static public function each(array $array, callable $callable)
+    {
+        $new = [];
+
+        foreach($array as $key => $value) {
+            list($newValue, $newKey) = $callable($value, $key);
+
+            if ($newKey === null) {
+                $new[] = $newValue;
+            } else {
+                $new[$newKey] = $newValue;
+            }
+        }
+
+        return $new;
+    }
+
+    static public function pack(array $array, $glue = null, $saveKeys = false)
+    {
+        $new = [];
+
+        foreach($array as $key => $value) {
+            if ($saveKeys) {
+                $new[$key] = $key . $glue . $value;
+            } else {
+                $new[] = $key . $glue . $value;
+            }
+        }
+
+        return $new;
     }
 }

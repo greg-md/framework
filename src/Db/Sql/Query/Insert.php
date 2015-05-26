@@ -2,14 +2,12 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\QueryTrait;
-use Greg\Engine\Internal;
+use Greg\Db\Sql\Query;
+use Greg\Support\Debug;
 use Greg\Support\Obj;
 
-class Insert
+class Insert extends Query
 {
-    use QueryTrait, Internal;
-
     protected $into = null;
 
     protected $columns = [];
@@ -59,10 +57,12 @@ class Insert
 
         $into = $this->into();
         if (!$into) {
-            throw Exception::newInstance($this->appName(), 'Undefined insert table.');
+            throw new \Exception('Undefined insert table.');
         }
 
-        $query[] = $into;
+        list($intoAlias, $intoName) = $this->fetchAlias($into);
+
+        $query[] = $this->quoteNamedExpr($intoName);
 
         $columns = $this->columns();
 
@@ -71,7 +71,7 @@ class Insert
         }, $columns);
 
         if (!$quoteColumns) {
-            throw Exception::newInstance($this->appName(), 'Undefined insert columns.');
+            throw new \Exception('Undefined insert columns.');
         }
 
         $query[] = '(' . implode(', ', $quoteColumns) . ')';
@@ -113,5 +113,10 @@ class Insert
     public function select($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this), false);
     }
 }

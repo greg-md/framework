@@ -4,6 +4,8 @@ namespace Greg\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
 use Greg\Engine\Internal;
+use Greg\Support\Arr;
+use Greg\Support\Type;
 
 class Stmt extends \PDOStatement implements StmtInterface
 {
@@ -16,7 +18,13 @@ class Stmt extends \PDOStatement implements StmtInterface
 
     public function fetchOne($column = 0)
     {
-        return parent::fetchColumn($column);
+        if (Type::isNaturalNumber($column)) {
+            return parent::fetchColumn($column);
+        }
+
+        $row = $this->fetchAssoc();
+
+        return $row ? Arr::get($row, $column) : null;
     }
 
     public function fetchPairs($key = 0, $value = 1)
@@ -32,6 +40,39 @@ class Stmt extends \PDOStatement implements StmtInterface
 
     public function fetchAssoc()
     {
+        return parent::fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function fetchAssocAll()
+    {
         return parent::fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function errorCheck()
+    {
+        $errorInfo = $this->errorInfo();
+
+        // Note: Ignoring error - bind or column index out of range
+        if ($errorInfo[1] and $errorInfo[1] != 25) {
+            throw new \Exception($errorInfo[2]);
+        }
+
+        return $this;
+    }
+
+    public function execute($params = null)
+    {
+        $result = parent::execute(...($params !== null ? [$params] : []));
+
+        if ($result === false) {
+            $this->errorCheck();
+        }
+
+        return $result;
+    }
+
+    public function nextRows()
+    {
+        return parent::nextRowset();
     }
 }

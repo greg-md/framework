@@ -35,12 +35,12 @@ class Script
 
     public function appendText($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_INNER, static::APPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_INNER, static::APPEND, $text, $condition, $attr);
     }
 
     public function prependText($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_INNER, static::PREPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_INNER, static::PREPEND, $text, $condition, $attr);
     }
 
     public function appendSrcBefore($src, $condition = null, array $attr = [])
@@ -55,12 +55,12 @@ class Script
 
     public function appendTextBefore($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_BEFORE, static::APPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_BEFORE, static::APPEND, $text, $condition, $attr);
     }
 
     public function prependTextBefore($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_BEFORE, static::PREPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_BEFORE, static::PREPEND, $text, $condition, $attr);
     }
 
     public function appendSrcAfter($src, $condition = null, array $attr = [])
@@ -75,12 +75,12 @@ class Script
 
     public function appendTextAfter($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_AFTER, static::APPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_AFTER, static::APPEND, $text, $condition, $attr);
     }
 
     public function prependTextAfter($text, $condition = null, array $attr = [])
     {
-        return $this->addSrc(self::ADD_AFTER, static::PREPEND, $text, $condition, $attr);
+        return $this->addText(self::ADD_AFTER, static::PREPEND, $text, $condition, $attr);
     }
 
     protected function addSrc($where, $type, $sources, $condition = null, array $attr = [])
@@ -149,6 +149,6 @@ class Script
             }
         }
 
-        return implode('', $html);
+        return implode("\n", $html);
     }
 }

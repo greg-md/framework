@@ -67,6 +67,13 @@ class Response
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    public function route($name, array $params = [], $code = null)
+    {
+        $url = $this->app()->router()->fetch($name, $params);
+
+        $this->redirect($url, $code);
+    }
+
     const CODES = [
         100 => 'Continue',
         101 => 'Switching Protocols',

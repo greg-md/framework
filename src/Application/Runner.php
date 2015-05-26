@@ -29,11 +29,19 @@ class Runner implements \ArrayAccess
 
     const EVENT_DISPATCHING = 'app.dispatching';
 
+    const EVENT_ROUTER_DISPATCH = 'app.router.dispatch';
+
+    const EVENT_ROUTER_DISPATCHING = 'app.router.dispatching';
+
+    const EVENT_ROUTER_DISPATCHED = 'app.router.dispatched';
+
     const EVENT_DISPATCHED = 'app.dispatched';
 
-    const EVENT_SENT = 'app.sent';
+    //const EVENT_SENT = 'app.sent';
 
     protected $controllersPrefixes = [];
+
+    protected $modelsPrefixes = [];
 
     protected $extended = [];
 
@@ -57,13 +65,19 @@ class Runner implements \ArrayAccess
 
         $this->initServer();
 
+        // Load Helper
+        $this->helper($helper = Helper::newInstance($this->appName()));
+
         $this->initBinder();
+
+        // Add staffs to Binder
+        $this->binder()->setObjects([$this, $helper]);
 
         $this->initLoader();
 
         $this->initListener();
 
-        $this->initResponse();
+        //$this->initResponse();
 
         $this->initTranslator();
 
@@ -72,8 +86,6 @@ class Runner implements \ArrayAccess
         $this->initResources();
 
         $this->initRouter();
-
-        $this->initSubscribers();
 
         $this->initComponents();
 
@@ -86,6 +98,8 @@ class Runner implements \ArrayAccess
     public function initConfig()
     {
         $this->controllersPrefixes($this->getIndexArray('controllers.prefixes'));
+
+        $this->modelsPrefixes($this->getIndexArray('models.prefixes'));
 
         $this->extended($this->getArray('extended'));
 
@@ -117,129 +131,194 @@ class Runner implements \ArrayAccess
         return $this;
     }
 
+    public function getHelper()
+    {
+        if (!$model = $this->helper()) {
+            throw new \Exception('Application helper was not initiated.');
+        }
+
+        return $model;
+    }
+
     public function initBinder()
     {
         // Load Binder
-        $this->binder($binder = Binder::create($this->appName()), $this->getIndexArray('binder'));
+        $this->binder($model = Binder::create($this->appName(),
+                                    $this->getIndexArray('binder.objects'),
+                                    $this->getIndexArray('binder.instances_prefixes')));
 
         // Add Binder to Binder
-        $binder->setObject($binder);
+        $model->setObject($model);
 
-        // Add myself to Binder
-        $binder->setObject($this);
-
-        // Register instances prefixes
-        $binder->instancesPrefixes($this->getIndexArray('binder.instances_prefixes'));
+        // Register Load Models to Binder adapters
+        $this->binder()->addAdapter(function($className) {
+            return $this->isModelPrefix($className) ? $className : false;
+        });
 
         return $this;
+    }
+
+    public function getBinder()
+    {
+        if (!$model = $this->binder()) {
+            throw new \Exception('Application binder was not initiated.');
+        }
+
+        return $model;
     }
 
     public function initLoader()
     {
         // Load ClassLoader
-        $this->loader($loader = ClassLoader::create($this->appName(), $this->getIndexArray('loader.paths')));
+        $this->loader($model = ClassLoader::create($this->appName(), $this->getIndexArray('loader.paths')));
 
         // Register the ClassLoader to autoload
-        $loader->register(true);
+        $model->register(true);
 
         // Add ClassLoader to Binder
-        $this->binder()->setObject($loader);
+        $this->binder()->setObject($model);
 
         return $this;
+    }
+
+    public function getLoader()
+    {
+        if (!$model = $this->loader()) {
+            throw new \Exception('Application loader was not initiated.');
+        }
+
+        return $model;
     }
 
     public function initListener()
     {
         // Load Listener
-        $this->listener($listener = Listener::create($this->appName(), $this->getIndexArray('listener')));
+        $this->listener($model = Listener::create($this->appName(),
+                                    $this->getIndexArray('listener.events'),
+                                    $this->getIndexArray('listener.subscribers')));
 
         // Add Listener to Binder
-        $this->binder()->setObject($listener);
+        $this->binder()->setObject($model);
 
         return $this;
     }
 
-    public function initResponse()
+    public function getListener()
     {
-        // Load Response
-        $this->response($response = Response::create($this->appName()));
+        if (!$model = $this->listener()) {
+            throw new \Exception('Application listener was not initiated.');
+        }
 
-        // Add Response to Binder
-        $this->binder()->setObject($response);
-
-        return $this;
+        return $model;
     }
 
     public function initTranslator()
     {
         // Load Translator
-        $this->translator($translator = Translator::create($this->appName(),
+        $this->translator($model = Translator::create($this->appName(),
                             $this->getIndexArray('translator.languages'),
                             $this->getIndexArray('translator.translates')));
 
         // Add Translator to Binder
-        $this->binder()->setObject($translator);
+        $this->binder()->setObject($model);
 
         return $this;
+    }
+
+    public function getTranslator()
+    {
+        if (!$model = $this->translator()) {
+            throw new \Exception('Application translator was not initiated.');
+        }
+
+        return $model;
     }
 
     public function initViewer()
     {
         // Load Translator
-        $this->viewer($viewer = Viewer::create($this->appName(),
+        $this->viewer($model = Viewer::create($this->appName(),
                         $this->getIndexArray('viewer.paths'),
                         $this->getIndexArray('viewer.params')));
 
         // Add Viewer to Binder
-        $this->binder()->setObject($viewer);
+        $this->binder()->setObject($model);
 
         return $this;
+    }
+
+    public function getViewer()
+    {
+        if (!$model = $this->viewer()) {
+            throw new \Exception('Application viewer was not initiated.');
+        }
+
+        return $model;
     }
 
     public function initResources()
     {
         // Load Resources Manager
-        $this->resources($resources = Resources::create($this->appName(), $this->getIndexArray('resources')));
+        $this->resources($model = Resources::create($this->appName(), $this->getIndexArray('resources')));
 
         // Add Resources Manager to Binder
-        $this->binder()->setObject($resources);
+        $this->binder()->setObject($model);
 
         // Register Resources Manager to Binder adapters
-        $this->binder()->addAdapter('resources', [$resources, 'get'], array_flip($resources->getClasses()));
+        $this->binder()->addAdapter(function($className) use ($model) {
+            return $model->get($model->getNameByClassName($className), false);
+        });
 
         return $this;
+    }
+
+    public function getResources()
+    {
+        if (!$model = $this->resources()) {
+            throw new \Exception('Application resources was not initiated.');
+        }
+
+        return $model;
     }
 
     public function initRouter()
     {
-        // Load Subscribers
-        $this->router($router = Dispatcher::newInstance($this->appName(), $this->getArray('router.routes')));
+        // Load Dispatcher
+        $this->router($model = Dispatcher::create($this->appName(), $this->getArray('router.routes')));
 
-        // Add Subscribers to Binder
-        $this->binder()->setObject($router);
+        // Add Dispatcher to Binder
+        $this->binder()->setObject($model);
 
         return $this;
     }
 
-    public function initSubscribers()
+    public function getRouter()
     {
-        // Load subscribers
-        if ($subscribers = $this->getArray('subscribers')) {
-            $this->listener()->addSubscribers($subscribers);
+        if (!$model = $this->router()) {
+            throw new \Exception('Application router was not initiated.');
         }
 
-        return $this;
+        return $model;
     }
 
     public function initComponents()
     {
         // Load Components Manager
-        $this->components($components = Components::create($this->appName(), $this->getArray('components')));
+        $this->components($model = Components::create($this->appName(), $this->getArray('components')));
 
         // Add Components Manager to Binder
-        $this->binder()->setObject($components);
+        $this->binder()->setObject($model);
 
         return $this;
+    }
+
+    public function getComponents()
+    {
+        if (!$model = $this->components()) {
+            throw new \Exception('Application components was not initiated.');
+        }
+
+        return $model;
     }
 
     public function loadInstance($className, ...$args)
@@ -312,14 +391,8 @@ class Runner implements \ArrayAccess
 
     public function run($path = '/')
     {
-        if (!func_num_args() and $requestRouteParam = $this->getIndex('request.route_param')) {
-            $path = Request::getRequest($requestRouteParam);
-
-            Request::delAll([$requestRouteParam]);
-
-            if ($requestRewriteParam = $this->getIndex('request.rewrite_param')) {
-                Request::delAll([$requestRewriteParam]);
-            }
+        if (!func_num_args()) {
+            list($path) = explode('?', Request::uri(), 2);
         }
 
         $path = $path ?: '/';
@@ -328,15 +401,19 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fire(static::EVENT_DISPATCHING);
 
-        $content = $this->router()->dispatch($path, $route);
+        $response = $this->router()->dispatch($path, [
+            Dispatcher::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
+            Dispatcher::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
+            Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
+        ], $route);
 
-        $this->response()->body($content);
+        //$this->response()->body($content);
 
-        $this->listener()->fire(static::EVENT_DISPATCHED, $route);
+        $this->listener()->fireRef(static::EVENT_DISPATCHED, $route, $response);
 
-        $this->response()->send();
+        //$this->response()->send();
 
-        $this->listener()->fire(static::EVENT_SENT);
+        //$this->listener()->fire(static::EVENT_SENT);
 
         return $this;
     }
@@ -345,37 +422,72 @@ class Runner implements \ArrayAccess
     {
         $name = $name ?: 'index';
 
-        $controllerName = $controllerName ?: 'home';
+        $controllerName = $controllerName ?: 'base';
 
         $controller = $this->loadController($controllerName);
 
         $actionName = Str::phpName($name) . 'Action';
 
         if (!method_exists($controller, $actionName)) {
-            throw new Exception('Action `' . $name . '` not found in controller `' . $controllerName . '`.');
+            throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
         }
 
         $request = Request::create($this->appName(), $param);
 
-        return $controller->$actionName($request);
+        return $this->binder()->call([$controller, $actionName], $request);
     }
 
     public function loadController($name)
     {
-        $name = Str::phpName($name);
+        if ($class = $this->controllerExists($name)) {
+            return $class::newInstance($this->appName());
+        }
 
-        $prefixes = array_merge($this->controllersPrefixes(), ['']);
+        throw new \Exception('Controller `' . $name . '` not found.');
+    }
+
+    public function controllerExists($name)
+    {
+        return $this->classExists($name, array_merge($this->controllersPrefixes(), ['']), 'Controllers\\');
+    }
+
+    public function modelExists($name)
+    {
+        return $this->classExists($name, array_merge($this->modelsPrefixes(), ['']));
+    }
+
+    /**
+     * @param $name
+     * @param array $prefixes
+     * @param null $namePrefix
+     * @return bool|string|Internal
+     */
+    protected function classExists($name, array $prefixes = [], $namePrefix = null)
+    {
+        $name = array_map(function($name) {
+            return Str::phpName($name);
+        }, Arr::bring($name));
+
+        $name = implode('\\', $name);
 
         foreach($prefixes as $prefix) {
-            /* @var $class Controller */
-            $class = $prefix . 'Controllers\\' . $name;
+            $class = $prefix . $namePrefix . $name;
 
             if (class_exists($class)) {
-                return $class::newInstance($this->appName());
+                return $class;
             }
         }
 
-        throw new Exception('Controller `' . $name . '` not found.');
+        return false;
+    }
+
+    public function loadModel($name)
+    {
+        if ($class = $this->modelExists($name)) {
+            return $class::instance($this->appName());
+        }
+
+        throw new \Exception('Model `' . $name . '` not found.');
     }
 
     public function once($name, callable $callable)
@@ -412,6 +524,15 @@ class Runner implements \ArrayAccess
         }
 
         return $this->accessor()[$key];
+    }
+
+    /**
+     * @param Helper $binder
+     * @return Helper|bool
+     */
+    public function helper(Helper $binder = null)
+    {
+        return $this->memory('helper', ...func_get_args());
     }
 
     /**
@@ -495,7 +616,21 @@ class Runner implements \ArrayAccess
         return $this->memory('router', ...func_get_args());
     }
 
+    public function isModelPrefix($className)
+    {
+        $array = $this->modelsPrefixes();
+
+        return Arr::has($array, function($value) use ($className) {
+            return strpos($className, $value) === 0;
+        });
+    }
+
     public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function modelsPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

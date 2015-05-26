@@ -3,11 +3,10 @@
 namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\Query;
-use Greg\Db\Sql\QueryTrait;
-use Greg\Db\Sql\Query\Traits\From;
-use Greg\Db\Sql\Query\Traits\Where;
+use Greg\Db\Sql\Query\Traits\FromTrait;
+use Greg\Db\Sql\Query\Traits\WhereTrait;
 use Greg\Db\Sql\Table;
-use Greg\Engine\Internal;
+use Greg\Support\Debug;
 use Greg\Support\Obj;
 
 /**
@@ -15,10 +14,11 @@ use Greg\Support\Obj;
  * @package Greg\Db\Sql\Query
  *
  * @method Select whereCol($column, $operator, $value = null)
+ * @method Select where($expr = null, $value = null, $_ = null)
  */
-class Select
+class Select extends Query
 {
-    use From, Where, QueryTrait, Internal;
+    use FromTrait, WhereTrait;
 
     const ORDER_ASC = 'ASC';
 
@@ -52,11 +52,17 @@ class Select
         return $this->columns;
     }
 
+    /**
+     * @param null $expr
+     * @param null $type
+     * @return Select|array
+     * @throws \Exception
+     */
     public function order($expr = null, $type = null)
     {
         if (func_num_args()) {
             if ($type and !in_array($type, [static::ORDER_ASC, static::ORDER_DESC])) {
-                throw Exception::newInstance($this->appName(), 'Wrong select order type.');
+                throw new \Exception('Wrong select order type.');
             }
 
             $this->order[] = [
@@ -108,11 +114,6 @@ class Select
         return $this->from;
     }
 
-    protected function parseLimit(&$query)
-    {
-        return $this;
-    }
-
     public function orderToString()
     {
         $order = [];
@@ -159,7 +160,9 @@ class Select
             $query[] = $order;
         }
 
-        $this->parseLimit($query);
+        if (method_exists($this, 'parseLimit')) {
+            $this->parseLimit($query);
+        }
 
         return implode(' ', $query);
     }
@@ -195,23 +198,145 @@ class Select
         return $this->stmt()->fetchAssoc();
     }
 
+    public function assocFull($references = null, $relationships = null, $dependencies = '*')
+    {
+        $item = $this->assoc();
+
+        $items = [$item];
+
+        $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies);
+
+        return $items[0];
+    }
+
+    public function assocAll()
+    {
+        return $this->stmt()->fetchAssocAll();
+    }
+
+    public function assocAllFull($references = null, $relationships = null, $dependencies = '*')
+    {
+        $items = $this->assocAll();
+
+        $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies);
+
+        return $items;
+    }
+
+    public function row()
+    {
+        return ($row = $this->assoc()) ? $this->getTable()->createRow($row) : null;
+    }
+
+
+    public function rowFull($references = null, $relationships = null, $dependencies = '*')
+    {
+        $item = $this->assoc();
+
+        $items = [$item];
+
+        $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies, true);
+
+        return $items[0];
+    }
+
     public function rows()
     {
-        $items = $this->assoc();
+        $table = $this->getTable();
 
-        $table = $this->table();
-        if (!$table) {
-            throw Exception::newInstance($this->appName(), 'Undefined table in SELECT query.');
-        }
+        $items = $this->assocAll();
 
         foreach($items as &$item) {
             $item = $table->createRow($item);
         }
         unset($item);
 
-        $items = $table->createRowSet($items);
+        $items = $table->createRows($items);
 
         return $items;
+    }
+
+    public function rowsFull($references = null, $relationships = null, $dependencies = '*')
+    {
+        $items = $this->assocAll();
+
+        $table = $this->getTable();
+
+        $table->addFullInfo($items, $references, $relationships, $dependencies, true);
+
+        $items = $table->createRows($items);
+
+        return $items;
+    }
+
+    public function paginationAssoc($page = 1, $limit = 10)
+    {
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        if ($limit < 1) {
+            $limit = 10;
+        }
+
+        $query = clone $this;
+
+        $query->limit($limit)->offset(($page - 1) * $limit);
+
+        $items = $query->assocAll();
+
+        return [
+            'items' => $items,
+        ];
+    }
+
+    public function paginationAssocFull($page = 1, $limit = 10, $references = null, $relationships = null, $dependencies = '*')
+    {
+        $pagination = $this->paginationAssoc($page, $limit);
+
+        $this->getTable()->addFullInfo($pagination['items'], $references, $relationships, $dependencies);
+
+        return $pagination;
+    }
+
+    public function pagination($page = 1, $limit = 10)
+    {
+        $pagination = $this->paginationAssoc($page, $limit);
+
+        $table = $this->getTable();
+
+        foreach($pagination['items'] as &$item) {
+            $item = $table->createRow($item);
+        }
+        unset($item);
+
+        $pagination = $table->createRowsPagination($pagination['items']);
+
+        return $pagination;
+    }
+
+    public function paginationFull($page = 1, $limit = 10, $references = null, $relationships = null, $dependencies = '*')
+    {
+        $pagination = $this->paginationAssoc($page, $limit);
+
+        $table = $this->getTable();
+
+        $table->addFullInfo($pagination['items'], $references, $relationships, $dependencies, true);
+
+        $pagination = $table->createRowsPagination($pagination['items']);
+
+        return $pagination;
+    }
+
+    public function getTable()
+    {
+        $table = $this->table();
+
+        if (!$table) {
+            throw new \Exception('Undefined table in SELECT query.');
+        }
+
+        return $table;
     }
 
     /**
@@ -244,5 +369,10 @@ class Select
     public function __toString()
     {
         return $this->toString();
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this), false);
     }
 }

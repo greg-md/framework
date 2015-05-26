@@ -7,17 +7,22 @@ use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
 use Greg\Support\Obj;
 
-class Adapter implements \ArrayAccess
+class Adapter
 {
-    use Accessor, ArrayAccess, Internal;
+    use Internal;
 
     protected $caller = null;
 
-    public function __construct(callable $caller, array $storage = [])
+    public function __construct(callable $caller, callable $storageCaller = null)
     {
         $this->caller($caller);
 
-        $this->storage($storage);
+        $this->storageCaller($storageCaller);
+    }
+
+    public function has($className)
+    {
+        return $this->app()->binder()->call($this->storageCaller(), $className);
     }
 
     static public function create($appName, callable $caller, array $storage = [])
@@ -26,6 +31,11 @@ class Adapter implements \ArrayAccess
     }
 
     public function caller(callable $callable = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function storageCaller(callable $callable = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

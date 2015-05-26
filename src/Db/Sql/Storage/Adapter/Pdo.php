@@ -35,7 +35,7 @@ class Pdo extends \PDO implements AdapterInterface
 
         // Note: Ignoring error - bind or column index out of range
         if ($errorInfo[1] and $errorInfo[1] != 25) {
-            throw Exception::newInstance($this->appName(), $errorInfo[2]);
+            throw new \Exception($errorInfo[2]);
         }
 
         return $this;
@@ -50,5 +50,16 @@ class Pdo extends \PDO implements AdapterInterface
         }
 
         return $stmt;
+    }
+
+    public function exec($query)
+    {
+        $result = parent::exec($query);
+
+        if ($result === false) {
+            $this->errorCheck();
+        }
+
+        return $result;
     }
 }

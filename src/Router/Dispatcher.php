@@ -15,6 +15,9 @@ class Dispatcher
 
     const EVENT_DISPATCHED = 'router.dispatched';
 
+    /**
+     * @var Route[]
+     */
     public $routes = [];
 
     public function __construct(array $routes = [])
@@ -38,9 +41,9 @@ class Dispatcher
         return $this;
     }
 
-    public function any($name, $format, $settings = null)
+    public function set($name, $format, $type = null, $settings = null)
     {
-        $route = Route::create($this->appName(), $name, $format);
+        $route = Route::create($this->appName(), $name, $format, $type);
 
         if (is_callable($settings)) {
             $route->callback($settings);
@@ -51,6 +54,7 @@ class Dispatcher
                 switch($key) {
                     case 'strict':
                     case 'callback':
+                    case 'encodeValues':
                         $route->$key($value);
 
                         break;
@@ -63,27 +67,69 @@ class Dispatcher
         return $route;
     }
 
-    public function dispatch($path, &$foundRoute = null)
+    public function any($name, $format, $settings = null)
     {
-        $this->app()->listener()->fireRef(static::EVENT_DISPATCH, $path);
+        return $this->set($name, $format, null, $settings);
+    }
+
+    public function post($name, $format, $settings = null)
+    {
+        return $this->set($name, $format, 'post', $settings);
+    }
+
+    public function dispatch($path, array $events = [], &$foundRoute = null)
+    {
+        $listener = $this->app()->listener();
+
+        $listener->fireRef(static::EVENT_DISPATCH, $path);
+
+        if (Arr::has($events, static::EVENT_DISPATCH)) {
+            $listener->fireRef($events[static::EVENT_DISPATCH], $path);
+        }
 
         $content = null;
 
-        /* @var $route Route */
         foreach($this->routes as $name => $route) {
             if ($route->match($path)) {
                 $foundRoute = $route;
 
-                $this->app()->listener()->fire(static::EVENT_DISPATCHING, $route);
+                $listener->fire(static::EVENT_DISPATCHING, $route);
+
+                if (Arr::has($events, static::EVENT_DISPATCHING)) {
+                    $listener->fireRef($events[static::EVENT_DISPATCHING], $route);
+                }
 
                 $content = $route->dispatch();
 
-                $this->app()->listener()->fire(static::EVENT_DISPATCHED, $route);
+                $listener->fire(static::EVENT_DISPATCHED, $route);
+
+                if (Arr::has($events, static::EVENT_DISPATCHED)) {
+                    $listener->fireRef($events[static::EVENT_DISPATCHED], $route);
+                }
 
                 break;
             }
         }
 
         return $content;
+    }
+
+    public function fetch($routeName, array $params = [], $full = false)
+    {
+        return $this->get($routeName)->fetch($params, $full);
+    }
+
+    public function get($name)
+    {
+        if (!$this->has($name)) {
+            throw new \Exception('Route `' . $name . '` not found.');
+        }
+
+        return $this->routes[$name];
+    }
+
+    public function has($name)
+    {
+        return array_key_exists($name, $this->routes);
     }
 }

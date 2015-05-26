@@ -11,7 +11,6 @@
  */
 namespace Greg\Composer\Autoload;
 
-use Greg\Composer\Exception;
 use Greg\Engine\Internal;
 use Greg\Support\Obj;
 
@@ -174,7 +173,7 @@ class ClassLoader
      * @param bool         $prepend Whether to prepend the directories
      * @return $this
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function addPsr4($prefix, $paths, $prepend = false)
     {
@@ -195,7 +194,7 @@ class ClassLoader
             // Register directories for a new namespace.
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw Exception::newInstance($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw new \Exception('A non-empty PSR-4 prefix must end with a namespace separator.');
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -243,7 +242,7 @@ class ClassLoader
      * @param array|string $paths  The PSR-4 base directories
      * @return $this
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function setPsr4($prefix, $paths)
     {
@@ -252,7 +251,7 @@ class ClassLoader
         } else {
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw Exception::newInstance($this->appName(), "A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw new \Exception('A non-empty PSR-4 prefix must end with a namespace separator.');
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;

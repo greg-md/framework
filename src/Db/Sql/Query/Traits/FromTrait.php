@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql\Query\Traits;
 
-trait From
+trait FromTrait
 {
     protected $from = [];
 

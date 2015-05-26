@@ -64,7 +64,7 @@ class Components
         $component = $this->memory('component/' . $name);
 
         if (!$component) {
-            throw Exception::newInstance($this->appName(), 'Undefined component `' . $name . '`.');
+            throw new \Exception('Undefined component `' . $name . '`.');
         }
 
         return $component;

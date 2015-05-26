@@ -2,7 +2,6 @@
 
 namespace Greg\Cache\Storage;
 
-use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Engine\Internal;
@@ -54,7 +53,7 @@ class File implements StorageInterface
         $exists = file_exists($file);
 
         if ($exists and !is_readable($file)) {
-            throw Exception::newInstance($this->appName(), 'Cache file `' . $name . '` from `' . $this->schema() . '` is not readable.');
+            throw new \Exception('Cache file `' . $name . '` from `' . $this->schema() . '` is not readable.');
         }
 
         return $exists ? unserialize(file_get_contents($file)) : null;
@@ -65,17 +64,17 @@ class File implements StorageInterface
         $path = $this->path();
 
         if (!is_readable($path)) {
-            throw Exception::newInstance($this->appName(), 'Cache path for `' . $this->schema() . '` is not readable.');
+            throw new \Exception('Cache path for `' . $this->schema() . '` is not readable.');
         }
 
         if (!is_writable($path)) {
-            throw Exception::newInstance($this->appName(), 'Cache path for `' . $this->schema() . '` is not writable.');
+            throw new \Exception('Cache path for `' . $this->schema() . '` is not writable.');
         }
 
         $file = $path . DIRECTORY_SEPARATOR . $name;
 
         if (file_exists($file) and !is_writable($file)) {
-            throw Exception::newInstance($this->appName(), 'Cache file `' . $file . '` from `' . $this->schema() . '` is not writable.');
+            throw new \Exception('Cache file `' . $file . '` from `' . $this->schema() . '` is not writable.');
         }
 
         file_put_contents($file, serialize($data));

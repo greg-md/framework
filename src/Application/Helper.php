@@ -1,10 +1,10 @@
 <?php
 
-namespace Greg\Html;
+namespace Greg\Application;
 
 use Greg\Engine\Internal;
 
-class Exception extends \Exception
+class Helper
 {
     use Internal;
 }

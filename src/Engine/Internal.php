@@ -3,6 +3,7 @@
 namespace Greg\Engine;
 
 use Greg\Application\Runner;
+use Greg\Support\Debug;
 use Greg\Support\Obj;
 
 trait Internal
@@ -89,5 +90,15 @@ trait Internal
     public function appName($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function _()
+    {
+        return $this->app()->helper();
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this));
     }
 }

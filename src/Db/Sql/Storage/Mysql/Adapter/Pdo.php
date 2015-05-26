@@ -6,18 +6,18 @@ class Pdo extends \Greg\Db\Sql\Storage\Adapter\Pdo
 {
     protected $stmtClass = Pdo\Stmt::class;
 
-    public function __construct($dns, $username = null, $password = null, $options = [])
+    public function __construct($dsn, $username = null, $password = null, $options = [])
     {
-        if (is_array($dns)) {
-            foreach($dns as $key => &$value) {
+        if (is_array($dsn)) {
+            foreach($dsn as $key => &$value) {
                 $value = $key . '=' . $value;
             }
             unset($value);
 
-            $dns = implode(';', $dns);
+            $dsn = implode(';', $dsn);
         }
 
-        parent::__construct('mysql:' . $dns, $username, $password, $options);
+        parent::__construct('mysql:' . $dsn, $username, $password, $options);
 
         return $this;
     }

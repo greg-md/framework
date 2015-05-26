@@ -8,14 +8,38 @@ interface StorageInterface
      * @param null $columns
      * @param null $_
      * @return Query\Select
+     * @throws \Exception
      */
     public function select($columns = null, $_ = null);
 
+    /**
+     * @param null $into
+     * @return Query\Insert
+     * @throws \Exception
+     */
     public function insert($into = null);
 
+    /**
+     * @param null $from
+     * @return Query\Delete
+     * @throws \Exception
+     */
     public function delete($from = null);
 
+    /**
+     * @param null $table
+     * @return Query\Update
+     * @throws \Exception
+     */
     public function update($table = null);
+
+    public function getTableSchema($tableName);
+
+    public function getTableInfo($tableName);
+
+    public function getTableReferences($tableName);
+
+    public function getTableRelationships($tableName);
 
     public function beginTransaction();
 

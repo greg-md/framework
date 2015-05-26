@@ -3,25 +3,34 @@
 namespace Greg\Router;
 
 use Greg\Engine\Internal;
+use Greg\Storage\Accessor;
+use Greg\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Regex;
 use Greg\Support\Regex\InNamespace;
 use Greg\Support\Str;
+use Greg\Support\Url;
 
-class Route
+class Route implements \ArrayAccess
 {
-    use Internal;
+    use Accessor, ArrayAccess, Internal;
 
     protected $name = null;
 
     protected $format = null;
 
+    protected $type = null;
+
     protected $callback = null;
+
+    protected $action = null;
 
     protected $compiled = null;
 
     protected $strict = true;
+
+    protected $encodeValues = true;
 
     protected $delimiter = '/';
 
@@ -31,22 +40,22 @@ class Route
 
     protected $lastMatchedPath = [];
 
-    protected $lastMatchedParams = [];
-
-    public function __construct($name, $format, callable $callback = null)
+    public function __construct($name, $format, $type = null, callable $callback = null)
     {
         $this->name($name);
 
         $this->compileFormat($format);
+
+        $this->type($type);
 
         $this->callback($callback);
 
         return $this;
     }
 
-    static public function create($appName, $name, $format, callable $callback = null)
+    static public function create($appName, $name, $format, $type = null, callable $callback = null)
     {
-        return static::newInstanceRef($appName, $name, $format, $callback);
+        return static::newInstanceRef($appName, $name, $format, $type, $callback);
     }
 
     public function compileFormat($format)
@@ -144,22 +153,24 @@ class Route
         if (preg_match(Regex::pattern('^((?:\\\:|\\\||[^\:])+?)(?:\:((?:|\\\||[^\|])+?))?(?:\|(.+?))?$'), $param, $matches)) {
             $name = $matches[1];
 
-            $default = $matches[2];
+            $default = Arr::get($matches, 2);
 
-            $regex = $matches[3] ? Regex::disableGroups($matches[3]) : null;
+            $regex = Arr::has($matches, 3) ? Regex::disableGroups($matches[3]) : null;
         }
 
         return [$name, $default, $regex];
     }
 
-    public function dispatch(array $params = [])
+    public function dispatch()
     {
-        $callback = $this->callback();
+        if ($callback = $this->callback()) {
+            return $this->app()->binder()->call($callback, $this);
+        }
 
-        $params += $this->lastMatchedParams();
+        if ($action = $this->action()) {
+            list($controller, $action) = explode('@', $action);
 
-        if ($callback) {
-            return $this->app()->binder()->call($callback, $params);
+            return $this->app()->action($action, $controller);
         }
 
         return null;
@@ -178,7 +189,9 @@ class Route
 
             foreach($this->params() as $key => $param) {
                 if (array_key_exists($key, $matches) and !Str::isEmpty($matches[$key])) {
-                    $params[$param] = $matches[$key];
+                    $params[$param] = $this->decode($matches[$key]);
+                } else {
+                    $params[$param] = $this->defaults($param);
                 }
             }
 
@@ -187,11 +200,7 @@ class Route
 
                 $remain = Str::splitPath($remain, $this->delimiter());
 
-                $remain = array_chunk($remain, 2);
-
-                foreach($remain as $param) {
-                    $params[$param[0]] = Arr::get($param, 1);
-                }
+                $params = array_merge($params, $this->chunkParams($remain));
             }
 
             $this->lastMatchedPath($path);
@@ -204,15 +213,57 @@ class Route
         return $matched;
     }
 
-    public function fetch(array $params = [])
+    public function chunkParams($params)
     {
-        //$path = $this->fetchFormat($this->format(), $params);
+        $params = array_chunk($params, 2);
 
+        $return = [];
+
+        foreach($params as $param) {
+            $return[$this->decode($param[0])] = $this->decode(Arr::get($param, 1));
+        }
+
+        return $return;
+    }
+
+    public function fetch(array $params = [], $full = false)
+    {
         $params = array_diff_assoc($params, $this->defaults());
+
+        $params = array_filter($params);
 
         $compiled = $this->fetchFormat($this->format(), $params);
 
+        if ($params) {
+            if ($this->strict()) {
+                $compiled .= '?' . http_build_query($params);
+            } else {
+                $delimiter = $this->delimiter();
+
+                // Need to make double encoding and then decode values
+                $params = Arr::each($params, function($value, $key) {
+                    return [$this->encode($value), $this->encode($key)];
+                });
+
+                $compiled .= $delimiter . implode($delimiter, Arr::pack($params, $delimiter));
+            }
+        }
+
+        if ($full) {
+            $compiled = Url::full($compiled);
+        }
+
         return $compiled;
+    }
+
+    protected function encode($value)
+    {
+        return $this->encodeValues() ? urlencode($value) : $value;
+    }
+
+    protected function decode($value)
+    {
+        return $this->encodeValues() ? urldecode($value) : $value;
     }
 
     protected function fetchFormat($format, &$params = [], $required = true)
@@ -240,7 +291,7 @@ class Route
             foreach($parts as $key => $remain) {
                 if (array_key_exists($key, $matches[0])) {
                     if ($param = $matches[$paramKey][$key]) {
-                        list($paramName, $paramDefault, $paramRegex) = $this->splitParam($param);
+                        list($paramName, $paramDefault) = $this->splitParam($param);
 
                         $paramRequired = !$matches[$paramRK][$key];
 
@@ -251,13 +302,13 @@ class Route
                                 if (!$required) {
                                     return null;
                                 }
-                                throw new Exception('Param `' . $paramName . '` is required in route `' . $this->name() . '`.');
+                                throw new \Exception('Param `' . $paramName . '` is required in route `' . $this->name() . '`.');
                             }
 
-                            $compiled[] = $value;
+                            $compiled[] = $this->encode($value);
                         } else {
                             if ((!Str::isEmpty($value) and $value != $paramDefault) or $compiled) {
-                                $compiled[] = $value;
+                                $compiled[] = $this->encode($value);
                             }
                         }
 
@@ -309,12 +360,27 @@ class Route
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    public function action($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function type($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
     public function compiled($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function strict($value = null)
+    {
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function encodeValues($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
@@ -341,6 +407,6 @@ class Route
 
     public function lastMatchedParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
     }
 }

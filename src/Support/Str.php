@@ -4,26 +4,48 @@ namespace Greg\Support;
 
 class Str
 {
+    const SPLIT_CASE = 'splitCase';
+
+    const SPLIT_UPPER_CASE = 'splitUpperCase';
+
     const CAMEL_CASE = 'camelCase';
+
+    const TRAIN_CASE = 'trainCase';
+
+    const SPINAL_CASE = 'spinalCase';
+
+    static public function splitCase($var, $delimiter = ' ')
+    {
+        $var = preg_replace('#[^a-z0-9]+#i', $delimiter, $var);
+
+        $var = trim($var);
+
+        return $var;
+    }
+
+    static public function splitUpperCase($var, $delimiter = ' ')
+    {
+        $var = static::splitCase($var, $delimiter);
+
+        $var = preg_replace('#([a-z]+)([A-Z]+)#', '$1' . $delimiter . '$2', $var);
+
+        return $var;
+    }
 
     static public function camelCase($var)
     {
-        $keywords = preg_replace('#[^a-z0-9]+#i', ' ', $var);
+        $var = static::splitCase($var);
 
-        $keywords = ucwords($keywords);
+        $var = ucwords($var);
 
-        $keywords = str_replace(' ', '', $keywords);
+        $var = str_replace(' ', '', $var);
 
-        return $keywords;
+        return $var;
     }
 
     static public function trainCase($var)
     {
-        $var = preg_replace(['#[^a-z0-9]+#i', '#([a-z]+)([A-Z]+)#'], [' ', '$1 $2'], $var);
-
-        $var = trim($var);
-
-        $var = mb_strtolower($var);
+        $var = static::splitUpperCase($var);
 
         $var = ucwords($var);
 
@@ -34,7 +56,7 @@ class Str
 
     static public function spinalCase($var)
     {
-        return mb_strtolower(static::trainCase($var));
+        return static::splitUpperCase($var, '-');
     }
 
     static public function phpName($var, $type = self::CAMEL_CASE)
@@ -44,6 +66,23 @@ class Str
         if (!$var or Type::isNaturalNumber($var[0])) {
             $var = '_' . $var;
         }
+
+        return $var;
+    }
+
+    static public function abbreviation($var)
+    {
+        $var = static::splitUpperCase($var);
+
+        $var = ucwords($var);
+
+        $var = explode(' ', $var);
+
+        $var = array_map(function($var) {
+            return $var[0];
+        }, $var);
+
+        $var = implode('', $var);
 
         return $var;
     }
@@ -123,8 +162,38 @@ class Str
         return explode(...$args);
     }
 
+    static public function splitQuoted($string, $delimiter = ',', $quotes = '"')
+    {
+        $string = static::split($string, $delimiter);
+
+        $string = array_map(function($column) use ($quotes) {
+            return trim($column, $quotes);
+        }, $string);
+
+        return $string;
+    }
+
     static public function isEmpty($string)
     {
         return $string === null or $string === '';
+    }
+
+    static public function parse($string, $delimiter = '&', $keyValueDelimiter = '=')
+    {
+        if ($delimiter === '&' and $keyValueDelimiter === '=') {
+            parse_str($string, $output);
+
+            return $output;
+        }
+
+        $output = [];
+
+        foreach(explode($delimiter, $string) as $part) {
+            list($key, $value) = explode($keyValueDelimiter, $part);
+
+            $output[$key] = $value;
+        }
+
+        return $output;
     }
 }

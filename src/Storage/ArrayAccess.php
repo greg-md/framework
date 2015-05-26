@@ -102,11 +102,19 @@ trait ArrayAccess
         return $this->set($key, $value);
     }
 
+    /**
+     * Leave this alone! It should return direct reference of accessor to be able to add recursive values.
+     * It may return a warning of undefined key.
+     * Bug: It will create new empty key in array if it does not exists.
+     * Fix: I think this will not be a problem. You can use "has" method instead of getting by undefined keys.
+     *
+     * @param $key
+     * @return array|null
+     */
     public function &offsetGet($key)
     {
-        // Leave this alone! It should return direct reference of accessor to be able to add recursive values.
-        // It may return a warning of undefined key.
         return $this->accessor()[$key];
+        //return $this->getRef($key);
     }
 
     public function offsetUnset($key)

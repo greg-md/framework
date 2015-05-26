@@ -2,7 +2,6 @@
 
 namespace Greg\Application;
 
-use Greg\Application\Binder\Adapter;
 use Greg\Engine\Internal;
 use Greg\Storage\Accessor;
 use Greg\Storage\ArrayAccess;
@@ -17,49 +16,46 @@ class Binder implements \ArrayAccess
 
     protected $instancesPrefixes = [];
 
-    public function __construct(array $objects = [])
+    public function __construct(array $objects = [], array $instancesPrefixes = [])
     {
         $this->storage($objects);
+
+        $this->instancesPrefixes($instancesPrefixes);
 
         return $this;
     }
 
-    static public function create($appName, array $objects = [])
+    static public function create($appName, array $objects = [], array $instancesPrefixes = [])
     {
-        return static::newInstanceRef($appName, $objects);
+        return static::newInstanceRef($appName, $objects, $instancesPrefixes);
     }
 
-    public function addAdapter($name, callable $caller, $storage)
+    public function addAdapter(callable $adapter)
     {
-        $this->adapters[$name] = new Adapter($caller, $storage);
+        $this->adapters[] = $adapter;
 
         return $this;
     }
 
     public function findInAdapters($className)
     {
-        /* @var $adapter Adapter */
-        foreach($this->adapters as $adapter) {
-            if ($adapter->has($className)) {
-                return $adapter;
+        foreach($this->adapters() as $adapter) {
+            if ($class = $adapter($className)) {
+                return $class;
             }
         }
 
         return false;
     }
 
-    /* We enabled to set and strings which will get an instance of the objects
-    public function set($name, $object)
+    public function setObjects(array $objects)
     {
-        if (!is_object($object)) {
-            throw Exception::newInstance($this->appName(), 'You can set only objects in binder.');
+        foreach($objects as $object) {
+            $this->setObject($object);
         }
-
-        Arr::set($this->accessor(), $name, $object);
 
         return $this;
     }
-    */
 
     public function setObject($object)
     {
@@ -158,23 +154,16 @@ class Binder implements \ArrayAccess
 
             $arg = $this->get($className);
 
+            if (!$arg) {
+                $arg = $this->findInAdapters($className);
+            }
+
+            if (!$arg and $this->isInstancePrefix($className)) {
+                $arg = $className;
+            }
+
             if (!$arg and !$expectedArg->isOptional()) {
-                $found = false;
-
-                if (($adapter = $this->findInAdapters($className))) {
-                    $arg = $this->callArgs($adapter->caller(), $adapter->getArray($className));
-
-                    $found = true;
-                } elseif ($this->isInstancePrefix($className)) {
-                    /* @var $className string|Internal */
-                    $arg = $className::instance($this->appName());
-
-                    $found = true;
-                }
-
-                if (!$found) {
-                    throw Exception::newInstance($this->appName(), '`' . $className . '` is not registered in binder.');
-                }
+                throw new \Exception('`' . $className . '` is not registered in binder.');
             }
 
             if (!is_object($arg)) {
@@ -182,7 +171,7 @@ class Binder implements \ArrayAccess
             }
         } else {
             if (!$expectedArg->isOptional()) {
-                throw Exception::newInstance($this->appName(), 'Argument `' . $expectedArg->getName() . '` is required in `'
+                throw new \Exception('Argument `' . $expectedArg->getName() . '` is required in `'
                     . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
             }
 
@@ -194,12 +183,19 @@ class Binder implements \ArrayAccess
 
     public function isInstancePrefix($className)
     {
-        return Arr::has($this->instancesPrefixes, function($value) use ($className) {
+        $array = $this->instancesPrefixes();
+
+        return Arr::has($array, function($value) use ($className) {
             return strpos($className, $value) === 0;
         });
     }
 
     public function instancesPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function adapters($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

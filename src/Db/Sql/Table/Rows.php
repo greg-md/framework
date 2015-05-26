@@ -4,7 +4,7 @@ namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
 
-class RowSet extends RowAbstract
+class Rows extends RowAbstract
 {
     public function toArray()
     {
@@ -12,7 +12,9 @@ class RowSet extends RowAbstract
 
         /* @var $item Row */
         foreach($items as &$item) {
-            $item = $item->toArray();
+            if ($item instanceof Row) {
+                $item = $item->toArray();
+            }
         }
         unset($item);
 
@@ -25,7 +27,9 @@ class RowSet extends RowAbstract
 
         /* @var $item Row */
         foreach($items as &$item) {
-            $item = $item->toArrayObject();
+            if ($item instanceof Row) {
+                $item = $item->toArrayObject();
+            }
         }
         unset($item);
 

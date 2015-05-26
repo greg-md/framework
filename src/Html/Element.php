@@ -104,7 +104,7 @@ class Element implements \ArrayAccess
         $name = $this->name();
 
         if (!$name) {
-            throw Exception::newInstance($this->appName(), 'Undefined tag name.');
+            throw new \Exception('Undefined tag name.');
         }
 
         return $name;

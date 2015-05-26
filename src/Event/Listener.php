@@ -11,16 +11,18 @@ class Listener
 {
     use Accessor, Internal;
 
-    public function __construct(array $events = [])
+    public function __construct(array $events = [], array $subscribers = [])
     {
         $this->addMore($events);
+
+        $this->addSubscribers($subscribers);
 
         return $this;
     }
 
-    static public function create($appName, array $events = [])
+    static public function create($appName, array $events = [], array $subscribers = [])
     {
-        return static::newInstanceRef($appName, $events);
+        return static::newInstanceRef($appName, $events, $subscribers);
     }
 
     public function addMore(array $events)
@@ -29,13 +31,13 @@ class Listener
             $name = array_shift($event);
 
             if (!$name) {
-                throw Exception::newInstance($this->appName(), 'Event name is required in listener.');
+                throw new \Exception('Event name is required in listener.');
             }
 
             $call = array_shift($event);
 
             if (!$call) {
-                throw Exception::newInstance($this->appName(), 'Event caller is required in listener.');
+                throw new \Exception('Event caller is required in listener.');
             }
 
             $this->on($name, $call, array_shift($event));
@@ -58,14 +60,14 @@ class Listener
     public function register($event, $class)
     {
         if (!is_object($class)) {
-            throw Exception::newInstance($this->appName(), 'Event registrar should be an object.');
+            throw new \Exception('Event registrar should be an object.');
         }
 
         foreach(Arr::bring($event) as $event) {
             $method = lcfirst(Str::phpName($event));
 
             if (!method_exists($class, $method)) {
-                throw new Exception('Method `' . $method . '` not found in class `' . get_class($class) . '`.');
+                throw new \Exception('Method `' . $method . '` not found in class `' . get_class($class) . '`.');
             }
 
             $this->on($event, [$class, $method], get_class($class) . '::' . $method);
@@ -113,8 +115,7 @@ class Listener
         }
 
         if (!($subscriber instanceof SubscriberInterface)) {
-            throw Exception::newInstance($this->appName(), 'Subscriber `' . $name
-                . '` should be an instance of Greg\Event\SubscriberInterface');
+            throw new \Exception('Subscriber `' . $name . '` should be an instance of Greg\Event\SubscriberInterface');
         }
 
         $subscriber->subscribe($this);

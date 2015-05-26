@@ -18,6 +18,8 @@ class Viewer implements \ArrayAccess
 
     protected $paths = [];
 
+    protected $parentViewer = null;
+
     public function __construct($paths = [], array $param = [])
     {
         Arr::bringRef($paths);
@@ -34,17 +36,17 @@ class Viewer implements \ArrayAccess
         return static::newInstanceRef($appName, $paths, $param);
     }
 
-    public function renderName($name, $include = true, $throwException = true)
+    public function renderName($name, array $params = [], $include = true, $throwException = true)
     {
-        return $this->render($this->nameToFile($name), $include, $throwException);
+        return $this->render($this->nameToFile($name), $params, $include, $throwException);
     }
 
-    public function render($fileName, $include = true, $throwException = true)
+    public function render($fileName, array $params = [], $include = true, $throwException = true)
     {
         $paths = $this->paths();
 
         if (!$paths) {
-            throw Exception::newInstance($this->appName(), 'Undefined view paths.');
+            throw new \Exception('Undefined view paths.');
         }
 
         $data = false;
@@ -60,22 +62,33 @@ class Viewer implements \ArrayAccess
                 continue;
             }
 
-            $data = $this->renderFile($file, $include);
+            $data = $this->renderFile($file, $params, $include);
 
             break;
         }
 
         if ($throwException and $data === false) {
-            throw Exception::newInstance($this->appName(), 'View file `' . $fileName . '` does not exist in view paths.');
+            throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
         }
 
         return $data;
     }
 
-    public function renderFile($file, $include = true)
+    public function renderFile($file, array $params = [], $include = true)
+    {
+        $viewer = clone $this;
+
+        $viewer->assign($params);
+
+        $viewer->parentViewer($this);
+
+        return $viewer->fetchFile($file, $include);
+    }
+
+    public function fetchFile($file, $include = true)
     {
         if (!is_file($file)) {
-            throw Exception::newInstance($this->appName(), 'You can render only from files.');
+            throw new \Exception('You can render only from files.');
         }
 
         if ($include) {
@@ -111,7 +124,7 @@ class Viewer implements \ArrayAccess
 
     public function assign($key, $value = null)
     {
-        return $this->storage(...func_num_args());
+        return $this->storage(...func_get_args());
     }
 
     public function __set($key, $value)
@@ -134,6 +147,15 @@ class Viewer implements \ArrayAccess
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    /**
+     * @param Viewer $value
+     * @return $this|Viewer
+     */
+    public function parentViewer(Viewer $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
     public function __call($method, array $args = [])
     {
         $components = $this->app()->components();
@@ -142,6 +164,6 @@ class Viewer implements \ArrayAccess
             return $components->get($method);
         }
 
-        throw Exception::newInstance($this->appName(), 'Component `' . $method . '` not found!');
+        throw new \Exception('Component `' . $method . '` not found!');
     }
 }

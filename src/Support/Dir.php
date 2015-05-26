@@ -2,23 +2,20 @@
 
 namespace Greg\Support;
 
+use Greg\Server\ErrorHandler;
+
 class Dir
 {
     static public function fix($dir, $recursive = false)
     {
         if (!file_exists($dir)) {
-            set_error_handler(['static', 'throwErrors']);
+            ErrorHandler::throwException();
 
             @mkdir($dir, 0777, $recursive);
 
-            restore_error_handler();
+            ErrorHandler::restore();
         }
 
         return true;
-    }
-
-    static public function throwErrors($errNo, $errStr, $errFile, $errLine)
-    {
-        throw new \Exception($errStr);
     }
 }

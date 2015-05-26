@@ -340,14 +340,49 @@ class Obj
      * @param null $key
      * @param null $value
      * @param string $type
+     * @param bool $recursive
+     * @return mixed|$this
+     */
+    static public function &fetchArrayReplaceVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $recursive = false)
+    {
+        if (($num = func_num_args()) > 2) {
+            if (is_array($key)) {
+                $value = null;
+
+                if ($num > 3) {
+                    $type = func_get_arg(3);
+                }
+                if ($num > 4) {
+                    $recursive = func_get_arg(4);
+                }
+
+                return static::fetchArrayVarArrayKey($return, $var, $key, $type, true, $recursive);
+            }
+
+            if ($num > 3) {
+                return static::fetchArrayVarKeyValue($return, $var, $key, $value, $type);
+            }
+
+            return static::fetchArrayVarGetKey($var, $key);
+        }
+
+        Arr::bringRef($var);
+
+        return $var;
+    }
+
+    /**
+     * @param $return
+     * @param $var
+     * @param null $key
+     * @param null $value
+     * @param string $type
      * @param bool $replace
      * @param bool $recursive
      * @return mixed|$this
      */
     static public function &fetchArrayVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $replace = false, $recursive = false)
     {
-        Arr::bringRef($var);
-
         if (($num = func_num_args()) > 2) {
             if (is_array($key)) {
                 $value = null;
@@ -362,82 +397,105 @@ class Obj
                     $recursive = func_get_arg(5);
                 }
 
-                if ($type === null) {
-                    $type = static::PROP_APPEND;
-                }
-
-                if ($type === true) {
-                    $type = static::PROP_REPLACE;
-                }
-
-                switch($type) {
-                    case static::PROP_REPLACE:
-                        $var = $key;
-
-                        break;
-                    case static::PROP_APPEND:
-                        if ($replace) {
-                            if ($recursive) {
-                                $var = array_replace_recursive($var, $key);
-                            } else {
-                                $var = array_replace($var, $key);
-                            }
-                        } else {
-                            if ($recursive) {
-                                $var = array_merge_recursive($var, $key);
-                            } else {
-                                $var = array_merge($var, $key);
-                            }
-                        }
-                        break;
-                    case static::PROP_PREPEND:
-                        if ($replace) {
-                            if ($recursive) {
-                                $var = array_replace_recursive($key, $var);
-                            } else {
-                                $var = array_replace($key, $var);
-                            }
-                        } else {
-                            if ($recursive) {
-                                $var = array_merge_recursive($key, $var);
-                            } else {
-                                $var = array_merge($key, $var);
-                            }
-                        }
-                        break;
-                }
-
-                return $return;
+                return static::fetchArrayVarArrayKey($return, $var, $key, $type, $replace, $recursive);
             }
 
             if ($num > 3) {
-                switch($type) {
-                    case static::PROP_REPLACE:
-                        $var[$key] = $value;
-
-                        break;
-                    case static::PROP_PREPEND:
-                        Arr::prependKey($var, $value, $key);
-
-                        break;
-                    case static::PROP_APPEND:
-                        Arr::appendKey($var, $value, $key);
-
-                        break;
-                }
-
-                return $return;
+                return static::fetchArrayVarKeyValue($return, $var, $key, $value, $type);
             }
 
-            if (array_key_exists($key, $var)) {
-                return $var[$key];
-            }
-
-            $return = null;
-
-            return $return;
+            return static::fetchArrayVarGetKey($var, $key);
         }
 
+        Arr::bringRef($var);
+
         return $var;
+    }
+
+    static public function &fetchArrayVarGetKey(&$var, $key)
+    {
+        Arr::bringRef($var);
+
+        if (array_key_exists($key, $var)) {
+            return $var[$key];
+        }
+
+        $return = null;
+
+        return $return;
+    }
+
+    static public function &fetchArrayVarKeyValue($return, &$var, $key, $value, $type = self::PROP_APPEND)
+    {
+        Arr::bringRef($var);
+
+        switch($type) {
+            case static::PROP_REPLACE:
+                $var[$key] = $value;
+
+                break;
+            case static::PROP_PREPEND:
+                Arr::prependKey($var, $value, $key);
+
+                break;
+            case static::PROP_APPEND:
+                Arr::appendKey($var, $value, $key);
+
+                break;
+        }
+
+        return $return;
+    }
+
+    static public function &fetchArrayVarArrayKey($return, &$var, array $key, $type = self::PROP_APPEND, $replace = false, $recursive = false)
+    {
+        Arr::bringRef($var);
+
+        if ($type === null) {
+            $type = static::PROP_APPEND;
+        }
+
+        if ($type === true) {
+            $type = static::PROP_REPLACE;
+        }
+
+        switch($type) {
+            case static::PROP_REPLACE:
+                $var = $key;
+
+                break;
+            case static::PROP_APPEND:
+                if ($replace) {
+                    if ($recursive) {
+                        $var = array_replace_recursive($var, $key);
+                    } else {
+                        $var = array_replace($var, $key);
+                    }
+                } else {
+                    if ($recursive) {
+                        $var = array_merge_recursive($var, $key);
+                    } else {
+                        $var = array_merge($var, $key);
+                    }
+                }
+                break;
+            case static::PROP_PREPEND:
+                if ($replace) {
+                    if ($recursive) {
+                        $var = array_replace_recursive($key, $var);
+                    } else {
+                        $var = array_replace($key, $var);
+                    }
+                } else {
+                    if ($recursive) {
+                        $var = array_merge_recursive($key, $var);
+                    } else {
+                        $var = array_merge($key, $var);
+                    }
+                }
+                break;
+        }
+
+        return $return;
     }
 }

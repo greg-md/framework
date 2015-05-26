@@ -2,7 +2,6 @@
 
 namespace Greg\Cache\Storage;
 
-use Greg\Cache\Exception;
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
 use Greg\Db\Sql\Storage\Sqlite\Adapter\Pdo;
@@ -30,7 +29,7 @@ class Sqlite extends \Greg\Db\Sql\Storage\Sqlite implements StorageInterface
                 $this->buildStructure();
 
                 if (!$this->checkStructure()) {
-                    throw Exception::newInstance($this->appName(), 'Impossible to build SQLite structure.');
+                    throw new \Exception('Impossible to build SQLite structure.');
                 }
             }
 
@@ -113,7 +112,7 @@ class Sqlite extends \Greg\Db\Sql\Storage\Sqlite implements StorageInterface
 
     public function delete($ids = [])
     {
-        $query = $this->delete('Cache');
+        $query = parent::delete('Cache');
 
         Arr::bringRef($ids);
 
@@ -123,7 +122,7 @@ class Sqlite extends \Greg\Db\Sql\Storage\Sqlite implements StorageInterface
             }
             unset($id);
 
-            $query->whereIn('Id', $ids);
+            $query->whereCol('Id', $ids);
         }
 
         return $query->exec();

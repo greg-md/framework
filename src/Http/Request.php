@@ -49,6 +49,11 @@ class Request implements \ArrayAccess
         return Info::get('HTTPS');
     }
 
+    static public function isSecured()
+    {
+        return static::secured() == 'on';
+    }
+
     static public function with()
     {
         return Info::get('HTTP_X_REQUESTED_WITH');
@@ -107,6 +112,11 @@ class Request implements \ArrayAccess
     static public function isGet()
     {
         return (bool)$_GET;
+    }
+
+    static public function &allGet()
+    {
+        return $_GET;
     }
 
     static public function hasGet($key, ...$keys)
@@ -174,6 +184,11 @@ class Request implements \ArrayAccess
         return (bool)$_POST;
     }
 
+    static public function &allPost()
+    {
+        return $_POST;
+    }
+
     static public function hasPost($key, ...$keys)
     {
         return Arr::has($_POST, $key, ...$keys);
@@ -237,6 +252,11 @@ class Request implements \ArrayAccess
     static public function isRequest()
     {
         return (bool)$_REQUEST;
+    }
+
+    static public function &allRequest()
+    {
+        return $_REQUEST;
     }
 
     static public function hasRequest($key, ...$keys)

@@ -38,24 +38,28 @@ class Resources
         return $this;
     }
 
-    public function getClasses()
+    public function getNameByClassName($className)
     {
-        $classNames = [];
-
         foreach($this->storage as $name => $class) {
-            $classNames[$name] = $class[0];
+            if ($className === $class[0]) {
+                return $name;
+            }
         }
 
-        return $classNames;
+        return false;
     }
 
-    public function get($name)
+    public function get($name, $throw = true)
     {
         $resource = $this->memory('resource/' . $name);
 
         if (!$resource) {
             if (!Arr::has($this->storage, $name)) {
-                throw Exception::newInstance($this->appName(), 'Undefined resource `' . $name . '`.');
+                if($throw) {
+                    throw new \Exception('Undefined resource `' . $name . '`.');
+                }
+
+                return false;
             }
 
             $resource = $this->app()->loadInstance(...$this->storage[$name]);

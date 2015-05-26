@@ -5,21 +5,18 @@ namespace Greg\Db\Sql\Table;
 use Greg\Db\Sql\Table;
 use Greg\Engine\Internal;
 use Greg\Storage\ArrayObject;
+use Greg\Support\Debug;
 use Greg\Support\Obj;
 
 abstract class RowAbstract extends ArrayObject
 {
     use Internal;
 
-    protected $tableName = null;
+    protected $table = null;
 
-    public function __construct($tableName, $data = [])
+    public function __construct(Table $table, $data = [])
     {
-        if (($tableName instanceof Table)) {
-            $tableName = $tableName->name();
-        }
-
-        $this->tableName($tableName);
+        $this->table($table);
 
         parent::__construct($data);
 
@@ -31,8 +28,35 @@ abstract class RowAbstract extends ArrayObject
         return static::newInstanceRef($appName, $tableName, $data);
     }
 
-    public function tableName($value = null)
+    public function getTableName()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->getTable()->getName();
+    }
+
+    /**
+     * @return Table
+     * @throws \Exception
+     */
+    public function getTable()
+    {
+        if (!($table = $this->table())) {
+            throw new \Exception('Please define a table for this row.');
+        }
+
+        return $table;
+    }
+
+    /**
+     * @param Table $value
+     * @return $this|Table
+     */
+    public function table(Table $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this), false);
     }
 }

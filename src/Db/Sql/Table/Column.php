@@ -20,6 +20,20 @@ class Column
 
     const TYPE_BIGINT = 'bigint';
 
+    const TYPE_VARCHAR = 'varchar';
+
+    const TYPE_TEXT = 'text';
+
+    const TYPE_DATE = 'date';
+
+    const TYPE_TIME = 'time';
+
+    const TYPE_DATETIME = 'datetime';
+
+    const TYPE_TIMESTAMP = 'timestamp';
+
+    const CURRENT_TIMESTAMP = 'now';
+
     const TINYINT_LENGTH = 1;
 
     const SMALLINT_LENGTH = 2;
@@ -53,6 +67,8 @@ class Column
     protected $comment = null;
 
     protected $values = [];
+
+    //protected $autoIncrement = false;
 
     public function __construct($name, $type = null, $length = null, $isUnsigned = null, $allowNull = null, $def = null, $comment = null)
     {
@@ -97,13 +113,19 @@ class Column
     static public function getNumericLength($type)
     {
         // phpStorm bug fix
-        return Arr::get($types = static::NUMERIC_TYPES, $type);
-        //return array_key_exists($type, static::NUMERIC_TYPES) ? static::NUMERIC_TYPES[$type] : null;
+        $types = static::NUMERIC_TYPES;
+
+        return Arr::get($types, $type);
     }
 
-    static public function isNumeric($type)
+    static public function isNumericType($type)
     {
         return static::getNumericLength($type) !== null;
+    }
+
+    public function isNumeric()
+    {
+        return $this->isNumericType($this->type());
     }
 
     public function getMinValue()
@@ -165,17 +187,17 @@ class Column
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function length($value = null, $type = Obj::PROP_REPLACE)
+    public function length($value = null)
     {
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
-    public function isUnsigned($value = null, $type = Obj::PROP_REPLACE)
+    public function isUnsigned($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function allowNull($value = null, $type = Obj::PROP_REPLACE)
+    public function allowNull($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
@@ -194,4 +216,11 @@ class Column
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
+
+    /*
+    public function autoIncrement($value = null)
+    {
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+    */
 }

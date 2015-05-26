@@ -101,12 +101,12 @@ class Html extends Layout
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function bodyOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function &bodyOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function bodyClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function &bodyClose($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

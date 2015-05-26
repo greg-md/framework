@@ -4,12 +4,15 @@ namespace Greg\Db\Sql;
 
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
+use Greg\Engine\Internal;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
-trait QueryTrait
+class Query
 {
+    use Internal;
+
     protected $quoteNameWith = '`';
 
     protected $storage = null;
@@ -19,6 +22,11 @@ trait QueryTrait
     public function __construct(StorageInterface $storage)
     {
         $this->storage($storage);
+    }
+
+    static public function create($appName, StorageInterface $storage)
+    {
+        return static::newInstanceRef($appName, $storage);
     }
 
     protected function fetchAlias($name)

@@ -22,7 +22,7 @@ interface StmtInterface
 
     public function errorInfo();
 
-    public function execute($params = []);
+    public function execute($params = null);
 
     public function fetch($style = null, $orientation = Storage::FETCH_ORI_NEXT, $offset = 0);
 
@@ -38,7 +38,7 @@ interface StmtInterface
 
     public function getColumnMeta($column);
 
-    public function nextRowset();
+    public function nextRows();
 
     public function rowCount();
 
@@ -51,4 +51,6 @@ interface StmtInterface
     public function fetchPairs($key = 0, $value = 1);
 
     public function fetchAssoc();
+
+    public function fetchAssocAll();
 }

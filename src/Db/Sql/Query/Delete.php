@@ -2,14 +2,14 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query\Traits\From;
-use Greg\Db\Sql\Query\Traits\Where;
-use Greg\Db\Sql\QueryTrait;
-use Greg\Engine\Internal;
+use Greg\Db\Sql\Query;
+use Greg\Db\Sql\Query\Traits\FromTrait;
+use Greg\Db\Sql\Query\Traits\WhereTrait;
+use Greg\Support\Debug;
 
-class Delete
+class Delete extends Query
 {
-    use From, Where, QueryTrait, Internal;
+    use FromTrait, WhereTrait;
 
     protected $delete = [];
 
@@ -86,5 +86,10 @@ class Delete
     public function __toString()
     {
         return $this->toString();
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this), false);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query\Traits\Where;
-use Greg\Db\Sql\QueryTrait;
-use Greg\Engine\Internal;
+use Greg\Db\Sql\Query;
+use Greg\Db\Sql\Query\Traits\WhereTrait;
+use Greg\Support\Debug;
 
 /**
  * Class Update
@@ -12,9 +12,9 @@ use Greg\Engine\Internal;
  *
  * @method Update whereCol($column, $value = null, $operator = '=')
  */
-class Update
+class Update extends Query
 {
-    use Where, QueryTrait, Internal;
+    use WhereTrait;
 
     protected $tables = [];
 
@@ -56,7 +56,7 @@ class Update
 
     public function exec()
     {
-        $stmt = $this->storage()->prepare($this->toString());
+        $stmt = $this->storage()->prepage($this->toString());
 
         $this->bindParamsToStmt($stmt);
 
@@ -70,7 +70,7 @@ class Update
         ];
 
         if (!$this->tables) {
-            throw Exception::newInstance($this->appName(), 'Undefined update tables.');
+            throw new \Exception('Undefined update tables.');
         }
 
         $tables = [];
@@ -82,7 +82,7 @@ class Update
         $query[] = implode(', ', $tables);
 
         if (!$this->set) {
-            throw Exception::newInstance($this->appName(), 'Undefined update set.');
+            throw new \Exception('Undefined update set.');
         }
 
         $query[] = 'SET';
@@ -105,5 +105,10 @@ class Update
     public function __toString()
     {
         return $this->toString();
+    }
+
+    public function __debugInfo()
+    {
+        return Debug::fixInfo($this, get_object_vars($this), false);
     }
 }
