@@ -7,5 +7,5 @@
 $app = (new \Greg\Application\Runner($settings = [])->init();
 
 // Run the application
-$app->run();
+echo $app->run();
 ```
