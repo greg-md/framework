@@ -43,13 +43,15 @@ class RowFull extends RowAbstract
         return parent::offsetExists($index);
     }
 
-    public function offsetGet($index, $else = null)
+    public function &offsetGet($index)
     {
         if (!is_array($index) and !parent::offsetExists($index)) {
             $row = $this->getRow();
 
             if ($row->offsetExists($index)) {
-                return $row[$index];
+                $ref = &$row[$index];
+
+                return $ref;
             }
 
             foreach($this->getTable()->dependencies() as $name => $info) {
@@ -59,7 +61,7 @@ class RowFull extends RowAbstract
             }
         }
 
-        return parent::get($index, $else);
+        return parent::offsetGet($index);
     }
 
     public function offsetSet($key, $value)

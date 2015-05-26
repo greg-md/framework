@@ -7,7 +7,6 @@ use Greg\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
-use Greg\Http\Response;
 use Greg\Router\Route;
 use Greg\Support\Obj;
 use Greg\View\Viewer;
@@ -19,8 +18,6 @@ class Layout implements SubscriberInterface
     const EVENT_DISPATCHING = 'layout.dispatching';
 
     const EVENT_DISPATCHED = 'layout.dispatched';
-
-    protected $body = null;
 
     protected $renderName = 'layout';
 
@@ -45,24 +42,17 @@ class Layout implements SubscriberInterface
         return $this;
     }
 
-    public function appDispatched(Route $route, Viewer $viewer, Listener $listener, Response $response)
+    public function appDispatched(Route $route, &$response, Viewer $viewer, Listener $listener)
     {
         if (!$this->disabled()) {
-            $this->body($response->body());
+            $response = $viewer->renderName($this->renderName(), [
+                'body' => $response,
+            ]);
 
-            $content = $viewer->renderName($this->renderName());
-
-            $response->body($content);
-
-            $listener->fire(static::EVENT_DISPATCHED);
+            $listener->fireRef(static::EVENT_DISPATCHED, $response);
         }
 
         return $this;
-    }
-
-    public function body($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function renderName($value = null, $type = Obj::PROP_REPLACE)

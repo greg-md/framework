@@ -6,7 +6,6 @@ use Greg\Composer\Autoload\ClassLoader;
 use Greg\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Http\Request;
-use Greg\Http\Response;
 use Greg\Router\Dispatcher;
 use Greg\Server\Config;
 use Greg\Server\Ini;
@@ -37,7 +36,7 @@ class Runner implements \ArrayAccess
 
     const EVENT_DISPATCHED = 'app.dispatched';
 
-    //const EVENT_SENT = 'app.sent';
+    const EVENT_FINISHED = 'app.finished';
 
     protected $controllersPrefixes = [];
 
@@ -76,8 +75,6 @@ class Runner implements \ArrayAccess
         $this->initLoader();
 
         $this->initListener();
-
-        //$this->initResponse();
 
         $this->initTranslator();
 
@@ -407,15 +404,12 @@ class Runner implements \ArrayAccess
             Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
         ], $route);
 
-        //$this->response()->body($content);
-
+        // finish with layout request
         $this->listener()->fireRef(static::EVENT_DISPATCHED, $route, $response);
 
-        //$this->response()->send();
+        $this->listener()->fire(static::EVENT_FINISHED);
 
-        //$this->listener()->fire(static::EVENT_SENT);
-
-        return $this;
+        return $response;
     }
 
     public function action($name = null, $controllerName = null, $param = [])
@@ -560,15 +554,6 @@ class Runner implements \ArrayAccess
     public function listener(Listener $listener = null)
     {
         return $this->memory('listener', ...func_get_args());
-    }
-
-    /**
-     * @param Response $response
-     * @return Response|bool
-     */
-    public function response(Response $response = null)
-    {
-        return $this->memory('response', ...func_get_args());
     }
 
     /**

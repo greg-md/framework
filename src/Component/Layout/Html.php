@@ -48,15 +48,19 @@ class Html extends Layout
 
     public function subscribe(Listener $listener)
     {
-        $listener->register([static::EVENT_DISPATCHED], $this);
+        $listener->register([
+            static::EVENT_DISPATCHED
+        ], $this);
 
         return parent::subscribe($listener);
     }
 
-    public function layoutDispatched(Response $response)
+    public function layoutDispatched(&$response)
     {
         if ($this->minifyHtml()) {
-            if ($response->contentType() == 'text/html') {
+            if (is_string($response)) {
+                $response = Minify::html($response);
+            } elseif ($response instanceof Response and $response->contentType() == 'text/html') {
                 $response->body(Minify::html($response->body()));
             }
         }

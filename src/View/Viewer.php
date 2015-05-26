@@ -14,7 +14,7 @@ class Viewer implements \ArrayAccess
 {
     use Accessor, ArrayAccess, Internal;
 
-    protected $extension = '.phtml';
+    protected $extension = '.php';
 
     protected $paths = [];
 
@@ -98,7 +98,7 @@ class Viewer implements \ArrayAccess
                 $this->includeFile($file);
 
                 $data = ob_get_clean();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 ob_get_clean();
 
                 throw $e;
