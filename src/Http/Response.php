@@ -15,18 +15,24 @@ class Response
 
     protected $charset = 'UTF-8';
 
-    protected $body = null;
+    protected $content = null;
 
-    public function __construct($body = null)
+    public function __construct($content = null, $contentType = null)
     {
-        $this->body($body);
+        if ($content !== null) {
+            $this->content($content);
+        }
+
+        if ($contentType !== null) {
+            $this->contentType($contentType);
+        }
 
         return $this;
     }
 
-    static public function create($appName, $body = null)
+    static public function create($appName, $content = null, $contentType = null)
     {
-        return static::newInstanceRef($appName, $body);
+        return static::newInstanceRef($appName, $content, $contentType);
     }
 
     public function send()
@@ -47,7 +53,7 @@ class Response
             $this->setContentType(implode('; ', $contentType));
         }
 
-        echo $this->body();
+        echo $this->content();
 
         return $this;
     }
@@ -62,16 +68,23 @@ class Response
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function body($value = null, $type = Obj::PROP_REPLACE)
+    public function content($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    /*
     public function route($name, array $params = [], $code = null)
     {
         $url = $this->app()->router()->fetch($name, $params);
 
         $this->redirect($url, $code);
+    }
+    */
+
+    public function __toString()
+    {
+        return $this->content();
     }
 
     const CODES = [

@@ -6,6 +6,7 @@ use Greg\Composer\Autoload\ClassLoader;
 use Greg\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Http\Request;
+use Greg\Http\Response;
 use Greg\Router\Dispatcher;
 use Greg\Server\Config;
 use Greg\Server\Ini;
@@ -386,6 +387,10 @@ class Runner implements \ArrayAccess
         return Arr::get($this->extended, $class, $class);
     }
 
+    /**
+     * @param string $path
+     * @return Response
+     */
     public function run($path = '/')
     {
         if (!func_num_args()) {
@@ -404,8 +409,12 @@ class Runner implements \ArrayAccess
             Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
         ], $route);
 
+        if (is_scalar($response)) {
+            $response = Response::create($this->appName(), $response);
+        }
+
         // finish with layout request
-        $this->listener()->fireRef(static::EVENT_DISPATCHED, $route, $response);
+        $this->listener()->fire(static::EVENT_DISPATCHED, $response, $route);
 
         $this->listener()->fire(static::EVENT_FINISHED);
 

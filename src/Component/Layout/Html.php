@@ -2,8 +2,12 @@
 
 namespace Greg\Component\Layout;
 
+use Greg\Application\Runner;
 use Greg\Component\Layout;
+use Greg\Engine\Internal;
 use Greg\Event\Listener;
+use Greg\Event\SubscriberInterface;
+use Greg\Event\SubscriberTrait;
 use Greg\Html\ElementClass;
 use Greg\Html\Head;
 use Greg\Html\Script;
@@ -11,8 +15,10 @@ use Greg\Http\Response;
 use Greg\Support\Obj;
 use Greg\Tool\Minify;
 
-class Html extends Layout
+class Html implements SubscriberInterface
 {
+    use SubscriberTrait, Internal;
+
     protected $htmlClass = [];
 
     protected $head = null;
@@ -28,8 +34,6 @@ class Html extends Layout
     protected $bodyClose = [];
 
     protected $script = null;
-
-    protected $subLayout = 'layout/default';
 
     protected $minifyHtml = false;
 
@@ -49,13 +53,13 @@ class Html extends Layout
     public function subscribe(Listener $listener)
     {
         $listener->register([
-            static::EVENT_DISPATCHED
+            Runner::EVENT_DISPATCHED
         ], $this);
 
-        return parent::subscribe($listener);
+        return $this;
     }
 
-    public function layoutDispatched(&$response)
+    public function appDispatched(&$response)
     {
         if ($this->minifyHtml()) {
             if (is_string($response)) {
@@ -122,11 +126,6 @@ class Html extends Layout
     public function script(Script $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function subLayout($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function minifyHtml($value = null)
