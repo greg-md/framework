@@ -28,6 +28,8 @@ class Select extends Query
 
     protected $columns = [];
 
+    protected $group = [];
+
     protected $order = [];
 
     protected $limit = null;
@@ -36,20 +38,110 @@ class Select extends Query
 
     protected $table = null;
 
-    public function columns($columns = null, $_ = null)
+    public function only($column = null, $_ = null)
+    {
+        if (!is_array($column)) {
+            $column = func_get_args();
+        }
+
+        return $this->tableColumns($this->getTable(), $column);
+    }
+
+    /**
+     * @param null $table
+     * @param null $column
+     * @param null $_
+     * @return Select|array
+     */
+    public function from($table = null, $column = null, $_ = null)
+    {
+        if (func_num_args()) {
+            $this->from[] = $table;
+
+            if (!is_array($column)) {
+                $column = func_get_args();
+
+                array_shift($column);
+            }
+
+            if ($column) {
+                $this->tableColumns($table, $column);
+            }
+
+            return $this;
+        }
+
+        return $this->from;
+    }
+
+    public function tableColumns($table, $column, $_ = null)
+    {
+        if (!is_array($column)) {
+            $column = func_get_args();
+        }
+
+        list($alias, $name) = $this->fetchAlias($table);
+
+        if (!$alias) {
+            $alias = $name;
+        }
+
+        foreach($column as &$col) {
+            if ($this->isCleanColumn($col)) {
+                $col = $alias . '.' . $col;
+            }
+        }
+        unset($col);
+
+        $this->columns($column);
+
+        return $this;
+    }
+
+    public function columns($column = null, $_ = null)
     {
         if (func_num_args()) {
 
-            if (!is_array($columns)) {
-                $columns = func_get_args();
+            if (!is_array($column)) {
+                $column = func_get_args();
             }
 
-            $this->columns = array_merge($this->columns, $columns);
+            $this->columns = array_merge($this->columns, $column);
 
             return $this;
         }
 
         return $this->columns;
+    }
+
+    public function clearColumns()
+    {
+        $this->columns = [];
+
+        return $this;
+    }
+
+    public function group($expr = null)
+    {
+        if (func_num_args()) {
+            $this->group[] = $expr;
+
+            return $this;
+        }
+
+        return $this->group;
+    }
+
+    public function hasGroup()
+    {
+        return (bool)$this->group;
+    }
+
+    public function clearGroup()
+    {
+        $this->group = [];
+
+        return $this;
     }
 
     /**
@@ -73,45 +165,30 @@ class Select extends Query
             return $this;
         }
 
-        return $this->columns;
+        return $this->order;
     }
 
-    /**
-     * @param null $table
-     * @param null $columns
-     * @param null $_
-     * @return Select|array
-     */
-    public function from($table = null, $columns = null, $_ = null)
+    public function hasOrder()
     {
-        if (func_num_args()) {
-            $this->from[] = $table;
+        return (bool)$this->order;
+    }
 
-            if (!is_array($columns)) {
-                $columns = func_get_args();
+    public function clearOrder()
+    {
+        $this->order = [];
 
-                array_shift($columns);
-            }
+        return $this;
+    }
 
-            if ($columns) {
-                list($tableAlias) = $this->fetchAlias($table);
+    public function groupToString()
+    {
+        $group = [];
 
-                if ($tableAlias) {
-                    foreach($columns as &$column) {
-                        if ($this->isCleanColumn($column)) {
-                            $column = $tableAlias . '.' . $column;
-                        }
-                    }
-                    unset($column);
-                }
-
-                $this->columns($columns);
-            }
-
-            return $this;
+        foreach($this->group as $expr) {
+            $group[] = $this->quoteExpr($expr);
         }
 
-        return $this->from;
+        return $group ? 'GROUP BY ' . implode(', ', $group) : '';
     }
 
     public function orderToString()
@@ -154,6 +231,10 @@ class Select extends Query
 
         if ($where = $this->whereToString()) {
             $query[] = $where;
+        }
+
+        if ($group = $this->groupToString()) {
+            $query[] = $group;
         }
 
         if ($order = $this->orderToString()) {
@@ -279,6 +360,40 @@ class Select extends Query
             $limit = 10;
         }
 
+        $countQ = clone $this;
+
+        $countQ->clearColumns();
+
+        $countQ->clearOrder();
+
+        if ($countQ->hasGroup()) {
+            $storage = $this->getTable()->storage();
+
+            $countQ->columns($storage->expr('1'));
+
+            $countQ = $storage->select('count(*)')->from(['table' => $countQ]);
+        } else {
+            $countQ->columns('count(*)');
+
+            if (!$countQ->hasWhere()) {
+                $countQ->clearJoinLeft();
+
+                $countQ->clearJoinRight();
+            }
+        }
+
+        $maxPage = 1;
+
+        $total = $countQ->one();
+
+        if ($total > 0) {
+            $maxPage = ceil($total / $limit);
+
+            if ($page > $maxPage) {
+                $page = $maxPage;
+            }
+        }
+
         $query = clone $this;
 
         $query->limit($limit)->offset(($page - 1) * $limit);
@@ -287,6 +402,10 @@ class Select extends Query
 
         return [
             'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'maxPage' => $maxPage,
         ];
     }
 
@@ -310,9 +429,7 @@ class Select extends Query
         }
         unset($item);
 
-        $pagination = $table->createRowsPagination($pagination['items']);
-
-        return $pagination;
+        return $table->createRowsPagination($pagination['items'], $pagination['total'], $pagination['page'], $pagination['limit']);
     }
 
     public function paginationFull($page = 1, $limit = 10, $references = null, $relationships = null, $dependencies = '*')
@@ -323,9 +440,7 @@ class Select extends Query
 
         $table->addFullInfo($pagination['items'], $references, $relationships, $dependencies, true);
 
-        $pagination = $table->createRowsPagination($pagination['items']);
-
-        return $pagination;
+        return $table->createRowsPagination($pagination['items'], $pagination['total'], $pagination['page'], $pagination['limit']);
     }
 
     public function getTable()

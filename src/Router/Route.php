@@ -170,7 +170,16 @@ class Route implements \ArrayAccess
         if ($action = $this->action()) {
             list($controller, $action) = explode('@', $action);
 
-            return $this->app()->action($action, $controller);
+            $controller = Str::spinalCase($controller);
+
+            $action = Str::spinalCase($action);
+
+            $params = [
+                    'controller' => $controller,
+                    'action' => $action,
+                ] + $this->lastMatchedParams();
+
+            return $this->app()->action($action, $controller, $params);
         }
 
         return null;
@@ -247,6 +256,10 @@ class Route implements \ArrayAccess
 
                 $compiled .= $delimiter . implode($delimiter, Arr::pack($params, $delimiter));
             }
+        }
+
+        if (!$compiled) {
+            $compiled = '/';
         }
 
         if ($full) {

@@ -35,10 +35,12 @@ class Query
             return [key($name), current($name)];
         }
 
-        if (is_scalar($name)) {
-            if (preg_match('#^(.+?)(?:\s+as\s+([a-z0-9_]+))?$#i', $name, $matches)) {
-                return [isset($matches[2]) ? $matches[2] : null, $matches[1]];
-            }
+        if (is_scalar($name) and $name[0] == ':') {
+            $name = $this->app()->loadModel($name);
+        }
+
+        if (is_scalar($name) and preg_match('#^(.+?)(?:\s+as\s+([a-z0-9_]+))?$#i', $name, $matches)) {
+            return [isset($matches[2]) ? $matches[2] : null, $matches[1]];
         }
 
         if (($name instanceof Table)) {

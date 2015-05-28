@@ -20,6 +20,18 @@ trait WhereTrait
         return $this->where;
     }
 
+    public function hasWhere()
+    {
+        return (bool)$this->where;
+    }
+
+    public function clearWhere()
+    {
+        $this->where = [];
+
+        return $this;
+    }
+
     public function orWhere($expr, $value = null, $_ = null)
     {
         return $this->whereLogic('OR', ...func_get_args());

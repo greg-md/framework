@@ -70,4 +70,6 @@ interface StorageInterface
     public function rollBack();
 
     public function setAttribute($name, $value);
+
+    public function expr($expr);
 }

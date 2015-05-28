@@ -46,7 +46,7 @@ class Table
 
     protected $rowsClass = Table\Rows::class;
 
-    protected $rowsPaginationClass = Table\Rows\Pagination::class;
+    protected $rowsPaginationClass = Table\RowsPagination::class;
 
     protected $scaffolding = [];
 
@@ -279,11 +279,14 @@ class Table
     }
 
     /**
-     * @param $data
-     * @return \Greg\Db\Sql\Table\Row[]|\Greg\Db\Sql\Table\Rows\Pagination
+     * @param $items
+     * @param $total
+     * @param $page
+     * @param $limit
+     * @return \Greg\Db\Sql\Table\Row[]|\Greg\Db\Sql\Table\RowsPagination
      * @throws \Exception
      */
-    public function createRowsPagination($data)
+    public function createRowsPagination($items, $total, $page = null, $limit = null)
     {
         $class = $this->rowsPaginationClass();
 
@@ -291,7 +294,7 @@ class Table
             throw new \Exception('Undefined table row set pagination class.');
         }
 
-        return $this->app()->binder()->loadInstance($class, $this, $data);
+        return $this->app()->binder()->loadInstance($class, $this, $items, $total, $page, $limit);
     }
 
     public function addFullInfo(&$items, $references = null, $relationships = null, $dependencies = '*', $rows = false)

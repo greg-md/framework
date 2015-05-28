@@ -24,6 +24,15 @@ class RowFull extends RowAbstract
         return $this[$name];
     }
 
+    /**
+     * @param $name
+     * @return Rows
+     */
+    public function getRelationship($name)
+    {
+        return $this['relationships'][$name];
+    }
+
     public function offsetExists($index)
     {
         if (!is_array($index) and !parent::offsetExists($index)) {

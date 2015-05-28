@@ -49,12 +49,18 @@ class Dispatcher
             $route->callback($settings);
         }
 
+        if (is_scalar($settings)) {
+            $settings = ['action' => $settings];
+        }
+
         if (is_array($settings)) {
             foreach($settings as $key => $value) {
                 switch($key) {
                     case 'strict':
                     case 'callback':
                     case 'encodeValues':
+                    case 'action':
+                    case 'defaults':
                         $route->$key($value);
 
                         break;

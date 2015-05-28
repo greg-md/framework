@@ -56,7 +56,7 @@ class Str
 
     static public function spinalCase($var)
     {
-        return static::splitUpperCase($var, '-');
+        return mb_strtolower(static::splitUpperCase($var, '-'));
     }
 
     static public function phpName($var, $type = self::CAMEL_CASE)
