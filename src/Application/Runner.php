@@ -41,8 +41,6 @@ class Runner implements \ArrayAccess
 
     protected $controllersPrefixes = [];
 
-    protected $modelsPrefixes = [];
-
     protected $extended = [];
 
     public function __construct(array $settings = [], $appName = null)
@@ -80,8 +78,6 @@ class Runner implements \ArrayAccess
 
         $this->initViewer();
 
-        //$this->initResources();
-
         $this->initRouter();
 
         $this->initComponents();
@@ -95,8 +91,6 @@ class Runner implements \ArrayAccess
     public function initConfig()
     {
         $this->controllersPrefixes($this->getIndexArray('controllers.prefixes'));
-
-        $this->modelsPrefixes($this->getIndexArray('models.prefixes'));
 
         $this->extended($this->getArray('extended'));
 
@@ -140,17 +134,18 @@ class Runner implements \ArrayAccess
     public function initBinder()
     {
         // Load Binder
-        $this->binder($model = Binder::create($this->appName(),
-                                    $this->getIndexArray('binder.objects'),
-                                    $this->getIndexArray('binder.instances_prefixes')));
+        $this->binder($model = Binder::create($this->appName()));
 
         // Add Binder to Binder
         $model->setObject($model);
 
-        // Register Load Models to Binder adapters
-        $this->binder()->addAdapter(function($className) {
-            return $this->isModelPrefix($className) ? $className : false;
-        });
+        if ($singletons = $this->getIndexArray('binder.singletons')) {
+            $model->singletons($singletons);
+        }
+
+        if ($instancesPrefixes = $this->getIndexArray('binder.instances_prefixes')) {
+            $model->instancesPrefixes($instancesPrefixes);
+        }
 
         return $this;
     }
@@ -253,31 +248,6 @@ class Runner implements \ArrayAccess
         return $model;
     }
 
-    public function initResources()
-    {
-        // Load Resources Manager
-        $this->resources($model = Resources::create($this->appName(), $this->getIndexArray('resources')));
-
-        // Add Resources Manager to Binder
-        $this->binder()->setObject($model);
-
-        // Register Resources Manager to Binder adapters
-        $this->binder()->addAdapter(function($className) use ($model) {
-            return $model->get($model->getNameByClassName($className), false);
-        });
-
-        return $this;
-    }
-
-    public function getResources()
-    {
-        if (!$model = $this->resources()) {
-            throw new \Exception('Application resources was not initiated.');
-        }
-
-        return $model;
-    }
-
     public function initRouter()
     {
         // Load Dispatcher
@@ -300,10 +270,10 @@ class Runner implements \ArrayAccess
 
     public function initComponents()
     {
-        // Load Components Manager
+        // Load Components
         $this->components($model = Components::create($this->appName(), $this->getArray('components')));
 
-        // Add Components Manager to Binder
+        // Add Components to Binder
         $this->binder()->setObject($model);
 
         return $this;
@@ -396,8 +366,6 @@ class Runner implements \ArrayAccess
             list($path) = explode('?', Request::uri(), 2);
         }
 
-        dd($path);
-
         $path = $path ?: '/';
 
         $this->listener()->fireRef(static::EVENT_RUN, $path);
@@ -447,6 +415,7 @@ class Runner implements \ArrayAccess
     {
         Arr::bringRef($name);
 
+        /* @var $class Internal */
         if ($class = $this->controllerExists($name)) {
             return $class::newInstance($this->appName());
         }
@@ -456,46 +425,7 @@ class Runner implements \ArrayAccess
 
     public function controllerExists($name)
     {
-        return $this->classExists($name, array_merge($this->controllersPrefixes(), ['']), 'Controllers\\');
-    }
-
-    public function modelExists($name)
-    {
-        return $this->classExists($name, array_merge($this->modelsPrefixes(), ['']));
-    }
-
-    /**
-     * @param $name
-     * @param array $prefixes
-     * @param null $namePrefix
-     * @return bool|string|Internal
-     */
-    protected function classExists($name, array $prefixes = [], $namePrefix = null)
-    {
-        $name = array_map(function($name) {
-            return Str::phpName($name);
-        }, Arr::bring($name));
-
-        $name = implode('\\', $name);
-
-        foreach($prefixes as $prefix) {
-            $class = $prefix . $namePrefix . $name;
-
-            if (class_exists($class)) {
-                return $class;
-            }
-        }
-
-        return false;
-    }
-
-    public function loadModel($name)
-    {
-        if ($class = $this->modelExists($name)) {
-            return $class::instance($this->appName());
-        }
-
-        throw new \Exception('Model `' . $name . '` not found.');
+        return Obj::classExists($name, array_merge($this->controllersPrefixes(), ['']), 'Controllers\\');
     }
 
     public function once($name, callable $callable)
@@ -589,15 +519,6 @@ class Runner implements \ArrayAccess
     }
 
     /**
-     * @param Resources $resources
-     * @return Resources|bool
-     */
-    public function resources(Resources $resources = null)
-    {
-        return $this->memory('resources', ...func_get_args());
-    }
-
-    /**
      * @param Components $components
      * @return Components|bool
      */
@@ -615,21 +536,7 @@ class Runner implements \ArrayAccess
         return $this->memory('router', ...func_get_args());
     }
 
-    public function isModelPrefix($className)
-    {
-        $array = $this->modelsPrefixes();
-
-        return Arr::has($array, function($value) use ($className) {
-            return strpos($className, $value) === 0;
-        });
-    }
-
     public function controllersPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function modelsPrefixes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

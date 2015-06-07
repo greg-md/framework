@@ -333,6 +333,6 @@ class Viewer implements \ArrayAccess
             return $components->get($method);
         }
 
-        throw new \Exception('Component `' . $method . '` not found!');
+        throw new \Exception('Component `' . $method . '` not found.');
     }
 }

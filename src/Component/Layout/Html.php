@@ -65,7 +65,7 @@ class Html implements SubscriberInterface
             if (is_string($response)) {
                 $response = Minify::html($response);
             } elseif ($response instanceof Response and $response->contentType() == 'text/html') {
-                $response->body(Minify::html($response->body()));
+                $response->content(Minify::html($response->content()));
             }
         }
 

@@ -74,27 +74,7 @@ class Table
 
     protected $cacheSchemaLifetime = 0;
 
-    public function __construct($name = null, StorageInterface $storage = null, CacheStorageInterface $cacheStorage = null)
-    {
-        if ($name !== null) {
-            $this->name($name);
-        }
-
-        if ($storage !== null) {
-            $this->storage($storage);
-        }
-
-        if ($cacheStorage !== null) {
-            $this->cacheStorage($cacheStorage);
-        }
-
-        return $this;
-    }
-
-    static public function create($appName, $name = null, StorageInterface $storage = null, CacheStorageInterface $cacheStorage = null)
-    {
-        return static::newInstanceRef($appName, $name, $storage, $cacheStorage);
-    }
+    protected $relationshipsTables = [];
 
     public function init()
     {
@@ -506,11 +486,10 @@ class Table
                 'callback' => null,
             ], $relationshipParams);
 
-            /* @var $relationshipTable Table */
-            $relationshipTable = $this->app()->loadModel($relationshipTableName);
+            $relationshipTable = $this->getRelationshipTable($relationshipTableName);
 
             $tableRelationships = Arr::get($tablesRelationships, $relationshipTable->getName());
-            
+
             if (!$tableRelationships) {
                 throw new \Exception('Relationship `' . $relationshipTableName . '` not found.');
             }
@@ -603,7 +582,7 @@ class Table
                         }
 
                         $hasKeysCombination = false;
-                        
+
                         foreach($parts[$columns] as $keys) {
                             if ($keys === $itemKeys) {
                                 $hasKeysCombination = true;
@@ -726,7 +705,7 @@ class Table
             $tableRelationships = $relationships[$dependenceTableName];
 
             $parts = [];
-            
+
             foreach($tableRelationships as $tablesRelationships) {
                 $columns = [];
 
@@ -770,7 +749,7 @@ class Table
                     }
                 }
             }
-            
+
             foreach($parts as $key => $part) {
                 if (!$part) {
                     unset($parts[$key]);
@@ -962,6 +941,26 @@ class Table
         return $name;
     }
 
+    /**
+     * @param $name
+     * @return Table
+     * @throws \Exception
+     */
+    public function getRelationshipTable($name)
+    {
+        $table = $this->relationshipTables($name);
+
+        if (!$table) {
+            throw new \Exception('Relationship table `' . $name . '` not found in table `' . $this->getName() . '`.');
+        }
+
+        if (is_callable($table)) {
+            $table = $this->app()->binder()->call($table);
+        }
+
+        return $table;
+    }
+
     public function lastInsertId($name = null)
     {
         return $this->storage()->lastInsertId($name);
@@ -1115,5 +1114,10 @@ class Table
     public function cacheSchemaLifetime($value = null)
     {
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+    }
+
+    public function relationshipsTables($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

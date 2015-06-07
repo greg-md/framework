@@ -9,11 +9,6 @@ class Helper
 {
     use Internal;
 
-    public function getResource($name, $throw = true)
-    {
-        return $this->app()->resources()->get($name, $throw);
-    }
-
     /**
      * @return Response
      */

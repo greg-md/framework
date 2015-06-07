@@ -2,8 +2,6 @@
 
 namespace Greg\Config;
 
-use Greg\Support\Arr;
-
 class Path
 {
     static public function fetch($path, $env = null, $ext = '.php')

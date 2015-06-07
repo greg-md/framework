@@ -3,7 +3,6 @@
 namespace Greg\Application;
 
 use Greg\Engine\Internal;
-use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 
 class Components

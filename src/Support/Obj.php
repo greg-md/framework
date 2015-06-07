@@ -498,4 +498,29 @@ class Obj
 
         return $return;
     }
+
+    /**
+     * @param $name
+     * @param array $prefixes
+     * @param null $namePrefix
+     * @return bool|string
+     */
+    static public function classExists($name, array $prefixes = [], $namePrefix = null)
+    {
+        $name = array_map(function($name) {
+            return Str::phpName($name);
+        }, Arr::bring($name));
+
+        $name = implode('\\', $name);
+
+        foreach($prefixes as $prefix) {
+            $class = $prefix . $namePrefix . $name;
+
+            if (class_exists($class)) {
+                return $class;
+            }
+        }
+
+        return false;
+    }
 }

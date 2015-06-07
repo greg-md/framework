@@ -71,10 +71,11 @@ class Sqlite extends Storage
 
     /**
      * @param null $from
+     * @param bool $delete
      * @return Delete
      * @throws \Exception
      */
-    public function delete($from = null)
+    public function delete($from = null, $delete = false)
     {
         $query = Delete::newInstance($this->appName(), $this);
 
@@ -99,6 +100,26 @@ class Sqlite extends Storage
         }
 
         return $query;
+    }
+
+    public function getTableSchema($tableName)
+    {
+
+    }
+
+    public function getTableInfo($tableName)
+    {
+
+    }
+
+    public function getTableReferences($tableName)
+    {
+
+    }
+
+    public function getTableRelationships($tableName)
+    {
+
     }
 
     public function beginTransaction()

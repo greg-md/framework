@@ -115,7 +115,7 @@ class Listener
         }
 
         if (!($subscriber instanceof SubscriberInterface)) {
-            throw new \Exception('Subscriber `' . $name . '` should be an instance of Greg\Event\SubscriberInterface');
+            throw new \Exception('Subscriber `' . $name . '` should be an instance of Greg\Event\SubscriberInterface.');
         }
 
         $subscriber->subscribe($this);

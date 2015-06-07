@@ -9,6 +9,12 @@ use Greg\Http\Request;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
+/**
+ * Class Redis
+ * @package Greg\Cache\Storage
+ *
+ * @method array getKeys($search)
+ */
 class Redis extends \Redis implements StorageInterface
 {
     use StorageTrait, Internal;

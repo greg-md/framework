@@ -2,6 +2,7 @@
 
 namespace Greg\Db\Sql\Query\Traits;
 
+use Greg\Application\Runner;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\StorageInterface;
 use Greg\Support\Arr;
@@ -140,7 +141,7 @@ trait WhereTrait
         if (is_callable($expr)) {
             $query = Where::create($this->appName(), $this->storage());
 
-            $expr($query);
+            $this->app()->binder()->call($expr, $query);
 
             $expr = $query->toString();
 
@@ -188,6 +189,12 @@ trait WhereTrait
 
         return $where ? ($useTag ? 'WHERE ' : '') . implode('', $where) : '';
     }
+
+    /**
+     * @param Runner $app
+     * @return Runner
+     */
+    abstract public function app(Runner $app = null);
 
     abstract public function appName($value = null, $type = Obj::PROP_REPLACE);
 
