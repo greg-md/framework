@@ -165,7 +165,43 @@ class Viewer implements \ArrayAccess
         return $viewer->fetchFile($file);
     }
 
-    public function fetchFile($file)
+    public function partialLoop($name, array $items, array $params = [])
+    {
+        return $this->partialNameLoop($name, $items, $params);
+    }
+
+    public function partialNameLoop($name, array $items, array $params = [])
+    {
+        return $this->partialFileNameLoop($this->toFileName($name), $items, $params);
+    }
+
+    public function partialFileNameLoop($fileName, array $items, array $params = [])
+    {
+        if ($file = $this->getFile($fileName)) {
+            return $this->partialFileLoop($file, $items, $params);
+        }
+
+        throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
+    }
+
+    public function partialFileLoop($file, array $items, array $params = [])
+    {
+        $result = [];
+
+        foreach($items as $item) {
+            $viewer = clone $this;
+
+            $viewer->assign(array_merge(['item' => $item], $params), true);
+
+            $viewer->parent($this);
+
+            $result[] = $viewer->fetchFile($file, false);
+        }
+
+        return Response::create($this->appName(), implode('', $result));
+    }
+
+    public function fetchFile($file, $responseObject = true)
     {
         if (!is_file($file)) {
             throw new \Exception('You can render only files.');
@@ -183,7 +219,7 @@ class Viewer implements \ArrayAccess
             throw $e;
         }
 
-        return Response::create($this->appName(), $data);
+        return $responseObject ? Response::create($this->appName(), $data) : $data;
     }
 
     public function fetchLayouts($content, $layout, $_ = null)

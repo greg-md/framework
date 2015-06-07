@@ -615,4 +615,56 @@ class Arr
 
         return $new;
     }
+
+    static public function fixIndexes(array $array, $delimiter = self::INDEX_DELIMITER)
+    {
+        $pack = static::packIndexes($array, $delimiter);
+
+        $unpack = static::unpackIndexes($pack, $delimiter);
+
+        return $unpack;
+    }
+
+    static public function packIndexes(array $array, $delimiter = self::INDEX_DELIMITER)
+    {
+        $new = [];
+
+        foreach($array as $key => $value) {
+            if (is_array($value)) {
+                $value = static::packIndexes($value);
+
+                foreach($value as $k => $v) {
+                    $new[$key . $delimiter . $k] = $v;
+                }
+            } else {
+                $new[$key] = $value;
+            }
+        }
+
+        return $new;
+    }
+
+    static public function unpackIndexes(array $array, $delimiter = self::INDEX_DELIMITER)
+    {
+        $new = [];
+
+        foreach($array as $key => $value) {
+            $sub = &$new;
+
+            foreach(explode($delimiter, $key) as $k) {
+                if ($k === null) {
+                    $sub = &$sub[];
+                } else {
+                    if (is_array($sub) and static::has($sub, $k) and !is_array($sub[$k])) {
+                        $sub[$k] = [];
+                    }
+                    $sub = &$sub[$k];
+                }
+            }
+
+            $sub = $value;
+        }
+
+        return $new;
+    }
 }

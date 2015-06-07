@@ -47,14 +47,13 @@ class Runner implements \ArrayAccess
 
     public function __construct(array $settings = [], $appName = null)
     {
-        // de adăugat ACL
         if ($appName !== null) {
             $this->appName($appName);
         }
 
         $this->memory('app', $this);
 
-        $this->storage($settings);
+        $this->storage(Arr::fixIndexes($settings));
 
         return $this;
     }
@@ -81,7 +80,7 @@ class Runner implements \ArrayAccess
 
         $this->initViewer();
 
-        $this->initResources();
+        //$this->initResources();
 
         $this->initRouter();
 
@@ -397,6 +396,8 @@ class Runner implements \ArrayAccess
             list($path) = explode('?', Request::uri(), 2);
         }
 
+        dd($path);
+
         $path = $path ?: '/';
 
         $this->listener()->fireRef(static::EVENT_RUN, $path);
@@ -427,6 +428,8 @@ class Runner implements \ArrayAccess
 
         $controllerName = $controllerName ?: 'base';
 
+        Arr::bringRef($controllerName);
+
         $controller = $this->loadController($controllerName);
 
         $actionName = Str::phpName($name) . 'Action';
@@ -442,11 +445,13 @@ class Runner implements \ArrayAccess
 
     public function loadController($name)
     {
+        Arr::bringRef($name);
+
         if ($class = $this->controllerExists($name)) {
             return $class::newInstance($this->appName());
         }
 
-        throw new \Exception('Controller `' . $name . '` not found.');
+        throw new \Exception('Controller `' . implode('/', $name) . '` not found.');
     }
 
     public function controllerExists($name)

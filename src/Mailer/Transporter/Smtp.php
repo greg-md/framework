@@ -76,7 +76,9 @@ class Smtp extends Transporter
 
         $headers = implode(static::NEW_LINE, $headers);
 
-        $from = $mail->from();
+        list($fromEmail, $fromName) = ($mail->from() ?: [null, null]);
+
+        $from = $this->emailsToString([$fromEmail => $fromName]);
 
         foreach($mail->to() as $email => $name) {
             $connection->mail($from);

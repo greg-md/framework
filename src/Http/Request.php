@@ -19,6 +19,47 @@ class Request implements \ArrayAccess
         return $this;
     }
 
+    public function required($key)
+    {
+        $value = $this->get($key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
+    }
+
+    public function &get($key, $else = null)
+    {
+        return Arr::get($this->accessor(), $key, $this->getRequest($key, $else));
+    }
+
+    public function &getRef($key, $else = null)
+    {
+        return Arr::getRef($this->accessor(), $key, $this->getRefRequest($key, $else));
+    }
+
+    public function getArray($key, $else = null)
+    {
+        return Arr::getArray($this->accessor(), $key, $this->getArrayRequest($key, $else));
+    }
+
+    public function &getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndex($this->accessor(), $index, $this->getIndexRequest($index, $else, $delimiter), $delimiter);
+    }
+
+    public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexRef($this->accessor(), $index, $this->getIndexRefRequest($index, $else, $delimiter), $delimiter);
+    }
+
+    public function getIndexArray($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexArray($this->accessor(), $index, $this->getIndexArrayRequest($index, $else, $delimiter), $delimiter);
+    }
+
     static public function create($appName, array $param = [])
     {
         return static::newInstanceRef($appName, $param);
@@ -159,6 +200,11 @@ class Request implements \ArrayAccess
         return Arr::getRef($_GET, $key, $else);
     }
 
+    static public function getArrayGet($key, $else = null)
+    {
+        return Arr::getArray($_GET, $key, $else);
+    }
+
     static public function &getIndexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_GET, $index, $else, $delimiter);
@@ -167,6 +213,11 @@ class Request implements \ArrayAccess
     static public function &getIndexRefGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexRef($_GET, $index, $else, $delimiter);
+    }
+
+    static public function getIndexArrayGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexArray($_GET, $index, $else, $delimiter);
     }
 
     static public function delGet($key, ...$keys)
@@ -229,6 +280,11 @@ class Request implements \ArrayAccess
         return Arr::getRef($_POST, $key, $else);
     }
 
+    static public function getArrayPost($key, $else = null)
+    {
+        return Arr::getArray($_POST, $key, $else);
+    }
+
     static public function &getIndexPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_POST, $index, $else, $delimiter);
@@ -237,6 +293,11 @@ class Request implements \ArrayAccess
     static public function &getIndexRefPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexRef($_POST, $index, $else, $delimiter);
+    }
+
+    static public function getIndexArrayPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexArray($_POST, $index, $else, $delimiter);
     }
 
     static public function delPost($key, ...$keys)
@@ -299,6 +360,11 @@ class Request implements \ArrayAccess
         return Arr::getRef($_REQUEST, $key, $else);
     }
 
+    static public function getArrayRequest($key, $else = null)
+    {
+        return Arr::getArray($_REQUEST, $key, $else);
+    }
+
     static public function &getIndexRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_REQUEST, $index, $else, $delimiter);
@@ -307,6 +373,11 @@ class Request implements \ArrayAccess
     static public function &getIndexRefRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexRef($_REQUEST, $index, $else, $delimiter);
+    }
+
+    static public function getIndexArrayRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexArray($_REQUEST, $index, $else, $delimiter);
     }
 
     static public function delRequest($key, ...$keys)

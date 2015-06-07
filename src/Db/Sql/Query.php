@@ -142,7 +142,7 @@ class Query
         $k = 1;
 
         foreach($this->bindParams() as $key => $param) {
-            Arr::bringRef($param);
+            $param = $param !== null ? Arr::bring($param) : [$param];
 
             array_unshift($param, is_int($key) ? $k++ : $key);
 

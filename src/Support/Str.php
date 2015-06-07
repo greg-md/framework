@@ -20,6 +20,8 @@ class Str
 
         $var = trim($var);
 
+        $var = trim($var, $delimiter);
+
         return $var;
     }
 
@@ -43,13 +45,15 @@ class Str
         return $var;
     }
 
-    static public function trainCase($var)
+    static public function trainCase($var, $delimiter = '-')
     {
         $var = static::splitUpperCase($var);
 
         $var = ucwords($var);
 
-        $var = str_replace(' ', '-', $var);
+        if ($delimiter !== ' ') {
+            $var = str_replace(' ', $delimiter, $var);
+        }
 
         return $var;
     }
@@ -195,5 +199,176 @@ class Str
         }
 
         return $output;
+    }
+
+    static public function substringHtml($string, $start = 0, $length = null, $delimiter = null, $suffix = null, $forceSuffix = null)
+    {
+        $textLength = mb_strlen(strip_tags(html_entity_decode($string, ENT_QUOTES, 'UTF-8')));
+
+        if (!$textLength) {
+            return $string;
+        }
+
+        if (is_null($length)) {
+            $length = mb_strlen(html_entity_decode($string, ENT_QUOTES, 'UTF-8')) - $start;
+        }
+
+        $delimiter = Arr::bring($delimiter);
+
+        $string = '>' . $string . '<';
+
+        $newString  = '';
+
+        $remainString = '';
+
+        $strLen = 0;
+
+        $delimiterFound = false;
+
+        $k = 0;
+
+        preg_replace_callback('#>([^<]+)<#s', function($match)
+            use(&$string, &$newString, &$remainString, $start, $length,
+                $delimiter, $suffix, $forceSuffix, $textLength,
+                &$strLen, &$delimiterFound, &$k) {
+            $index = mb_strpos($string, $match[0]);
+
+            if ($index) {
+                $subStrNew = mb_substr($string, 1, $index);
+            } else {
+                $subStrNew = '';
+            }
+
+            $string = '>' . mb_substr($string, mb_strlen($subStrNew) + 1 + mb_strlen($match[1]));
+
+            if ($strLen >= $length and (!$delimiter or $delimiterFound)) {
+                $remainString .= $subStrNew;
+                return '><';
+            }
+
+            $subStr = max(0, ($start - $strLen));
+
+            if ($subStr) {
+                while(true) {
+                    $replaced = preg_replace(array(
+                        '#<[^/][^>]*/>#s',
+                        '#<[^/][^>]*(?<!/)></[^>]+>#s',
+                    ), '', $subStrNew);
+
+                    if ($replaced == $subStrNew) {
+                        break;
+                    }
+
+                    $subStrNew = $replaced;
+                };
+            }
+
+            $newString .= $subStrNew;
+
+            $htmlStr = html_entity_decode($match[1], ENT_QUOTES, 'UTF-8');
+
+            $htmlStrLen = mb_strlen($htmlStr);
+
+            if ($htmlStrLen <= $subStr) {
+                $strLen += $htmlStrLen;
+                return '><';
+            }
+
+            $subLen = $length - $strLen;
+
+            if ($subLen < 0) {
+                $subLen = 0;
+            }
+
+            $dFetch = false;
+
+            $del = null;
+
+            if ($delimiter and $htmlStrLen > $subLen) {
+                $offset = $subLen + $subStr;
+
+                $pos = false;
+
+                if ($offset < $htmlStrLen) {
+                    $offset -= 1;
+
+                    if ($offset < 0) {
+                        $offset = 0;
+                    }
+
+                    foreach($delimiter as $del => $dFetch) {
+                        if (is_int($del)) {
+                            $del = $dFetch;
+
+                            $dFetch = true;
+                        }
+
+                        $pos = mb_strpos($htmlStr, $del, $offset);
+
+                        if ($pos !== false) {
+                            break;
+                        }
+                    }
+                }
+
+                if ($pos !== false) {
+                    $delimiterFound = true;
+
+                    $subLen = $pos;
+                } else {
+                    $subLen = $htmlStrLen;
+                }
+            }
+
+            $htmlStr = mb_substr($htmlStr, $subStr, $subLen);
+
+            $strLen += mb_strlen($htmlStr);
+
+            $htmlStr = htmlentities($htmlStr, ENT_QUOTES, 'UTF-8');
+
+            if (($forceSuffix and $strLen >= $textLength) or ($suffix and $strLen >= $length and (!$delimiter or $delimiterFound))) {
+                if ($delimiter and $dFetch) {
+                    $suffix = str_replace('%d%', $del, $suffix);
+                }
+
+                $htmlStr .= $suffix;
+            }
+
+            $newString .= $htmlStr;
+
+            ++$k;
+
+            return '>' . $htmlStr . '<';
+        }, $string);
+
+        $string = ltrim($string, '>');
+
+        $string = rtrim($string, '<');
+
+        $string = trim($string);
+
+        if ($remainString) {
+            $remainString .= $string;
+
+            while(true) {
+                $replaced = preg_replace(array(
+                    '#<[^/][^>]*/>#s',
+                    '#<([^\s>]*)(\b)?[^>]*(?<!/)></\1>#si',
+                    '#<(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|basefont|bgsound|frame|isindex)\b[^>]*>#si',
+                ), '', $remainString);
+
+                if ($replaced == $remainString) {
+                    break;
+                }
+
+                $remainString = $replaced;
+            };
+        } else {
+            $remainString .= $string;
+        }
+
+        $return = $newString . $remainString;
+
+        return $return;
     }
 }

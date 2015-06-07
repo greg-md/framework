@@ -8,6 +8,13 @@ use Greg\Storage\ArrayObject;
 use Greg\Support\Debug;
 use Greg\Support\Obj;
 
+/**
+ * Class RowAbstract
+ * @package Greg\Db\Sql\Table
+ *
+ * @method Row[]|RowFull[] toArray()
+ * @method Row[]|RowFull[] toArrayObject()
+ */
 abstract class RowAbstract extends ArrayObject
 {
     use Internal;

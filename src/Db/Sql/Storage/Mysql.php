@@ -263,15 +263,15 @@ class Mysql extends Storage
 
     /**
      * @param null $from
+     * @param bool $delete
      * @return Delete
-     * @throws \Exception
      */
-    public function delete($from = null)
+    public function delete($from = null, $delete = false)
     {
         $query = Delete::newInstance($this->appName(), $this);
 
         if ($from !== null) {
-            $query->from($from);
+            $query->from($from, $delete);
         }
 
         return $query;

@@ -14,6 +14,7 @@ use Greg\Support\Obj;
  * @package Greg\Db\Sql\Query
  *
  * @method Select whereCol($column, $operator, $value = null)
+ * @method Select whereCols(array $columns)
  * @method Select where($expr = null, $value = null, $_ = null)
  */
 class Select extends Query
@@ -267,6 +268,11 @@ class Select extends Query
     public function one($column = 0)
     {
         return $this->stmt()->fetchOne($column);
+    }
+
+    public function exists()
+    {
+        return (bool)$this->one();
     }
 
     public function pairs($key = 0, $value = 1)

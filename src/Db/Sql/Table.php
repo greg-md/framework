@@ -210,13 +210,18 @@ class Table
 
     public function delete(array $whereIs = [])
     {
-        $query = $this->storage()->delete($this);
+        $query = $this->storage()->delete($this, true);
 
         if ($whereIs) {
             $query->whereCols($whereIs);
         }
 
         return $query;
+    }
+
+    public function exists($column, $value)
+    {
+        return $this->select($this->storage()->expr(1))->whereCol($column, $value)->exists();
     }
 
     public function newRow(array $data = [])
@@ -899,34 +904,48 @@ class Table
                 continue;
             }
 
-            if ($column->allowNull() and $value === null) {
-                continue;
+            if ($value === '') {
+                $value = null;
+            }
+
+            if (!$column->allowNull()) {
+                $value = (string)$value;
+            }
+
+            if ($column->isNumeric() and (!$column->allowNull() or $value !== null)) {
+                $value = (int)$value;
             }
 
             switch($this->columnsTypes($columnName) ?: $column->type()) {
                 case Column::TYPE_DATETIME:
                 case Column::TYPE_TIMESTAMP:
-                    $value = DateTime::format('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? null : $value);
+                    if ($value) {
+                        $value = DateTime::format('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? null : $value);
+                    }
 
                     break;
                 case Column::TYPE_DATE:
-                    $value = DateTime::format('%Y-%m-%d', $value);
+                    if ($value) {
+                        $value = DateTime::format('%Y-%m-%d', $value);
+                    }
 
                     break;
                 case Column::TYPE_TIME:
-                    $value = DateTime::format('%H:%M:%S', $value);
+                    if ($value) {
+                        $value = DateTime::format('%H:%M:%S', $value);
+                    }
 
                     break;
                 case 'systemName':
-                    $value = Url::transform($value);
+                    if ($value) {
+                        $value = Url::transform($value);
+                    }
 
                     break;
                 case 'boolean':
                     $value = (bool)$value;
 
                     break;
-                default:
-                    $value = $column->isNumeric() ? (int)$value : (string)$value;
             }
         }
         unset($value);

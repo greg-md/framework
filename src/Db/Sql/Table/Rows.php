@@ -6,32 +6,34 @@ use Greg\Db\Sql\Table;
 
 class Rows extends RowAbstract
 {
-    public function toArray()
+    public function toArray($recursive = true)
     {
         $items = parent::toArray();
 
-        /* @var $item Row */
-        foreach($items as &$item) {
-            if ($item instanceof Row) {
-                $item = $item->toArray();
+        if ($recursive) {
+            foreach($items as &$item) {
+                if ($item instanceof Row) {
+                    $item = $item->toArray();
+                }
             }
+            unset($item);
         }
-        unset($item);
 
         return $items;
     }
 
-    public function toArrayObject()
+    public function toArrayObject($recursive = true)
     {
         $items = parent::toArrayObject();
 
-        /* @var $item Row */
-        foreach($items as &$item) {
-            if ($item instanceof Row) {
-                $item = $item->toArrayObject();
+        if ($recursive) {
+            foreach($items as &$item) {
+                if ($item instanceof Row) {
+                    $item = $item->toArrayObject();
+                }
             }
+            unset($item);
         }
-        unset($item);
 
         return $items;
     }

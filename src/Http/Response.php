@@ -15,6 +15,10 @@ class Response
 
     protected $charset = 'UTF-8';
 
+    protected $location = null;
+
+    protected $code = null;
+
     protected $content = null;
 
     public function __construct($content = null, $contentType = null)
@@ -30,6 +34,13 @@ class Response
         return $this;
     }
 
+    /**
+     * @param $appName
+     * @param null $content
+     * @param null $contentType
+     * @return self
+     * @throws \Exception
+     */
     static public function create($appName, $content = null, $contentType = null)
     {
         return static::newInstanceRef($appName, $content, $contentType);
@@ -53,6 +64,14 @@ class Response
             $this->setContentType(implode('; ', $contentType));
         }
 
+        if ($code = $this->code()) {
+            $this->setCode($code);
+        }
+
+        if ($location = $this->location()) {
+            $this->redirect($location, null, false);
+        }
+
         echo $this->content();
 
         return $this;
@@ -68,19 +87,31 @@ class Response
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    public function location($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function code($value = null)
+    {
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+    }
+
     public function content($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    /*
     public function route($name, array $params = [], $code = null)
     {
-        $url = $this->app()->router()->fetch($name, $params);
+        $this->location($this->app()->router()->fetch($name, $params));
 
-        $this->redirect($url, $code);
+        if ($code !== null) {
+            $this->code($code);
+        }
+
+        return $this;
     }
-    */
 
     public function __toString()
     {
@@ -150,7 +181,7 @@ class Response
         511 => 'Network Authentication Required',                             // RFC6585
     ];
 
-    static public function code($code)
+    static public function setCode($code)
     {
         if (Type::isNaturalNumber($code) and Arr::has($codes = static::CODES, $code)) {
             $code .= ' ' . $codes[$code];
@@ -164,7 +195,7 @@ class Response
     static public function redirect($url = '/', $code = null, $die = true)
     {
         if ($code !== null) {
-            static::code($code);
+            static::setCode($code);
         }
 
         if (!$url) {

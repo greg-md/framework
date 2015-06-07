@@ -56,7 +56,7 @@ class Update extends Query
 
     public function exec()
     {
-        $stmt = $this->storage()->prepage($this->toString());
+        $stmt = $this->storage()->prepare($this->toString());
 
         $this->bindParamsToStmt($stmt);
 
