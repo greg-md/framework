@@ -12,9 +12,9 @@ class Request implements \ArrayAccess
 {
     use Accessor, ArrayAccess, Internal;
 
-    public function __construct(array $param = [])
+    public function __construct(array $params = [])
     {
-        $this->storage($param);
+        $this->storage($params);
 
         return $this;
     }

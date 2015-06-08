@@ -214,7 +214,7 @@ class Viewer implements \ArrayAccess
 
             $data = ob_get_clean();
         } catch (\Exception $e) {
-            ob_get_clean();
+            ob_end_clean();
 
             throw $e;
         }

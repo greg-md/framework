@@ -37,6 +37,8 @@ class Runner implements \ArrayAccess
 
     const EVENT_DISPATCHED = 'app.dispatched';
 
+    const EVENT_ERROR_DISPATCHED = 'app.error.dispatched';
+
     const EVENT_FINISHED = 'app.finished';
 
     protected $controllersPrefixes = [];
@@ -390,7 +392,18 @@ class Runner implements \ArrayAccess
         return $response;
     }
 
-    public function action($name = null, $controllerName = null, $param = [])
+    protected function dispatchError(\Exception $exception, array $params = [])
+    {
+        if ($error = $this->getIndexArray('error')) {
+            return $this->router()->createRoute('error', '', null, $error)->dispatch([
+                    'exception' => $exception,
+                ] + $params, false);
+        }
+
+        throw $exception;
+    }
+
+    public function action($name = null, $controllerName = null, array $params = [], $catchException = true)
     {
         $name = $name ?: 'index';
 
@@ -398,17 +411,27 @@ class Runner implements \ArrayAccess
 
         Arr::bringRef($controllerName);
 
-        $controller = $this->loadController($controllerName);
+        try {
+            $controller = $this->loadController($controllerName);
 
-        $actionName = Str::phpName($name) . 'Action';
+            $actionName = Str::phpName($name);
 
-        if (!method_exists($controller, $actionName)) {
-            throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
+            if (!method_exists($controller, $actionName)) {
+                throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
+            }
+
+            $request = Request::create($this->appName(), $params);
+
+            return $this->binder()->call([$controller, $actionName], $request);
+        } catch (\Exception $e) {
+            if ($catchException) {
+                return $this->dispatchError($e, [
+                    'from' => 'app.action',
+                ]);
+            }
+
+            throw $e;
         }
-
-        $request = Request::create($this->appName(), $param);
-
-        return $this->binder()->call([$controller, $actionName], $request);
     }
 
     public function loadController($name)

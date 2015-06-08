@@ -161,7 +161,7 @@ class Route implements \ArrayAccess
         return [$name, $default, $regex];
     }
 
-    public function dispatch()
+    public function dispatch(array $params = [], $catchException = true)
     {
         if ($callback = $this->callback()) {
             return $this->app()->binder()->call($callback, $this);
@@ -177,9 +177,9 @@ class Route implements \ArrayAccess
             $params = [
                     'controller' => $controller,
                     'action' => $action,
-                ] + $this->lastMatchedParams();
+                ] + $this->lastMatchedParams() + $params;
 
-            return $this->app()->action($action, $controller, $params);
+            return $this->app()->action($action, $controller, $params, $catchException);
         }
 
         return null;

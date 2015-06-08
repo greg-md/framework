@@ -43,6 +43,22 @@ class Dispatcher
 
     public function set($name, $format, $type = null, $settings = null)
     {
+        $route = $this->createRoute($name, $format, $type, $settings);
+
+        $this->routes[$name] = $route;
+
+        return $route;
+    }
+
+    /**
+     * @param $name
+     * @param $format
+     * @param null $type
+     * @param null $settings
+     * @return Route
+     */
+    public function createRoute($name, $format, $type = null, $settings = null)
+    {
         $route = Route::create($this->appName(), $name, $format, $type);
 
         if (is_callable($settings)) {
@@ -67,8 +83,6 @@ class Dispatcher
                 }
             }
         }
-
-        $this->routes[$name] = $route;
 
         return $route;
     }

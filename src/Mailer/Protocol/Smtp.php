@@ -141,13 +141,9 @@ class Smtp
 
             $this->expect(250, 300);
         } catch (\Exception $e) {
-            try {
-                $this->send('HELO ' . $host);
+            $this->send('HELO ' . $host);
 
-                $this->expect(250, 300);
-            } catch (\Exception $e) {
-                throw $e;
-            }
+            $this->expect(250, 300);
         }
 
         return $this;

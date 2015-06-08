@@ -18,7 +18,7 @@ class Config
     {
         if (is_array($var)) {
             foreach($var as $key => $value) {
-                return static::set($key, $value);
+                static::set($key, $value);
             }
         } else {
             static::set($var, $value);
