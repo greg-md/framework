@@ -2,7 +2,7 @@
 
 namespace Greg\Support;
 
-class DateTime
+class DateTime extends \DateTime
 {
     static public function toCurrentYearInterval($start, $delimiter = ' - ')
     {
@@ -17,7 +17,12 @@ class DateTime
         return $interval;
     }
 
-    static public function format($format, $time = 'now')
+    static public function formatTime($format, $time = 'now')
+    {
+        return date($format, static::toTimestamp($time));
+    }
+
+    static public function formatTimeLocale($format, $time = 'now')
     {
         $string = strftime($format, static::toTimestamp($time));
 
@@ -33,12 +38,27 @@ class DateTime
         return Type::isNaturalNumber($time) ? $time : strtotime($time);
     }
 
-    static public function diff($time1, $time2)
+    static public function diffTime($time1, $time2)
     {
         $time1 = static::toTimestamp($time1);
 
         $time2 = static::toTimestamp($time2);
 
         return ($time1 === $time2) ? 0 : ($time1 > $time2 ? 1 : -1);
+    }
+
+    static public function toStringDateTime($time, $second = true)
+    {
+        return static::formatTime('Y-m-d H:i' . ($second ? ':s' : ''), $time);
+    }
+
+    static public function toStringDate($time)
+    {
+        return static::formatTime('Y-m-d', $time);
+    }
+
+    static public function toStringTime($time, $second = true)
+    {
+        return static::formatTime('H:i' . ($second ? ':s' : ''), $time);
     }
 }

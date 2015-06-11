@@ -899,19 +899,19 @@ class Table
                 case Column::TYPE_DATETIME:
                 case Column::TYPE_TIMESTAMP:
                     if ($value) {
-                        $value = DateTime::format('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? null : $value);
+                        $value = DateTime::formatTimeLocale('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? null : $value);
                     }
 
                     break;
                 case Column::TYPE_DATE:
                     if ($value) {
-                        $value = DateTime::format('%Y-%m-%d', $value);
+                        $value = DateTime::formatTimeLocale('%Y-%m-%d', $value);
                     }
 
                     break;
                 case Column::TYPE_TIME:
                     if ($value) {
-                        $value = DateTime::format('%H:%M:%S', $value);
+                        $value = DateTime::formatTimeLocale('%H:%M:%S', $value);
                     }
 
                     break;
@@ -948,7 +948,7 @@ class Table
      */
     public function getRelationshipTable($name)
     {
-        $table = $this->relationshipTables($name);
+        $table = $this->relationshipsTables($name);
 
         if (!$table) {
             throw new \Exception('Relationship table `' . $name . '` not found in table `' . $this->getName() . '`.');
@@ -956,6 +956,10 @@ class Table
 
         if (is_callable($table)) {
             $table = $this->app()->binder()->call($table);
+        }
+
+        if (!is_object($table)) {
+            $table = $table::instance($this->appName());
         }
 
         return $table;

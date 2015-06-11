@@ -13,6 +13,7 @@ use Greg\Support\Obj;
  * Class Select
  * @package Greg\Db\Sql\Query
  *
+ * @method Select whereRel($column, $operator, $value = null)
  * @method Select whereCol($column, $operator, $value = null)
  * @method Select whereCols(array $columns)
  * @method Select where($expr = null, $value = null, $_ = null)
@@ -122,6 +123,10 @@ class Select extends Query
         return $this;
     }
 
+    /**
+     * @param null $expr
+     * @return Select|array
+     */
     public function group($expr = null)
     {
         if (func_num_args()) {
@@ -219,7 +224,7 @@ class Select extends Query
         if ($columns) {
             $cols = [];
             foreach($columns as $column) {
-                $cols[] = $this->quoteExpr($column);
+                $cols[] = $this->quoteAliasExpr($column);
             }
             $query[] = implode(', ', $cols);
         } else {

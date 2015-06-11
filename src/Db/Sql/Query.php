@@ -31,12 +31,14 @@ class Query
 
     protected function fetchAlias($name)
     {
+        /* @var $name string|array|Table */
+
         if (is_array($name)) {
             return [key($name), current($name)];
         }
 
-        if (is_scalar($name) and $name[0] == ':') {
-            $name = $this->app()->loadModel($name);
+        if (is_scalar($name) and strpos($name, '\\') !== false) {
+            $name = $name::instance($this->appName());
         }
 
         if (is_scalar($name) and preg_match('#^(.+?)(?:\s+as\s+([a-z0-9_]+))?$#i', $name, $matches)) {
@@ -88,15 +90,27 @@ class Query
             return $expr;
         }
 
-        if (preg_match('#^[a-z0-9_\.\*]+$#i', $expr)) {
-            $expr = explode('.', $expr);
+        $regex = '[a-z0-9_\.\*]+';
 
-            $expr = array_map(function($part) {
-                return $part !== '*' ? $this->quoteName($part) : $part;
-            }, $expr);
+        $expr = preg_replace_callback([
+            '#\{(' . $regex . ')\}#i',
+            '#^(' . $regex . ')$#i',
+        ], function($matches) {
+            return $this->quoteColumnName($matches[1]);
+        }, $expr);
 
-            $expr = implode('.', $expr);
-        }
+        return $expr;
+    }
+
+    protected function quoteColumnName($name)
+    {
+        $expr = explode('.', $name);
+
+        $expr = array_map(function($part) {
+            return $part !== '*' ? $this->quoteName($part) : $part;
+        }, $expr);
+
+        $expr = implode('.', $expr);
 
         return $expr;
     }

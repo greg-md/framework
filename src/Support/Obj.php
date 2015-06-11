@@ -40,6 +40,19 @@ class Obj
         return $self;
     }
 
+    static public function expectedArgs(callable $callable)
+    {
+        if (is_scalar($callable) and strpos($callable, '::')) {
+            $callable = explode('::', $callable, 2);
+        }
+
+        if (is_array($callable)) {
+            return (new \ReflectionMethod($callable[0], $callable[1]))->getParameters();
+        }
+
+        return (new \ReflectionFunction($callable))->getParameters();
+    }
+
     static public function fetchRef($value)
     {
         return ($value instanceof ArrayReference) ? $value->get() : $value;

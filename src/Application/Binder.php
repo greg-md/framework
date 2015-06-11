@@ -90,54 +90,88 @@ class Binder
 
     public function callArgs(callable $callable, array $args = [])
     {
-        if (is_scalar($callable) and strpos($callable, '::')) {
-            $callable = explode('::', $callable, 2);
-        }
-
-        if (is_array($callable)) {
-            $expectedArgs = (new \ReflectionMethod($callable[0], $callable[1]))->getParameters();
-        } else {
-            $expectedArgs = (new \ReflectionFunction($callable))->getParameters();
-        }
-
-        if ($expectedArgs) {
+        if ($expectedArgs = Obj::expectedArgs($callable)) {
             $args = $this->addExpectedArgs($args, $expectedArgs);
         }
 
         return call_user_func_array($callable, $args);
     }
 
-    public function addExpectedArgs($args, $expectedArgs)
+
+
+    public function addExpectedArgs(array $args, array $expectedArgs)
     {
+        /* @var $expectedArgs \ReflectionParameter[] */
+
         if ($args) {
             $expectedArgs = array_slice($expectedArgs, sizeof($args));
         }
 
-        if ($expectedArgs) {
-            $newArgs = [];
-
-            /* @var $expectedArg \ReflectionParameter */
-            foreach (array_reverse($expectedArgs) as $expectedArg) {
-                if (!$newArgs and !$expectedArg->getClass() and $expectedArg->isOptional()) {
-                    continue;
-                }
-
-                $newArgs[] = $this->expectedArg($expectedArg);
-            }
-
-            if ($newArgs) {
-                $args = array_merge($args, array_reverse($newArgs));
-            }
+        if ($newArgs = $this->fetchExpectedArgs($expectedArgs)) {
+            $args = array_merge($args, $newArgs);
         }
 
         return $args;
     }
 
+    public function fetchExpectedArgs(array $expectedArgs, array $customArgs = [])
+    {
+        $assocArgs = [];
+
+        foreach($customArgs as $key => $value) {
+            if (is_int($key)) {
+                $assocArgs[get_class($value)] = $value;
+            } else {
+                $assocArgs[$key] = $value;
+            }
+        }
+
+        /* @var $expectedArgs \ReflectionParameter[] */
+        $expectedArgs = array_reverse($expectedArgs);
+
+        $returnArgs = [];
+
+        foreach ($expectedArgs as $expectedArg) {
+            if (!$returnArgs and !$expectedArg->getClass() and $expectedArg->isOptional()) {
+                continue;
+            }
+
+            if ($assocArgs and $expectedType = $expectedArg->getClass() and Arr::has($assocArgs, $expectedType->getName())) {
+                $returnArgs[] = $assocArgs[$expectedType->getName()];
+            } else {
+                $returnArgs[] = $this->expectedArg($expectedArg);
+            }
+        }
+
+        $returnArgs = array_reverse($returnArgs);
+
+        return $returnArgs;
+    }
+
+    public function callWith(callable $callable, ...$args)
+    {
+        return $this->callWithRef($callable, ...$args);
+    }
+
+    public function callWithRef(callable $callable, &...$args)
+    {
+        return $this->callWithArgs($callable, $args);
+    }
+
+    public function callWithArgs(callable $callable, array $args = [])
+    {
+        $funcArgs = [];
+
+        if ($expectedArgs = Obj::expectedArgs($callable)) {
+            $funcArgs = $this->fetchExpectedArgs($expectedArgs, $args);
+        }
+
+        return call_user_func_array($callable, $funcArgs);
+    }
+
     public function expectedArg(\ReflectionParameter $expectedArg)
     {
-        $expectedType = $expectedArg->getClass();
-
-        if ($expectedType) {
+        if ($expectedType = $expectedArg->getClass()) {
             $className = $expectedType->getName();
 
             $arg = $this->get($className);

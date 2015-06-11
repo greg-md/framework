@@ -38,6 +38,62 @@ trait WhereTrait
         return $this->whereLogic('OR', ...func_get_args());
     }
 
+    public function whereRel($column1, $operator, $column2 = null)
+    {
+        return $this->whereRelLogic('AND', ...func_get_args());
+    }
+
+    public function orWhereRel($column1, $operator, $column2 = null)
+    {
+        return $this->whereRelLogic('OR', ...func_get_args());
+    }
+
+    /**
+     * @param $type
+     * @param $column1
+     * @param $operator
+     * @param null $column2
+     * @return array|WhereTrait
+     */
+    public function whereRelLogic($type, $column1, $operator, $column2 = null)
+    {
+        $args = func_get_args();
+
+        array_shift($args);
+
+        if (sizeof($args) < 3) {
+            $column1 = array_shift($args);
+
+            $column2 = array_shift($args);
+
+            $operator = null;
+        }
+
+        if (is_array($column1)) {
+            if (sizeof($column1) > 1) {
+                $column1 = array_map([$this, 'quoteExpr'], $column1);
+
+                $column1 = '(' . implode(', ', $column1) . ')';
+            } else {
+                $column1 = current($column1);
+            }
+        }
+
+        if (is_array($column2)) {
+            if (sizeof($column2) > 1) {
+                $column2 = array_map([$this, 'quoteExpr'], $column2);
+
+                $column2 = '(' . implode(', ', $column2) . ')';
+            } else {
+                $column2 = current($column2);
+            }
+        }
+
+        $expr = $this->quoteExpr($column1) . ' ' . ($operator ?: '=') . ' ' . $this->quoteExpr($column2);
+
+        return $this->whereLogic($type, $expr);
+    }
+
     public function whereCol($column, $operator, $value = null)
     {
         return $this->whereColLogic('AND', ...func_get_args());

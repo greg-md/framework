@@ -422,7 +422,7 @@ class Runner implements \ArrayAccess
 
             $request = Request::create($this->appName(), $params);
 
-            return $this->binder()->call([$controller, $actionName], $request);
+            return $this->binder()->callWith([$controller, $actionName], $request);
         } catch (\Exception $e) {
             if ($catchException) {
                 return $this->dispatchError($e, [
