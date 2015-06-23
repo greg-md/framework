@@ -19,6 +19,16 @@ class Request implements \ArrayAccess
         return $this;
     }
 
+    public function &get($key, $else = null)
+    {
+        return Arr::get($this->accessor(), $key, $this->getRequest($key, $else));
+    }
+
+    public function &getRef($key, $else = null)
+    {
+        return Arr::getRef($this->accessor(), $key, $this->getRefRequest($key, $else));
+    }
+
     public function required($key)
     {
         $value = $this->get($key);
@@ -28,16 +38,6 @@ class Request implements \ArrayAccess
         }
 
         return $value;
-    }
-
-    public function &get($key, $else = null)
-    {
-        return Arr::get($this->accessor(), $key, $this->getRequest($key, $else));
-    }
-
-    public function &getRef($key, $else = null)
-    {
-        return Arr::getRef($this->accessor(), $key, $this->getRefRequest($key, $else));
     }
 
     public function getArray($key, $else = null)
@@ -200,6 +200,17 @@ class Request implements \ArrayAccess
         return Arr::getRef($_GET, $key, $else);
     }
 
+    static public function requiredGet($key)
+    {
+        $value = static::getGet($key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
+    }
+
     static public function getArrayGet($key, $else = null)
     {
         return Arr::getArray($_GET, $key, $else);
@@ -280,6 +291,17 @@ class Request implements \ArrayAccess
         return Arr::getRef($_POST, $key, $else);
     }
 
+    static public function requiredPost($key)
+    {
+        $value = static::getPost($key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
+    }
+
     static public function getArrayPost($key, $else = null)
     {
         return Arr::getArray($_POST, $key, $else);
@@ -358,6 +380,17 @@ class Request implements \ArrayAccess
     static public function &getRefRequest($key, $else = null)
     {
         return Arr::getRef($_REQUEST, $key, $else);
+    }
+
+    static public function requiredRequest($key)
+    {
+        $value = static::getRequest($key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
     }
 
     static public function getArrayRequest($key, $else = null)

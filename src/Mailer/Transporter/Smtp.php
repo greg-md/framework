@@ -76,12 +76,10 @@ class Smtp extends Transporter
 
         $headers = implode(static::NEW_LINE, $headers);
 
-        list($fromEmail, $fromName) = ($mail->from() ?: [null, null]);
-
-        $from = $this->emailsToString([$fromEmail => $fromName]);
+        list($fromEmail) = ($mail->from() ?: [null, null]);
 
         foreach($mail->to() as $email => $name) {
-            $connection->mail($from);
+            $connection->mail($fromEmail);
 
             $recipients = is_array($name) ? $name : [$email => $name];
 

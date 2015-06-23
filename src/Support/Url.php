@@ -6,6 +6,8 @@ use Greg\Http\Request;
 
 class Url
 {
+    const UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13';
+
     static public function is($url)
     {
         return preg_match('#^(?:https?\:)?//#i', $url);
@@ -17,16 +19,65 @@ class Url
             return $url;
         }
 
-        return static::fix(Request::clientHost() . $url);
+        return static::fix(Request::clientHost() . $url, Request::isSecured());
     }
 
-    static public function fix($url, $secured = null)
+    static public function fix($url, $secured = false)
     {
         if (static::is($url)) {
             return $url;
         }
 
-        return ($secured !== null ? $secured : Request::isSecured() ? 'https' : 'http') . '://' . $url;
+        return ($secured ? 'https' : 'http') . '://' . $url;
+    }
+
+    static public function host($url, $stripWWW = true)
+    {
+        $url = Url::fix($url);
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if ($stripWWW and substr($host, 0, 4) == 'www.') {
+            $host = substr($host, 4);
+        }
+
+        return $host;
+    }
+
+    static public function home($url)
+    {
+        $url = Url::fix($url);
+
+        $info = parse_url($url);
+
+        return $info['scheme'] . '://' . $info['host'];
+    }
+
+    static public function init($url)
+    {
+        $ch = curl_init(static::fix($url));
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        curl_setopt($ch, CURLOPT_USERAGENT, static::UA);
+
+        return $ch;
+    }
+
+    static public function effective($url)
+    {
+        $ch = static::init($url);
+
+        curl_exec($ch);
+
+        return curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+    }
+
+    static public function contents($url)
+    {
+        $ch = static::init($url);
+
+        return curl_exec($ch);
     }
 
     static public function transform($string, $type = Str::SPINAL_CASE)
