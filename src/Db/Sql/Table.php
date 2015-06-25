@@ -6,7 +6,7 @@ use Greg\Cache\StorageInterface as CacheStorageInterface;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\Table\Column;
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
 use Greg\Support\Obj;

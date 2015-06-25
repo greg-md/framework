@@ -2,10 +2,10 @@
 
 namespace Greg\View;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Http\Response;
-use Greg\Storage\Accessor;
-use Greg\Storage\ArrayAccess;
+use Greg\Support\Storage\Accessor;
+use Greg\Support\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 

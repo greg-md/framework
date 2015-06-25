@@ -3,8 +3,8 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
-use Greg\Engine\Internal;
-use Greg\Storage\ArrayObject;
+use Greg\Support\Engine\Internal;
+use Greg\Support\Storage\ArrayObject;
 use Greg\Support\Debug;
 use Greg\Support\Obj;
 

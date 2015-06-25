@@ -2,8 +2,6 @@
 
 namespace Greg\Support;
 
-use Greg\Server\ErrorHandler;
-
 class Dir
 {
     static public function fix($dir, $recursive = false)

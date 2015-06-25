@@ -2,8 +2,8 @@
 
 namespace Greg\Support;
 
-use Greg\Storage\ArrayObject;
-use Greg\Storage\ArrayReference;
+use Greg\Support\Storage\ArrayObject;
+use Greg\Support\Storage\ArrayReference;
 
 class Obj
 {

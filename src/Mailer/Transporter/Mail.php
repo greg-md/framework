@@ -3,7 +3,7 @@
 namespace Greg\Mailer\Transporter;
 
 use Greg\Mailer\Transporter;
-use Greg\Server\ErrorHandler;
+use Greg\Support\ErrorHandler;
 
 class Mail extends Transporter
 {

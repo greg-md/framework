@@ -2,7 +2,7 @@
 
 namespace Greg\Support;
 
-use Greg\Storage\ArrayReference;
+use Greg\Support\Storage\ArrayReference;
 
 class Arr
 {

@@ -2,7 +2,7 @@
 
 namespace Greg\System;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Support\Obj;
 
 class File
@@ -37,5 +37,4 @@ class File
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
-
 }

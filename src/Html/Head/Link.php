@@ -2,9 +2,9 @@
 
 namespace Greg\Html\Head;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Html\Element;
-use Greg\Storage\Accessor;
+use Greg\Support\Storage\Accessor;
 
 class Link
 {

@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 
 abstract class Storage implements StorageInterface
 {

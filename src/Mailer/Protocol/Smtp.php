@@ -2,8 +2,8 @@
 
 namespace Greg\Mailer\Protocol;
 
-use Greg\Engine\Internal;
-use Greg\Server\ErrorHandler;
+use Greg\Support\Engine\Internal;
+use Greg\Support\ErrorHandler;
 use Greg\Support\Obj;
 
 class Smtp

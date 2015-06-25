@@ -11,7 +11,7 @@
  */
 namespace Greg\Composer\Autoload;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Support\Obj;
 
 /**

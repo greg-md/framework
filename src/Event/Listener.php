@@ -2,8 +2,8 @@
 
 namespace Greg\Event;
 
-use Greg\Engine\Internal;
-use Greg\Storage\Accessor;
+use Greg\Support\Engine\Internal;
+use Greg\Support\Storage\Accessor;
 use Greg\Support\Arr;
 use Greg\Support\Str;
 

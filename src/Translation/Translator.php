@@ -2,9 +2,9 @@
 
 namespace Greg\Translation;
 
-use Greg\Engine\Internal;
-use Greg\Storage\Accessor;
-use Greg\Storage\ArrayAccess;
+use Greg\Support\Engine\Internal;
+use Greg\Support\Storage\Accessor;
+use Greg\Support\Storage\ArrayAccess;
 use Greg\Support\Obj;
 
 class Translator implements \ArrayAccess

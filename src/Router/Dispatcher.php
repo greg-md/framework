@@ -2,7 +2,7 @@
 
 namespace Greg\Router;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Support\Arr;
 
 class Dispatcher

@@ -2,10 +2,9 @@
 
 namespace Greg\Html\Head;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Html\Element;
-use Greg\Storage\Accessor;
-use Greg\Support\Arr;
+use Greg\Support\Storage\Accessor;
 
 class Meta
 {
@@ -17,12 +16,6 @@ class Meta
             'name' => $name,
             'content' => $this->clear($content),
         ]] : []));
-        /*
-        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
-            'name' => $name,
-            'content' => $this->clear($content),
-        ], $this) : Arr::get($this->storage, $name);
-        */
     }
 
     public function property($name, $content = null)
@@ -31,12 +24,6 @@ class Meta
             'property' => $name,
             'content' => $this->clear($content),
         ]] : []));
-        /*
-        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
-            'property' => $name,
-            'content' => $this->clear($content),
-        ], $this) : Arr::get($this->storage, $name);
-        */
     }
 
     public function httpEquiv($name, $content = null)
@@ -45,12 +32,6 @@ class Meta
             'http-equiv' => $name,
             'content' => $this->clear($content),
         ]] : []));
-        /*
-        return func_num_args() > 1 ? Arr::set($this->storage, $name, [
-            'http-equiv' => $name,
-            'content' => $this->clear($content),
-        ], $this) : Arr::get($this->storage, $name);
-        */
     }
 
     public function charset($charset = null)
@@ -58,11 +39,6 @@ class Meta
         return $this->storage('charset', ...(func_num_args() ? [[
             'charset' => $charset,
         ]] : []));
-        /*
-        return func_num_args() ? Arr::set($this->storage, 'charset', [
-            'charset' => $charset,
-        ], $this) : Arr::get($this->storage, 'charset');
-        */
     }
 
     public function refresh($timeout = 0, $url = null)

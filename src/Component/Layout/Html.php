@@ -4,7 +4,7 @@ namespace Greg\Component\Layout;
 
 use Greg\Application\Runner;
 use Greg\Component\Layout;
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
@@ -13,7 +13,7 @@ use Greg\Html\Head;
 use Greg\Html\Script;
 use Greg\Http\Response;
 use Greg\Support\Obj;
-use Greg\Tool\Minify;
+use Greg\Support\Tool\Minify;
 
 class Html implements SubscriberInterface
 {

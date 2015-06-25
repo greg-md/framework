@@ -3,16 +3,16 @@
 namespace Greg\Application;
 
 use Greg\Composer\Autoload\ClassLoader;
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
-use Greg\Server\Config;
-use Greg\Server\Ini;
-use Greg\Server\Session;
-use Greg\Storage\Accessor;
-use Greg\Storage\ArrayAccess;
+use Greg\Support\Server\Config;
+use Greg\Support\Server\Ini;
+use Greg\Support\Server\Session;
+use Greg\Support\Storage\Accessor;
+use Greg\Support\Storage\ArrayAccess;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;

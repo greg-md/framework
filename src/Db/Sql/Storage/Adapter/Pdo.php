@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql\Storage\Adapter;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Support\Obj;
 
 class Pdo extends \PDO implements AdapterInterface

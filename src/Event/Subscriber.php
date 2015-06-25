@@ -2,7 +2,7 @@
 
 namespace Greg\Event;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 
 abstract class Subscriber implements SubscriberInterface
 {

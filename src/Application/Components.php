@@ -2,7 +2,7 @@
 
 namespace Greg\Application;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 use Greg\Event\SubscriberInterface;
 
 class Components

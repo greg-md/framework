@@ -2,7 +2,7 @@
 
 namespace Greg\Mailer;
 
-use Greg\Engine\Internal;
+use Greg\Support\Engine\Internal;
 
 abstract class Transporter implements TransporterInterface
 {
