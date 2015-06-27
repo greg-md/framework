@@ -4,7 +4,7 @@ namespace Greg\Db\Sql\Table;
 
 use Greg\Support\Obj;
 
-trait Schema
+trait SchemaTrait
 {
     abstract protected function loadSchema();
 

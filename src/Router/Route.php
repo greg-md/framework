@@ -2,9 +2,9 @@
 
 namespace Greg\Router;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Regex;
@@ -14,7 +14,7 @@ use Greg\Support\Url;
 
 class Route implements \ArrayAccess
 {
-    use Accessor, ArrayAccess, Internal;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     protected $name = null;
 

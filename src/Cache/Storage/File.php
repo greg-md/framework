@@ -4,15 +4,15 @@ namespace Greg\Cache\Storage;
 
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Http\Request;
-use Greg\Support\Storage\Accessor;
+use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class File implements StorageInterface
 {
-    use Accessor, StorageTrait, Internal;
+    use AccessorTrait, StorageTrait, InternalTrait;
 
     protected $path = null;
 

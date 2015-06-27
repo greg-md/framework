@@ -119,7 +119,11 @@ class Arr
             $myRef = &$myRef[$index];
         }
 
-        $myRef[$lastIndex] = &$value;
+        if ($lastIndex === '') {
+            $myRef[] = &$value;
+        } else {
+            $myRef[$lastIndex] = &$value;
+        }
 
         return true;
     }

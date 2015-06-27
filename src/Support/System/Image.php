@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\System;
+namespace Greg\Support\System;
 
 class Image extends File
 {

@@ -402,7 +402,7 @@ class Mysql extends Storage
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__},function($adapter) {
             if (!is_object($adapter)) {
-                /* @var $adapter \Greg\Support\Engine\Internal */
+                /* @var $adapter \Greg\Support\Engine\InternalTrait */
                 $adapter = $adapter::newInstance($this->appName(), $this->dns(), $this->username(), $this->password(), $this->options());
             }
 

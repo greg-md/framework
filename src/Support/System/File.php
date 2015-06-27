@@ -1,14 +1,11 @@
 <?php
 
-namespace Greg\System;
+namespace Greg\Support\System;
 
-use Greg\Support\Engine\Internal;
 use Greg\Support\Obj;
 
 class File
 {
-    use Internal;
-
     protected $file = null;
 
     public function __construct($file)
@@ -16,11 +13,6 @@ class File
         $this->file($file);
 
         return $this;
-    }
-
-    static public function create($appName, $file)
-    {
-        return static::newInstanceRef($appName, $file);
     }
 
     public function ext()

@@ -3,8 +3,7 @@
 namespace Greg\Component\Layout;
 
 use Greg\Application\Runner;
-use Greg\Component\Layout;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
@@ -17,7 +16,7 @@ use Greg\Support\Tool\Minify;
 
 class Html implements SubscriberInterface
 {
-    use SubscriberTrait, Internal;
+    use SubscriberTrait, InternalTrait;
 
     protected $htmlClass = [];
 

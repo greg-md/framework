@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Storage;
 
-trait Serializable
+trait SerializableTrait
 {
     abstract protected function &accessor(array $storage = []);
 

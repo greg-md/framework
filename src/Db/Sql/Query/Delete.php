@@ -3,8 +3,6 @@
 namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\Query;
-use Greg\Db\Sql\Query\Traits\FromTrait;
-use Greg\Db\Sql\Query\Traits\WhereTrait;
 use Greg\Support\Debug;
 
 class Delete extends Query

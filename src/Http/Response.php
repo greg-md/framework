@@ -2,12 +2,12 @@
 
 namespace Greg\Http;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 class Response extends \Greg\Support\Http\Response
 {
-    use Internal;
+    use InternalTrait;
 
     protected $contentType = 'text/html';
 
@@ -18,6 +18,8 @@ class Response extends \Greg\Support\Http\Response
     protected $code = null;
 
     protected $content = null;
+
+    protected $callbacks = [];
 
     public function __construct($content = null, $contentType = null)
     {
@@ -44,8 +46,32 @@ class Response extends \Greg\Support\Http\Response
         return static::newInstanceRef($appName, $content, $contentType);
     }
 
+    public function route($name, array $params = [], $code = null)
+    {
+        $this->location($this->app()->router()->fetch($name, $params));
+
+        if ($code !== null) {
+            $this->code($code);
+        }
+
+        return $this;
+    }
+
+    public function with(callable $callable)
+    {
+        $this->callbacks()[] = $callable;
+
+        return $this;
+    }
+
     public function send()
     {
+        if ($callbacks = $this->callbacks()) {
+            foreach($callbacks as $callback) {
+                $this->app()->binder()->callWith($callback, $this);
+            }
+        }
+
         $contentType = [];
 
         $type = $this->contentType();
@@ -100,15 +126,9 @@ class Response extends \Greg\Support\Http\Response
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function route($name, array $params = [], $code = null)
+    protected function &callbacks($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
-        $this->location($this->app()->router()->fetch($name, $params));
-
-        if ($code !== null) {
-            $this->code($code);
-        }
-
-        return $this;
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function __toString()

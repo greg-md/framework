@@ -2,14 +2,14 @@
 
 namespace Greg\Db\Sql\Storage\Adapter;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 class Pdo extends \PDO implements AdapterInterface
 {
     protected $stmtClass = Pdo\Stmt::class;
 
-    use Internal;
+    use InternalTrait;
 
     public function init()
     {

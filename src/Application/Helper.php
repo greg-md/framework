@@ -2,12 +2,12 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Http\Response;
 
 class Helper
 {
-    use Internal;
+    use InternalTrait;
 
     /**
      * @return Response
@@ -17,6 +17,12 @@ class Helper
         return Response::create($this->appName());
     }
 
+    /**
+     * @param $name
+     * @param array $params
+     * @param null $code
+     * @return Response
+     */
     public function routeRedirect($name, array $params = [], $code = null)
     {
         return $this->redirect()->route($name, $params, $code);

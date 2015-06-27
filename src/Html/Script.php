@@ -2,13 +2,13 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Arr;
 
 class Script
 {
-    use Accessor, Internal;
+    use AccessorTrait, InternalTrait;
 
     const APPEND = 'append';
 

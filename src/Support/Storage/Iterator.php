@@ -4,7 +4,7 @@ namespace Greg\Support\Storage;
 
 class Iterator implements \Iterator
 {
-    use Accessor;
+    use AccessorTrait;
 
     public function __construct(&$array = [])
     {

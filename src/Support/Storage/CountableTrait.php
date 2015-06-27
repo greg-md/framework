@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Storage;
 
-trait Countable
+trait CountableTrait
 {
     abstract protected function &accessor(array $storage = []);
 

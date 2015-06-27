@@ -2,14 +2,14 @@
 
 namespace Greg\Support\Config;
 
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Ini implements \ArrayAccess
 {
-    use Accessor, ArrayAccess;
+    use AccessorTrait, ArrayAccessTrait;
 
     protected $contents = [];
 

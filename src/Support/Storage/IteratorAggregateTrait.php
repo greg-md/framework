@@ -4,7 +4,7 @@ namespace Greg\Support\Storage;
 
 use Greg\Support\Obj;
 
-trait IteratorAggregate
+trait IteratorAggregateTrait
 {
     protected $iteratorClass = \ArrayIterator::class;
 

@@ -3,7 +3,7 @@
 namespace Greg\Application;
 
 use Greg\Composer\Autoload\ClassLoader;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
@@ -11,8 +11,8 @@ use Greg\Router\Dispatcher;
 use Greg\Support\Server\Config;
 use Greg\Support\Server\Ini;
 use Greg\Support\Server\Session;
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
@@ -21,7 +21,7 @@ use Greg\View\Viewer;
 
 class Runner implements \ArrayAccess
 {
-    use Accessor, ArrayAccess, Internal;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     const EVENT_INIT = 'app.init';
 
@@ -309,7 +309,7 @@ class Runner implements \ArrayAccess
 
         $binder = $this->binder();
 
-        /* @var $class Internal */
+        /* @var $class InternalTrait */
         $class = $binder ? $binder->loadInstanceArgs($className, $args) : Obj::loadInstanceArgs($className, $args);
 
         $class->appName($this->appName());
@@ -338,7 +338,7 @@ class Runner implements \ArrayAccess
         if (!$instance) {
             $binder = $this->binder();
 
-            /* @var $instance Internal */
+            /* @var $instance InternalTrait */
             $instance = $binder ? $binder->loadInstance($className) : Obj::loadInstance($className);
 
             $instance->appName($this->appName());
@@ -438,7 +438,7 @@ class Runner implements \ArrayAccess
     {
         Arr::bringRef($name);
 
-        /* @var $class Internal */
+        /* @var $class InternalTrait */
         if ($class = $this->controllerExists($name)) {
             return $class::newInstance($this->appName());
         }

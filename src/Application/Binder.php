@@ -2,13 +2,13 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Binder
 {
-    use Internal;
+    use InternalTrait;
 
     protected $storage = [];
 
@@ -243,7 +243,7 @@ class Binder
         */
 
         if (!$object and $this->isInstancePrefix($name)) {
-            /* @var $name Internal */
+            /* @var $name InternalTrait */
             $object = $name::instance($this->appName());
         }
 

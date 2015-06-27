@@ -2,14 +2,14 @@
 
 namespace Greg\Event;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Arr;
 use Greg\Support\Str;
 
 class Listener
 {
-    use Accessor, Internal;
+    use AccessorTrait, InternalTrait;
 
     public function __construct(array $events = [], array $subscribers = [])
     {

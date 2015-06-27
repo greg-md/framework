@@ -11,7 +11,7 @@
  */
 namespace Greg\Composer\Autoload;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 /**
@@ -44,7 +44,7 @@ use Greg\Support\Obj;
  */
 class ClassLoader
 {
-    use Internal;
+    use InternalTrait;
 
     // PSR-4
     protected $prefixLengthsPsr4 = [];

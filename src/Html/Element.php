@@ -2,14 +2,14 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Obj;
 
 class Element implements \ArrayAccess
 {
-    use Accessor, ArrayAccess, Internal;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     const SHORT_TAGS = 'h1,h2,h3,h4,h5,h6,input,hr,br,link,meta,img,keygen';
 

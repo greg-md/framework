@@ -2,12 +2,12 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Event\SubscriberInterface;
 
 class Components
 {
-    use Internal;
+    use InternalTrait;
 
     public function __construct(array $components = [])
     {

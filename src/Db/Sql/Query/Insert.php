@@ -62,6 +62,8 @@ class Insert extends Query
 
         list($intoAlias, $intoName) = $this->fetchAlias($into);
 
+        unset($intoAlias);
+
         $query[] = $this->quoteNamedExpr($intoName);
 
         $columns = $this->columns();

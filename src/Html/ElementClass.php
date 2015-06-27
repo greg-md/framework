@@ -2,12 +2,12 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
 
 class ElementClass
 {
-    use Accessor, Internal;
+    use AccessorTrait, InternalTrait;
 
     public function add($class, $id = null)
     {

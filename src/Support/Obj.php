@@ -316,6 +316,8 @@ class Obj
                 return $return;
             }
 
+            unset($recursive);
+
             if ($num > 3) {
                 switch($type) {
                     case static::PROP_REPLACE:

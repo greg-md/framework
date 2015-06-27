@@ -3,13 +3,13 @@
 namespace Greg\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Type;
 
 class Stmt extends \PDOStatement implements StmtInterface
 {
-    use Internal;
+    use InternalTrait;
 
     /**
      * \PDOStatement require it to be protected

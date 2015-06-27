@@ -2,7 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Html\Head\Link;
 use Greg\Html\Head\Meta;
 use Greg\Html\Head\Style;
@@ -10,7 +10,7 @@ use Greg\Support\Obj;
 
 class Head
 {
-    use Internal;
+    use InternalTrait;
 
     protected $title = null;
 

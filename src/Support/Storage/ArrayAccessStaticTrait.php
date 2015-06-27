@@ -4,7 +4,7 @@ namespace Greg\Support\Storage;
 
 use Greg\Support\Arr;
 
-trait ArrayAccessStatic
+trait ArrayAccessStaticTrait
 {
     abstract protected function &accessor(array $storage = []);
 

@@ -2,14 +2,14 @@
 
 namespace Greg\Translation;
 
-use Greg\Support\Engine\Internal;
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Obj;
 
 class Translator implements \ArrayAccess
 {
-    use Accessor, ArrayAccess, Internal;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     protected $language = 'en';
 

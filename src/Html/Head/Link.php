@@ -2,13 +2,13 @@
 
 namespace Greg\Html\Head;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Html\Element;
-use Greg\Support\Storage\Accessor;
+use Greg\Support\Storage\AccessorTrait;
 
 class Link
 {
-    use Accessor, Internal;
+    use AccessorTrait, InternalTrait;
 
     public function set($rel, $href, array $attr = [], $id = null)
     {

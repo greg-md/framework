@@ -2,12 +2,12 @@
 
 namespace Greg\Mailer;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 class Mail
 {
-    use Internal;
+    use InternalTrait;
 
     protected $subject = null;
 

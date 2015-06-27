@@ -4,7 +4,7 @@ namespace Greg\Cache\Storage;
 
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Http\Request;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
@@ -17,7 +17,7 @@ use Greg\Support\Obj;
  */
 class Redis extends \Redis implements StorageInterface
 {
-    use StorageTrait, Internal;
+    use StorageTrait, InternalTrait;
 
     protected $host = '127.0.0.1';
 

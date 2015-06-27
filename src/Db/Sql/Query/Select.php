@@ -3,8 +3,6 @@
 namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\Query;
-use Greg\Db\Sql\Query\Traits\FromTrait;
-use Greg\Db\Sql\Query\Traits\WhereTrait;
 use Greg\Db\Sql\Table;
 use Greg\Support\Debug;
 use Greg\Support\Obj;

@@ -1,9 +1,8 @@
 <?php
 
-namespace Greg\Db\Sql\Query\Traits;
+namespace Greg\Db\Sql\Query;
 
 use Greg\Application\Runner;
-use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\StorageInterface;
 use Greg\Support\Arr;
 use Greg\Support\Obj;

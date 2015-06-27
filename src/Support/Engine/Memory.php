@@ -2,10 +2,10 @@
 
 namespace Greg\Support\Engine;
 
-use Greg\Support\Storage\AccessorStatic;
-use Greg\Support\Storage\ArrayAccessStatic;
+use Greg\Support\Storage\AccessorStaticTrait;
+use Greg\Support\Storage\ArrayAccessStaticTrait;
 
 class Memory
 {
-    use AccessorStatic, ArrayAccessStatic;
+    use AccessorStaticTrait, ArrayAccessStaticTrait;
 }

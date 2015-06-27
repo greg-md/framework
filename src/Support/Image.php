@@ -11,6 +11,8 @@ class Image extends File
         if (!$type) {
             list($width, $height, $type) = @getimagesize($file);
 
+            unset($width, $height);
+
             return $type;
         }
 
@@ -60,6 +62,8 @@ class Image extends File
     static public function height($file)
     {
         list($width, $height) = @getimagesize($file);
+
+        unset($width);
 
         if (!$height) {
             $height = imagesy(static::get($file));

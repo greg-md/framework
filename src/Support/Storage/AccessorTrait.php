@@ -4,7 +4,7 @@ namespace Greg\Support\Storage;
 
 use Greg\Support\Obj;
 
-trait Accessor
+trait AccessorTrait
 {
     protected $storage = [];
 

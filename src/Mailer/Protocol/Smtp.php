@@ -2,7 +2,7 @@
 
 namespace Greg\Mailer\Protocol;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\ErrorHandler;
 use Greg\Support\Obj;
 
@@ -10,7 +10,7 @@ class Smtp
 {
     const NEW_LINE = "\r\n";
 
-    use Internal;
+    use InternalTrait;
 
     protected $remoteAddress = 'tcp://127.0.0.1:25';
 

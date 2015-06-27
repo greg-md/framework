@@ -2,9 +2,9 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 
 abstract class Controller
 {
-    use Internal;
+    use InternalTrait;
 }

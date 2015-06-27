@@ -1,9 +1,9 @@
 {
-    "name": "greg-md/framework",
+    "name": "greg-md/support",
     "type": "library",
-    "description": "Greg Framework",
-    "keywords": ["greg","framework"],
-    "homepage": "https://github.com/greg-md/framework",
+    "description": "Greg Support",
+    "keywords": ["greg","support"],
+    "homepage": "https://github.com/greg-md/framework/tree/master/src/Support",
     "license": "MIT",
     "authors": [
         {

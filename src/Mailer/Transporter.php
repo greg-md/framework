@@ -2,11 +2,11 @@
 
 namespace Greg\Mailer;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 
 abstract class Transporter implements TransporterInterface
 {
-    use Internal;
+    use InternalTrait;
 
     const NEW_LINE = "\r\n";
 

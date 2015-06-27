@@ -5,7 +5,7 @@ namespace Greg\Support\Engine;
 use Greg\Application\Runner;
 use Greg\Support\Obj;
 
-trait Adapter
+trait AdapterTrait
 {
     protected $adapter = null;
 

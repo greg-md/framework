@@ -6,7 +6,7 @@ use Greg\Cache\StorageInterface as CacheStorageInterface;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\Table\Column;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
 use Greg\Support\Obj;
@@ -14,7 +14,7 @@ use Greg\Support\Url;
 
 class Table
 {
-    use Internal;
+    use InternalTrait;
 
     protected $prefix = null;
 
@@ -694,7 +694,7 @@ class Table
             /* @var $dependenceTable string|Table */
             $dependenceTable = $dependenceInfo['table'];
 
-            $dependenceTable = $dependenceTable::create($this->appName(), $this->storage());
+            $dependenceTable = $dependenceTable::newInstance($this->appName(), $this->storage());
 
             $dependenceTableName = $dependenceTable->name();
 

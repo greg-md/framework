@@ -2,16 +2,16 @@
 
 namespace Greg\View;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Http\Response;
-use Greg\Support\Storage\Accessor;
-use Greg\Support\Storage\ArrayAccess;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Viewer implements \ArrayAccess
 {
-    use Accessor, ArrayAccess, Internal;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     protected $extension = '.php';
 

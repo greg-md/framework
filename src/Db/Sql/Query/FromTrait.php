@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Db\Sql\Query\Traits;
+namespace Greg\Db\Sql\Query;
 
 trait FromTrait
 {

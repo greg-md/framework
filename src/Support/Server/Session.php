@@ -229,7 +229,7 @@ class Session
 
         return Arr::delIndex($_SESSION, $index, $delimiter);
     }
-    
+
     static public function destroy()
     {
         static::start();

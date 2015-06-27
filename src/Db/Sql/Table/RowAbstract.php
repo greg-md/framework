@@ -3,7 +3,7 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Storage\ArrayObject;
 use Greg\Support\Debug;
 use Greg\Support\Obj;
@@ -17,7 +17,7 @@ use Greg\Support\Obj;
  */
 abstract class RowAbstract extends ArrayObject
 {
-    use Internal;
+    use InternalTrait;
 
     protected $table = null;
 

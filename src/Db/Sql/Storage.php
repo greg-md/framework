@@ -2,11 +2,11 @@
 
 namespace Greg\Db\Sql;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 
 abstract class Storage implements StorageInterface
 {
-    use StorageTrait, Internal;
+    use StorageTrait, InternalTrait;
 
     const PARAM_BOOL = 5;
 

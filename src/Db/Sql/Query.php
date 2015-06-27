@@ -4,14 +4,14 @@ namespace Greg\Db\Sql;
 
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
 class Query
 {
-    use Internal;
+    use InternalTrait;
 
     protected $quoteNameWith = '`';
 
@@ -140,7 +140,7 @@ class Query
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    protected function bindParams(array $params = [])
+    public function bindParams(array $params = [])
     {
         if (func_num_args()) {
             $this->params = array_merge($this->params, $params);

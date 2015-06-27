@@ -6,7 +6,7 @@ use Greg\Support\Arr;
 
 class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \Countable
 {
-    use Accessor, ArrayAccess, IteratorAggregate, Serializable, Countable;
+    use AccessorTrait, ArrayAccessTrait, IteratorAggregateTrait, SerializableTrait, CountableTrait;
 
     public function __construct($input = [], $iteratorClass = null)
     {

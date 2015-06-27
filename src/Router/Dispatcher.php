@@ -2,12 +2,12 @@
 
 namespace Greg\Router;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 
 class Dispatcher
 {
-    use Internal;
+    use InternalTrait;
 
     const EVENT_DISPATCH = 'router.dispatch';
 

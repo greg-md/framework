@@ -6,7 +6,7 @@ use Greg\Application\Runner;
 use Greg\Support\Debug;
 use Greg\Support\Obj;
 
-trait Internal
+trait InternalTrait
 {
     protected $appName = 'default';
 

@@ -2,13 +2,13 @@
 
 namespace Greg\Db\Sql\Table;
 
-use Greg\Support\Engine\Internal;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Column
 {
-    use Internal;
+    use InternalTrait;
 
     const TYPE_TINYINT = 'tinyint';
 
