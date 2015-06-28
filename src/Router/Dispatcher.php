@@ -113,18 +113,18 @@ class Dispatcher
             if ($route->match($path)) {
                 $foundRoute = $route;
 
-                $listener->fire(static::EVENT_DISPATCHING, $route);
+                $listener->fireWith(static::EVENT_DISPATCHING, $route);
 
                 if (Arr::has($events, static::EVENT_DISPATCHING)) {
-                    $listener->fireRef($events[static::EVENT_DISPATCHING], $route);
+                    $listener->fireWith($events[static::EVENT_DISPATCHING], $route);
                 }
 
                 $content = $route->dispatch();
 
-                $listener->fire(static::EVENT_DISPATCHED, $route);
+                $listener->fireWith(static::EVENT_DISPATCHED, $route);
 
                 if (Arr::has($events, static::EVENT_DISPATCHED)) {
-                    $listener->fireRef($events[static::EVENT_DISPATCHED], $route);
+                    $listener->fireWith($events[static::EVENT_DISPATCHED], $route);
                 }
 
                 break;

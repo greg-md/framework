@@ -227,21 +227,29 @@ class Session
 
     static public function getArray($key, $else = null)
     {
+        static::start();
+
         return Arr::getArray($_SESSION, $key, $else);
     }
 
     static public function &getArrayRef($key, $else = null)
     {
+        static::start();
+
         return Arr::getArrayRef($_SESSION, $key, $else);
     }
 
     static public function getArrayForce($key, $else = null)
     {
+        static::start();
+
         return Arr::getArrayForce($_SESSION, $key, $else);
     }
 
     static public function &getArrayForceRef($key, $else = null)
     {
+        static::start();
+
         return Arr::getArrayForceRef($_SESSION, $key, $else);
     }
 
@@ -275,21 +283,29 @@ class Session
 
     static public function getIndexArray($index, $else = null)
     {
+        static::start();
+
         return Arr::getIndexArray($_SESSION, $index, $else);
     }
 
     static public function &getIndexArrayRef($index, $else = null)
     {
+        static::start();
+
         return Arr::getIndexArrayRef($_SESSION, $index, $else);
     }
 
     static public function getIndexArrayForce($index, $else = null)
     {
+        static::start();
+
         return Arr::getIndexArrayForce($_SESSION, $index, $else);
     }
 
     static public function &getIndexArrayForceRef($index, $else = null)
     {
+        static::start();
+
         return Arr::getIndexArrayForceRef($_SESSION, $index, $else);
     }
 

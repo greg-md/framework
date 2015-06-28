@@ -235,7 +235,7 @@ class Arr
         return static::bringRef(static::getForceRef($array, $key, $else));
     }
 
-    static public function &getIndex(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
+    static public function getIndex(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
     {
         if (is_array($index)) {
             $return = [];
@@ -297,7 +297,7 @@ class Arr
         return $myRef;
     }
 
-    static public function &getIndexForce(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
+    static public function getIndexForce(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
     {
         if (is_array($index)) {
             $return = [];

@@ -62,8 +62,6 @@ class Viewer implements \ArrayAccess
                 $layout = func_get_args();
 
                 array_shift($layout);
-
-                array_shift($layout);
             }
 
             $content = $this->fetchLayouts($content, ...$layout);
@@ -72,15 +70,15 @@ class Viewer implements \ArrayAccess
         return $content;
     }
 
-    public function fetchName($name)
+    public function fetchName($name, $responseObject = true)
     {
-        return $this->fetchFileName($this->toFileName($name));
+        return $this->fetchFileName($this->toFileName($name), $responseObject);
     }
 
-    public function fetchFileName($fileName)
+    public function fetchFileName($fileName, $responseObject = true)
     {
         if ($file = $this->getFile($fileName)) {
-            return $this->fetchFile($file);
+            return $this->fetchFile($file, $responseObject);
         }
 
         throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
@@ -224,16 +222,25 @@ class Viewer implements \ArrayAccess
 
     public function fetchLayouts($content, $layout, $_ = null)
     {
+        return $this->fetchLayoutsAs(true, ...func_get_args());
+    }
+
+    public function fetchLayoutsAs($responseObject, $content, $layout, $_ = null)
+    {
         if (!is_array($layout)) {
             $layout = func_get_args();
 
+            // Remote $responseObject
+            array_shift($layout);
+
+            // Remote $content
             array_shift($layout);
         }
 
         $this->content($content);
 
         foreach($layouts = $layout as $layout) {
-            $content = $this->fetchName($layout);
+            $content = $this->fetchName($layout, $responseObject);
 
             $this->content($content);
         }

@@ -13,6 +13,7 @@ use Greg\Html\Script;
 use Greg\Http\Response;
 use Greg\Support\Obj;
 use Greg\Support\Tool\Minify;
+use Greg\View\Viewer;
 
 class Html implements SubscriberInterface
 {
@@ -36,6 +37,10 @@ class Html implements SubscriberInterface
 
     protected $minifyHtml = false;
 
+    protected $render = true;
+
+    protected $views = [];
+
     public function __bind()
     {
         $this->htmlClass(ElementClass::newInstance($this->appName()));
@@ -58,14 +63,14 @@ class Html implements SubscriberInterface
         return $this;
     }
 
-    public function appDispatched(&$response)
+    public function appDispatched(Response $response, Viewer $viewer)
     {
-        if ($this->minifyHtml()) {
-            if (is_string($response)) {
-                $response = Minify::html($response);
-            } elseif ($response instanceof Response and $response->contentType() == 'text/html') {
-                $response->content(Minify::html($response->content()));
-            }
+        if ($this->render() and $views = $this->views()) {
+            $response->content($viewer->fetchLayoutsAs(false, $response->content(), ...$views));
+        }
+
+        if ($this->minifyHtml() and $response->contentType() == 'text/html') {
+            $response->content(Minify::html($response->content()));
         }
 
         return $this;
@@ -130,5 +135,15 @@ class Html implements SubscriberInterface
     public function minifyHtml($value = null)
     {
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function render($value = null)
+    {
+        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function views($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

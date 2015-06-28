@@ -99,6 +99,29 @@ class Listener
         return $this;
     }
 
+    public function fireWith($event, ...$args)
+    {
+        return $this->fireWithRef($event, ...$args);
+    }
+
+    public function fireWithRef($event, &...$args)
+    {
+        return $this->fireWithArgs($event, $args);
+    }
+
+    public function fireWithArgs($event, array $args = [])
+    {
+        $binder = $this->app()->binder();
+
+        if (Arr::has($this->storage, $event)) {
+            foreach($this->storage[$event] as $function) {
+                $binder->callWithArgs($function, $args);
+            }
+        }
+
+        return $this;
+    }
+
     public function addSubscribers($subscribers, callable $callback = null)
     {
         foreach($subscribers as $name => $subscriber) {

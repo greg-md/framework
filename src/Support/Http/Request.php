@@ -102,6 +102,8 @@ class Request
         return $_GET;
     }
 
+    // Start standard $_GET array methods
+
     static public function hasGet($key, ...$keys)
     {
         return Arr::has($_GET, $key, ...$keys);
@@ -119,7 +121,7 @@ class Request
 
     static public function setRefGet($key, &$value)
     {
-        return Arr::set($_GET, $key, $value);
+        return Arr::setRef($_GET, $key, $value);
     }
 
     static public function setIndexGet($index, $value, $delimiter = Arr::INDEX_DELIMITER)
@@ -129,7 +131,7 @@ class Request
 
     static public function setIndexRefGet($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::setIndex($_GET, $index, $value, $delimiter);
+        return Arr::setIndexRef($_GET, $index, $value, $delimiter);
     }
 
     static public function getGet($key, $else = null)
@@ -142,15 +144,14 @@ class Request
         return Arr::getRef($_GET, $key, $else);
     }
 
-    static public function requiredGet($key)
+    static public function getForceGet($key, $else = null)
     {
-        $value = static::getGet($key);
+        return Arr::getForce($_GET, $key, $else);
+    }
 
-        if (!$value) {
-            throw new \Exception('Undefined value for `' . $key . '`.');
-        }
-
-        return $value;
+    static public function &getForceRefGet($key, $else = null)
+    {
+        return Arr::getForceRef($_GET, $key, $else);
     }
 
     static public function getArrayGet($key, $else = null)
@@ -158,7 +159,22 @@ class Request
         return Arr::getArray($_GET, $key, $else);
     }
 
-    static public function &getIndexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &getArrayRefGet($key, $else = null)
+    {
+        return Arr::getArrayRef($_GET, $key, $else);
+    }
+
+    static public function getArrayForceGet($key, $else = null)
+    {
+        return Arr::getArrayForce($_GET, $key, $else);
+    }
+
+    static public function &getArrayForceRefGet($key, $else = null)
+    {
+        return Arr::getArrayForceRef($_GET, $key, $else);
+    }
+
+    static public function getIndexGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_GET, $index, $else, $delimiter);
     }
@@ -168,9 +184,44 @@ class Request
         return Arr::getIndexRef($_GET, $index, $else, $delimiter);
     }
 
+    static public function getIndexForceGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForce($_GET, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexForceRefGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForceRef($_GET, $index, $else, $delimiter);
+    }
+
     static public function getIndexArrayGet($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexArray($_GET, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexArrayRefGet($index, $else = null)
+    {
+        return Arr::getIndexArrayRef($_GET, $index, $else);
+    }
+
+    static public function getIndexArrayForceGet($index, $else = null)
+    {
+        return Arr::getIndexArrayForce($_GET, $index, $else);
+    }
+
+    static public function &getIndexArrayForceRefGet($index, $else = null)
+    {
+        return Arr::getIndexArrayForceRef($_GET, $index, $else);
+    }
+
+    static public function requiredGet($key)
+    {
+        return Arr::required($_GET, $key);
+    }
+
+    static public function &requiredRefGet($key)
+    {
+        return Arr::requiredRef($_GET, $key);
     }
 
     static public function delGet($key, ...$keys)
@@ -183,6 +234,8 @@ class Request
         return Arr::delIndex($_GET, $index, $delimiter);
     }
 
+    // End standard $_GET array methods
+
     static public function isPost()
     {
         return (bool)$_POST;
@@ -192,6 +245,8 @@ class Request
     {
         return $_POST;
     }
+
+    // Start standard $_POST array methods
 
     static public function hasPost($key, ...$keys)
     {
@@ -210,7 +265,7 @@ class Request
 
     static public function setRefPost($key, &$value)
     {
-        return Arr::set($_POST, $key, $value);
+        return Arr::setRef($_POST, $key, $value);
     }
 
     static public function setIndexPost($index, $value, $delimiter = Arr::INDEX_DELIMITER)
@@ -220,7 +275,7 @@ class Request
 
     static public function setIndexRefPost($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::setIndex($_POST, $index, $value, $delimiter);
+        return Arr::setIndexRef($_POST, $index, $value, $delimiter);
     }
 
     static public function getPost($key, $else = null)
@@ -233,15 +288,14 @@ class Request
         return Arr::getRef($_POST, $key, $else);
     }
 
-    static public function requiredPost($key)
+    static public function getForcePost($key, $else = null)
     {
-        $value = static::getPost($key);
+        return Arr::getForce($_POST, $key, $else);
+    }
 
-        if (!$value) {
-            throw new \Exception('Undefined value for `' . $key . '`.');
-        }
-
-        return $value;
+    static public function &getForceRefPost($key, $else = null)
+    {
+        return Arr::getForceRef($_POST, $key, $else);
     }
 
     static public function getArrayPost($key, $else = null)
@@ -249,7 +303,22 @@ class Request
         return Arr::getArray($_POST, $key, $else);
     }
 
-    static public function &getIndexPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &getArrayRefPost($key, $else = null)
+    {
+        return Arr::getArrayRef($_POST, $key, $else);
+    }
+
+    static public function getArrayForcePost($key, $else = null)
+    {
+        return Arr::getArrayForce($_POST, $key, $else);
+    }
+
+    static public function &getArrayForceRefPost($key, $else = null)
+    {
+        return Arr::getArrayForceRef($_POST, $key, $else);
+    }
+
+    static public function getIndexPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_POST, $index, $else, $delimiter);
     }
@@ -259,9 +328,44 @@ class Request
         return Arr::getIndexRef($_POST, $index, $else, $delimiter);
     }
 
+    static public function getIndexForcePost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForce($_POST, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexForceRefPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForceRef($_POST, $index, $else, $delimiter);
+    }
+
     static public function getIndexArrayPost($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexArray($_POST, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexArrayRefPost($index, $else = null)
+    {
+        return Arr::getIndexArrayRef($_POST, $index, $else);
+    }
+
+    static public function getIndexArrayForcePost($index, $else = null)
+    {
+        return Arr::getIndexArrayForce($_POST, $index, $else);
+    }
+
+    static public function &getIndexArrayForceRefPost($index, $else = null)
+    {
+        return Arr::getIndexArrayForceRef($_POST, $index, $else);
+    }
+
+    static public function requiredPost($key)
+    {
+        return Arr::required($_POST, $key);
+    }
+
+    static public function &requiredRefPost($key)
+    {
+        return Arr::requiredRef($_POST, $key);
     }
 
     static public function delPost($key, ...$keys)
@@ -274,6 +378,8 @@ class Request
         return Arr::delIndex($_POST, $index, $delimiter);
     }
 
+    // End standard $_POST array methods
+
     static public function isRequest()
     {
         return (bool)$_REQUEST;
@@ -283,6 +389,8 @@ class Request
     {
         return $_REQUEST;
     }
+
+    // Start standard $_REQUEST array methods
 
     static public function hasRequest($key, ...$keys)
     {
@@ -301,7 +409,7 @@ class Request
 
     static public function setRefRequest($key, &$value)
     {
-        return Arr::set($_REQUEST, $key, $value);
+        return Arr::setRef($_REQUEST, $key, $value);
     }
 
     static public function setIndexRequest($index, $value, $delimiter = Arr::INDEX_DELIMITER)
@@ -311,7 +419,7 @@ class Request
 
     static public function setIndexRefRequest($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::setIndex($_REQUEST, $index, $value, $delimiter);
+        return Arr::setIndexRef($_REQUEST, $index, $value, $delimiter);
     }
 
     static public function getRequest($key, $else = null)
@@ -324,15 +432,14 @@ class Request
         return Arr::getRef($_REQUEST, $key, $else);
     }
 
-    static public function requiredRequest($key)
+    static public function getForceRequest($key, $else = null)
     {
-        $value = static::getRequest($key);
+        return Arr::getForce($_REQUEST, $key, $else);
+    }
 
-        if (!$value) {
-            throw new \Exception('Undefined value for `' . $key . '`.');
-        }
-
-        return $value;
+    static public function &getForceRefRequest($key, $else = null)
+    {
+        return Arr::getForceRef($_REQUEST, $key, $else);
     }
 
     static public function getArrayRequest($key, $else = null)
@@ -340,7 +447,22 @@ class Request
         return Arr::getArray($_REQUEST, $key, $else);
     }
 
-    static public function &getIndexRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    static public function &getArrayRefRequest($key, $else = null)
+    {
+        return Arr::getArrayRef($_REQUEST, $key, $else);
+    }
+
+    static public function getArrayForceRequest($key, $else = null)
+    {
+        return Arr::getArrayForce($_REQUEST, $key, $else);
+    }
+
+    static public function &getArrayForceRefRequest($key, $else = null)
+    {
+        return Arr::getArrayForceRef($_REQUEST, $key, $else);
+    }
+
+    static public function getIndexRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndex($_REQUEST, $index, $else, $delimiter);
     }
@@ -350,9 +472,44 @@ class Request
         return Arr::getIndexRef($_REQUEST, $index, $else, $delimiter);
     }
 
+    static public function getIndexForceRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForce($_REQUEST, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexForceRefRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        return Arr::getIndexForceRef($_REQUEST, $index, $else, $delimiter);
+    }
+
     static public function getIndexArrayRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
         return Arr::getIndexArray($_REQUEST, $index, $else, $delimiter);
+    }
+
+    static public function &getIndexArrayRefRequest($index, $else = null)
+    {
+        return Arr::getIndexArrayRef($_REQUEST, $index, $else);
+    }
+
+    static public function getIndexArrayForceRequest($index, $else = null)
+    {
+        return Arr::getIndexArrayForce($_REQUEST, $index, $else);
+    }
+
+    static public function &getIndexArrayForceRefRequest($index, $else = null)
+    {
+        return Arr::getIndexArrayForceRef($_REQUEST, $index, $else);
+    }
+
+    static public function requiredRequest($key)
+    {
+        return Arr::required($_REQUEST, $key);
+    }
+
+    static public function &requiredRefRequest($key)
+    {
+        return Arr::requiredRef($_REQUEST, $key);
     }
 
     static public function delRequest($key, ...$keys)
@@ -364,6 +521,8 @@ class Request
     {
         return Arr::delIndex($_REQUEST, $index, $delimiter);
     }
+
+    // End standard $_REQUEST array methods
 
     static public function delAll($key, ...$keys)
     {

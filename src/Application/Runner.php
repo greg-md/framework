@@ -397,7 +397,7 @@ class Runner implements \ArrayAccess
         }
 
         // finish with layout request
-        $this->listener()->fire(static::EVENT_DISPATCHED, $response, $route);
+        $this->listener()->fireWith(static::EVENT_DISPATCHED, $response, $route);
 
         $this->listener()->fire(static::EVENT_FINISHED);
 

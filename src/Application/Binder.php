@@ -97,8 +97,6 @@ class Binder
         return call_user_func_array($callable, $args);
     }
 
-
-
     public function addExpectedArgs(array $args, array $expectedArgs)
     {
         /* @var $expectedArgs \ReflectionParameter[] */
