@@ -325,11 +325,11 @@ class Obj
 
                         break;
                     case static::PROP_PREPEND:
-                        $var->prependKey($value, $key);
+                        $var->prependKey($key, $value);
 
                         break;
                     case static::PROP_APPEND:
-                        $var->appendKey($value, $key);
+                        $var->appendKey($key, $value);
 
                         break;
                 }
@@ -367,6 +367,7 @@ class Obj
                 if ($num > 3) {
                     $type = func_get_arg(3);
                 }
+
                 if ($num > 4) {
                     $recursive = func_get_arg(4);
                 }
@@ -375,6 +376,8 @@ class Obj
             }
 
             if ($num > 3) {
+                $type = $num > 4 ? func_get_arg(4) : static::PROP_REPLACE;
+
                 return static::fetchArrayVarKeyValue($return, $var, $key, $value, $type);
             }
 
@@ -405,9 +408,11 @@ class Obj
                 if ($num > 3) {
                     $type = func_get_arg(3);
                 }
+
                 if ($num > 4) {
                     $replace = func_get_arg(4);
                 }
+
                 if ($num > 5) {
                     $recursive = func_get_arg(5);
                 }
@@ -416,10 +421,42 @@ class Obj
             }
 
             if ($num > 3) {
+
+                $type = $num > 4 ? func_get_arg(4) : static::PROP_REPLACE;
+
                 return static::fetchArrayVarKeyValue($return, $var, $key, $value, $type);
             }
 
             return static::fetchArrayVarGetKey($var, $key);
+        }
+
+        Arr::bringRef($var);
+
+        return $var;
+    }
+
+    static public function &fetchArrayVarIndex($return, &$var, $index = null, $value = null, $type = self::PROP_REPLACE, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        if (($num = func_num_args()) > 2) {
+            if (is_array($index)) {
+                $value = null;
+
+                if ($num > 3) {
+                    $type = func_get_arg(3);
+                }
+
+                foreach(($indexes = $index) as $index => $value) {
+                    static::fetchArrayVarIndexValue($return, $var, $index, $value, $type, $delimiter);
+                }
+
+                return $return;
+            }
+
+            if ($num > 3) {
+                return static::fetchArrayVarIndexValue($return, $var, $index, $value, $type, $delimiter);
+            }
+
+            return static::fetchArrayVarGetIndex($var, $index, $delimiter);
         }
 
         Arr::bringRef($var);
@@ -440,6 +477,13 @@ class Obj
         return $return;
     }
 
+    static public function &fetchArrayVarGetIndex(&$var, $index, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        Arr::bringRef($var);
+
+        return Arr::getIndexRef($var, $index, null, $delimiter);
+    }
+
     static public function &fetchArrayVarKeyValue($return, &$var, $key, $value, $type = self::PROP_APPEND)
     {
         Arr::bringRef($var);
@@ -450,11 +494,33 @@ class Obj
 
                 break;
             case static::PROP_PREPEND:
-                Arr::prependKey($var, $value, $key);
+                Arr::prependKey($var, $key, $value);
 
                 break;
             case static::PROP_APPEND:
-                Arr::appendKey($var, $value, $key);
+                Arr::appendKey($var, $key, $value);
+
+                break;
+        }
+
+        return $return;
+    }
+
+    static public function &fetchArrayVarIndexValue($return, &$var, $index, $value, $type = self::PROP_APPEND, $delimiter = Arr::INDEX_DELIMITER)
+    {
+        Arr::bringRef($var);
+
+        switch($type) {
+            case static::PROP_REPLACE:
+                Arr::setIndex($var, $index, $value, $delimiter);
+
+                break;
+            case static::PROP_PREPEND:
+                Arr::prependIndex($var, $index, $value, $delimiter);
+
+                break;
+            case static::PROP_APPEND:
+                Arr::appendIndex($var, $index, $value, $delimiter);
 
                 break;
         }

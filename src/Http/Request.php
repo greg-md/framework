@@ -23,7 +23,7 @@ class Request extends \Greg\Support\Http\Request implements \ArrayAccess
         return static::newInstanceRef($appName, $param);
     }
 
-    public function &get($key, $else = null)
+    public function get($key, $else = null)
     {
         return Arr::get($this->accessor(), $key, $this->getRequest($key, $else));
     }
@@ -47,6 +47,11 @@ class Request extends \Greg\Support\Http\Request implements \ArrayAccess
     public function getArray($key, $else = null)
     {
         return Arr::getArray($this->accessor(), $key, $this->getArrayRequest($key, $else));
+    }
+
+    public function &getArrayRef($key, $else = null)
+    {
+        return Arr::getArrayRef($this->accessor(), $key, $this->getArrayRequest($key, $else));
     }
 
     public function &getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)

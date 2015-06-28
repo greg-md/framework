@@ -56,7 +56,7 @@ trait InternalTrait
         return $app->getInstance(get_called_class());
     }
 
-    public function &memory($key = null, $value = null)
+    public function memory($key = null, $value = null)
     {
         return $this->memoryRef(...func_get_args());
     }
@@ -75,7 +75,7 @@ trait InternalTrait
             }
         }
 
-        return Memory::get($memoryKey);
+        return Memory::getRef($memoryKey);
     }
 
     /**

@@ -38,7 +38,7 @@ trait ArrayAccessStaticTrait
         return Arr::setIndexRef(static::accessor(), $index, $value, $delimiter);
     }
 
-    static public function &get($key, $else = null)
+    static public function get($key, $else = null)
     {
         return Arr::get(static::accessor(), $key, $else);
     }

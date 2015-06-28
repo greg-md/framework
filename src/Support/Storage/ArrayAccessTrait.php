@@ -46,7 +46,7 @@ trait ArrayAccessTrait
         return $this;
     }
 
-    public function &get($key, $else = null)
+    public function get($key, $else = null)
     {
         return Arr::get($this->accessor(), $key, $else);
     }

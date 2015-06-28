@@ -23,9 +23,9 @@ class Notification
 
     protected $message = null;
 
-    protected $options = [];
+    protected $settings = [];
 
-    public function __construct(Notifier $notifier, $message = null, $type = null, array $options = [])
+    public function __construct(Notifier $notifier, $message = null, $type = null, array $settings = [])
     {
         $this->notifier($notifier);
 
@@ -37,7 +37,7 @@ class Notification
             $this->type($type);
         }
 
-        $this->options($options);
+        $this->settings($settings);
     }
 
     /**
@@ -45,13 +45,13 @@ class Notification
      * @param Notifier $notifier
      * @param null $message
      * @param null $type
-     * @param array $options
+     * @param array $settings
      * @return Notification
      * @throws \Exception
      */
-    static public function create($appName, Notifier $notifier, $message = null, $type = null, array $options = [])
+    static public function create($appName, Notifier $notifier, $message = null, $type = null, array $settings = [])
     {
-        return static::newInstanceRef($appName, $notifier, $message, $type, $options);
+        return static::newInstanceRef($appName, $notifier, $message, $type, $settings);
     }
 
     public function flash()
@@ -107,7 +107,7 @@ class Notification
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function options($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function settings($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

@@ -2,13 +2,11 @@
 
 namespace Greg\Component\NotificationCenter;
 
-
-use Greg\Application\Runner;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
+use Greg\Support\Arr;
 use Greg\Support\Engine\InternalTrait;
-use Greg\Support\Server\Session;
 
 class Notifier implements SubscriberInterface
 {
@@ -17,28 +15,33 @@ class Notifier implements SubscriberInterface
     public function subscribe(Listener $listener)
     {
         $listener->register([
-            Runner::EVENT_INIT
+            //Runner::EVENT_INIT
         ], $this);
 
         return $this;
     }
 
-    public function appInit()
+    public function getFlash()
     {
-        // add Session instance with _flash_, _new_, _old_ params
-        $flash = Session::get('_flash_');
+        $notifications = (array)$this->app()->session()->flash('notifications');
 
-        Session::del('_flash_');
+        foreach($notifications as &$notification) {
+            $message = Arr::get($notification, 'message');
+            $type = Arr::get($notification, 'type');
+            $settings = Arr::get($notification, 'settings');
 
-        $flash and dd($flash);
+            $notification = Notification::create($this->appName(), $this, $message, $type, $settings);
+        }
+
+        return $notifications;
     }
 
     public function toFlash(Notification $notification)
     {
-        Session::setIndex('_flash_.notifications.', [
+        $this->app()->session()->flashIndex('notifications.', [
             'type' => $notification->type(),
             'message' => $notification->message(),
-            'options' => $notification->options(),
+            'settings' => $notification->settings(),
         ]);
 
         return $this;
@@ -49,58 +52,65 @@ class Notifier implements SubscriberInterface
 
     }
 
-    public function info($message = null, array $options = [])
+    public function info($message = null, array $settings = [])
     {
-        return Notification::create($this->appName(), $this, $message, Notification::TYPE_INFO, $options);
+        return Notification::create($this->appName(), $this, $message, Notification::TYPE_INFO, $settings);
     }
 
-    public function success($message = null, array $options = [])
+    public function success($message = null, array $settings = [])
     {
-        return Notification::create($this->appName(), $this, $message, Notification::TYPE_SUCCESS, $options);
+        return Notification::create($this->appName(), $this, $message, Notification::TYPE_SUCCESS, $settings);
     }
 
-    public function error($message = null, array $options = [])
+    public function error($message = null, array $settings = [])
     {
-        return Notification::create($this->appName(), $this, $message, Notification::TYPE_ERROR, $options);
+        return Notification::create($this->appName(), $this, $message, Notification::TYPE_ERROR, $settings);
     }
 
-    public function warning($message = null, array $options = [])
+    public function warning($message = null, array $settings = [])
     {
-        return Notification::create($this->appName(), $this, $message, Notification::TYPE_WARNING, $options);
+        return Notification::create($this->appName(), $this, $message, Notification::TYPE_WARNING, $settings);
+    }
+
+    public function renderFlash($name, $params = [])
+    {
+        return $this->app()->viewer()->partial($name, [
+            'notifications' => $this->getFlash(),
+        ] + $params);
     }
 
     /*
-    public function multiInfo($messages, array $options = [])
+    public function multiInfo($messages, array $settings = [])
     {
         foreach($messages as $message) {
-            Notification::create($this->appName(), $this, $message, Notification::TYPE_INFO, $options);
+            Notification::create($this->appName(), $this, $message, Notification::TYPE_INFO, $settings);
         }
 
         return $this;
     }
 
-    public function multiSuccess($messages, array $options = [])
+    public function multiSuccess($messages, array $settings = [])
     {
         foreach($messages as $message) {
-            Notification::create($this->appName(), $this, $message, Notification::TYPE_SUCCESS, $options);
+            Notification::create($this->appName(), $this, $message, Notification::TYPE_SUCCESS, $settings);
         }
 
         return $this;
     }
 
-    public function multiError($messages, array $options = [])
+    public function multiError($messages, array $settings = [])
     {
         foreach($messages as $message) {
-            Notification::create($this->appName(), $this, $message, Notification::TYPE_ERROR, $options);
+            Notification::create($this->appName(), $this, $message, Notification::TYPE_ERROR, $settings);
         }
 
         return $this;
     }
 
-    public function multiWarning($messages, array $options = [])
+    public function multiWarning($messages, array $settings = [])
     {
         foreach($messages as $message) {
-            Notification::create($this->appName(), $this, $message, Notification::TYPE_WARNING, $options);
+            Notification::create($this->appName(), $this, $message, Notification::TYPE_WARNING, $settings);
         }
 
         return $this;

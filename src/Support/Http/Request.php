@@ -132,7 +132,7 @@ class Request
         return Arr::setIndex($_GET, $index, $value, $delimiter);
     }
 
-    static public function &getGet($key, $else = null)
+    static public function getGet($key, $else = null)
     {
         return Arr::get($_GET, $key, $else);
     }
@@ -223,7 +223,7 @@ class Request
         return Arr::setIndex($_POST, $index, $value, $delimiter);
     }
 
-    static public function &getPost($key, $else = null)
+    static public function getPost($key, $else = null)
     {
         return Arr::get($_POST, $key, $else);
     }
@@ -314,7 +314,7 @@ class Request
         return Arr::setIndex($_REQUEST, $index, $value, $delimiter);
     }
 
-    static public function &getRequest($key, $else = null)
+    static public function getRequest($key, $else = null)
     {
         return Arr::get($_REQUEST, $key, $else);
     }

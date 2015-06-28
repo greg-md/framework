@@ -142,7 +142,7 @@ class Viewer implements \ArrayAccess
 
     public function partialName($name, array $params = [])
     {
-        return $this->renderFileName($this->toFileName($name), $params);
+        return $this->partialFileName($this->toFileName($name), $params);
     }
 
     public function partialFileName($fileName, array $params = [])

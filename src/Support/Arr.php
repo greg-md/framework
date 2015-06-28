@@ -8,6 +8,11 @@ class Arr
 {
     const INDEX_DELIMITER = '.';
 
+    static public function &all(array &$array)
+    {
+        return $array;
+    }
+
     static public function has(array &$array, $key, ...$keys)
     {
         $keys ? array_unshift($keys, $key) : ($keys = $key);
@@ -128,18 +133,13 @@ class Arr
         return true;
     }
 
-    static public function getArray(array &$array, $key, $else = null)
-    {
-        return static::bring(static::get($array, $key, $else));
-    }
-
     /**
      * @param array $array
      * @param $key
      * @param null $else
      * @return mixed
      */
-    static public function &get(array &$array, $key, $else = null)
+    static public function get(array &$array, $key, $else = null)
     {
         if (is_array($key)) {
             $return = [];
@@ -173,9 +173,66 @@ class Arr
         if (static::has($array, $key)) return $array[$key]; return $else;
     }
 
-    static public function getIndexArray(array &$array, $key, $else = null)
+    static public function getForce(array &$array, $key, $else = null)
     {
-        return static::bring(static::getIndex($array, $key, $else));
+        if (is_array($key)) {
+            $return = [];
+
+            static::bringRef($else);
+
+            foreach(($keys = $key) as $k => $key) {
+                $return[$k] = static::getForce($array, $key, array_key_exists($key, $else) ? $else[$key] : null);
+            }
+
+            return $return;
+        }
+
+        if (!static::has($array, $key)) {
+            $array[$key] = $else;
+        }
+
+        return $array[$key];
+    }
+
+    static public function &getForceRef(array &$array, $key, $else = null)
+    {
+        if (is_array($key)) {
+            $return = [];
+
+            static::bringRef($else);
+
+            foreach(($keys = $key) as $k => $key) {
+                $return[$k] = &static::getForceRef($array, $key, array_key_exists($key, $else) ? $else[$key] : null);
+            }
+
+            return $return;
+        }
+
+        if (static::has($array, $key)) {
+            $array[$key] = $else;
+        }
+
+        return $array[$key];
+    }
+
+    static public function getArray(array &$array, $key, $else = null)
+    {
+        return static::bring(static::get($array, $key, $else));
+    }
+
+    static public function &getArrayRef(array &$array, $key, $else = null)
+    {
+        return static::bringRef(static::getRef($array, $key, $else));
+    }
+
+    static public function getArrayForce(array &$array, $key, $else = null)
+    {
+        return static::bring(static::getForce($array, $key, $else));
+    }
+
+    static public function &getArrayForceRef(array &$array, $key, $else = null)
+    {
+        return static::bringRef(static::getForceRef($array, $key, $else));
     }
 
     static public function &getIndex(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
@@ -238,6 +295,122 @@ class Arr
         }
 
         return $myRef;
+    }
+
+    static public function &getIndexForce(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        if (is_array($index)) {
+            $return = [];
+
+            static::bringRef($else);
+
+            foreach(($indexes = $index) as $k => $index) {
+                $return[$k] = static::getIndexForce($array, $index, array_key_exists($index, $else) ? $else[$index] : null, $delimiter);
+            }
+
+            return $return;
+        }
+
+        if (strpos($index, $delimiter) === false) {
+            return static::getForce($array, $index, $else);
+        }
+
+        $myRef = &$array;
+
+        $has = true;
+
+        foreach(explode($delimiter, $index) as $index) {
+            if (!(is_array($myRef) and array_key_exists($index, $myRef))) {
+                $has = false;
+            }
+
+            $myRef = &$myRef[$index];
+        }
+
+        if (!$has) {
+            $myRef = $else;
+        }
+
+        return $myRef;
+    }
+
+    static public function &getIndexForceRef(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        if (is_array($index)) {
+            $return = [];
+
+            static::bringRef($else);
+
+            foreach(($indexes = $index) as $k => $index) {
+                $return[$k] = &static::getIndexForceRef($array, $index, array_key_exists($index, $else) ? $else[$index] : null, $delimiter);
+            }
+
+            return $return;
+        }
+
+        if (strpos($index, $delimiter) === false) {
+            return static::getForceRef($array, $index, $else);
+        }
+
+        $myRef = &$array;
+
+        $has = true;
+
+        foreach(explode($delimiter, $index) as $index) {
+            if (!(is_array($myRef) and array_key_exists($index, $myRef))) {
+                $has = false;
+            }
+
+            $myRef = &$myRef[$index];
+        }
+
+        if (!$has) {
+            $myRef = $else;
+        }
+
+        return $myRef;
+    }
+
+    static public function getIndexArray(array &$array, $index, $else = null)
+    {
+        return static::bring(static::getIndex($array, $index, $else));
+    }
+
+    static public function &getIndexArrayRef(array &$array, $index, $else = null)
+    {
+        return static::bringRef(static::getIndexRef($array, $index, $else));
+    }
+
+    static public function getIndexArrayForce(array &$array, $index, $else = null)
+    {
+        return static::bring(static::getIndexForce($array, $index, $else));
+    }
+
+    static public function &getIndexArrayForceRef(array &$array, $index, $else = null)
+    {
+        return static::bringRef(static::getIndexForceRef($array, $index, $else));
+    }
+
+    static public function required(array &$array, $key)
+    {
+        $value = static::get($array, $key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
+    }
+
+    static public function &requiredRef(array &$array, $key)
+    {
+        $value = static::getRef($array, $key);
+
+        if (!$value) {
+            throw new \Exception('Undefined value for `' . $key . '`.');
+        }
+
+        return $value;
     }
 
     static public function del(array &$array, $key, ...$keys)
@@ -324,12 +497,12 @@ class Arr
         return true;
     }
 
-    static public function appendKey(array &$array, $value = null, $key = null)
+    static public function appendKey(array &$array, $key = null, $value = null)
     {
-        return static::appendKeyRef($array, $value, $key);
+        return static::appendKeyRef($array, $key, $value);
     }
 
-    static public function appendKeyRef(array &$array, &$value = null, $key = null)
+    static public function appendKeyRef(array &$array, $key = null, &$value = null)
     {
         if ($key === null) {
             $array[] = &$value;
@@ -342,6 +515,24 @@ class Arr
         return true;
     }
 
+    static public function appendIndex(array &$array, $index = null, $value = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        return static::appendIndexRef($array, $index, $value, $delimiter);
+    }
+
+    static public function appendIndexRef(array &$array, $index = null, &$value = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        $indexes = explode($delimiter, $index);
+
+        $lastIndex = array_pop($indexes);
+
+        if ($lastIndex === '') {
+            $lastIndex = null;
+        }
+
+        return static::appendKeyRef(static::getIndexArrayForceRef($array, implode($delimiter, $indexes)), $lastIndex, $value);
+    }
+
     static public function prepend(array &$array, $value = null, ...$values)
     {
         array_unshift($array, $value, ...$values);
@@ -351,11 +542,11 @@ class Arr
 
     static public function prependRef(array &$array, &$value = null, &...$values)
     {
-        static::prependKeyRef($array, $value);
+        static::prependKeyRef($array, null, $value);
 
         if ($values) {
-            foreach($values as &$val) {
-                static::prependKeyRef($array, $val);
+            foreach($values as &$value) {
+                static::prependKeyRef($array, null, $value);
             }
             unset($val);
         }
@@ -363,12 +554,12 @@ class Arr
         return true;
     }
 
-    static public function prependKey(array &$array, $value = null, $key = null)
+    static public function prependKey(array &$array, $key = null, $value = null)
     {
         return static::prependKeyRef($array, $key, $value);
     }
 
-    static public function prependKeyRef(array &$array, &$value = null, $key = null)
+    static public function prependKeyRef(array &$array, $key = null, &$value = null)
     {
         if ($key === null) {
             array_unshift($array, null);
@@ -379,6 +570,24 @@ class Arr
         }
 
         return true;
+    }
+
+    static public function prependIndex(array &$array, $index = null, $value = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        return static::prependIndexRef($array, $index, $value, $delimiter);
+    }
+
+    static public function prependIndexRef(array &$array, $index = null, &$value = null, $delimiter = self::INDEX_DELIMITER)
+    {
+        $indexes = explode($delimiter, $index);
+
+        $lastIndex = array_pop($indexes);
+
+        if ($lastIndex === '') {
+            $lastIndex = null;
+        }
+
+        return static::prependKeyRef(static::getIndexArrayForceRef($array, implode($delimiter, $indexes)), $lastIndex, $value);
     }
 
     static public function &first(array &$array, callable $callable = null, $else = null)

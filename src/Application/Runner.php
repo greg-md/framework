@@ -10,7 +10,6 @@ use Greg\Http\Response;
 use Greg\Router\Dispatcher;
 use Greg\Support\Server\Config;
 use Greg\Support\Server\Ini;
-use Greg\Support\Server\Session;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
@@ -75,6 +74,8 @@ class Runner implements \ArrayAccess
         $this->initLoader();
 
         $this->initListener();
+
+        $this->initSession();
 
         $this->initTranslator();
 
@@ -192,6 +193,17 @@ class Runner implements \ArrayAccess
                                     $this->getIndexArray('listener.subscribers')));
 
         // Add Listener to Binder
+        $this->binder()->setObject($model);
+
+        return $this;
+    }
+
+    public function initSession()
+    {
+        // Load Session
+        $this->session($model = Session::newInstance($this->appName()));
+
+        // Add Session to Binder
         $this->binder()->setObject($model);
 
         return $this;
@@ -469,7 +481,7 @@ class Runner implements \ArrayAccess
         return $this;
     }
 
-    public function &get($key, $else = null)
+    public function get($key, $else = null)
     {
         if (!$this->has($key)) {
             $this->loadOnce($key);
@@ -521,6 +533,15 @@ class Runner implements \ArrayAccess
     public function listener(Listener $listener = null)
     {
         return $this->memory('listener', ...func_get_args());
+    }
+
+    /**
+     * @param Session $session
+     * @return Session|bool
+     */
+    public function session(Session $session = null)
+    {
+        return $this->memory('session', ...func_get_args());
     }
 
     /**

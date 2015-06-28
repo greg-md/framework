@@ -65,16 +65,16 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
         return $this;
     }
 
-    public function appendKey($value = null, ...$values)
+    public function appendKey($key = null, $value = null)
     {
-        Arr::appendKey($this->storage, $value, ...$values);
+        Arr::appendKey($this->storage, $key, $value);
 
         return $this;
     }
 
-    public function appendKeyRef(&$value = null, &...$values)
+    public function appendKeyRef($key = null, &$value = null)
     {
-        Arr::appendKeyRef($this->storage, $value, ...$values);
+        Arr::appendKeyRef($this->storage, $key, $value);
 
         return $this;
     }
@@ -93,16 +93,16 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
         return $this;
     }
 
-    public function prependKey($value = null, $index = null)
+    public function prependKey($key = null, $value = null)
     {
-        Arr::prependKey($this->storage, $value, $index);
+        Arr::prependKey($this->storage, $key, $value);
 
         return $this;
     }
 
-    public function prependKeyRef(&$value = null, $index = null)
+    public function prependKeyRef($key = null, &$value = null)
     {
-        Arr::prependKeyRef($this->storage, $value, $index);
+        Arr::prependKeyRef($this->storage, $key, $value);
 
         return $this;
     }
