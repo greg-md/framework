@@ -392,7 +392,7 @@ class Runner implements \ArrayAccess
             Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
         ], $route);
 
-        if (is_scalar($response)) {
+        if (Str::isScalar($response)) {
             $response = Response::create($this->appName(), $response);
         }
 

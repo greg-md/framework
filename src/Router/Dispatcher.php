@@ -4,6 +4,7 @@ namespace Greg\Router;
 
 use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
+use Greg\Support\Str;
 
 class Dispatcher
 {
@@ -65,7 +66,7 @@ class Dispatcher
             $route->callback($settings);
         }
 
-        if (is_scalar($settings)) {
+        if (Str::isScalar($settings)) {
             $settings = ['action' => $settings];
         }
 

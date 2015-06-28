@@ -42,7 +42,7 @@ class Obj
 
     static public function expectedArgs(callable $callable)
     {
-        if (is_scalar($callable) and strpos($callable, '::')) {
+        if (Str::isScalar($callable) and strpos($callable, '::')) {
             $callable = explode('::', $callable, 2);
         }
 
@@ -95,7 +95,7 @@ class Obj
 
                     break;
                 case static::PROP_REPLACE:
-                    $var = is_scalar($value) ? $value : (string)$value;
+                    $var = Str::isScalar($value) ? $value : (string)$value;
 
                     break;
             }
@@ -103,7 +103,7 @@ class Obj
             return $return;
         }
 
-        $var = is_scalar($var) ? $var : (string)$var;
+        $var = Str::isScalar($var) ? $var : (string)$var;
 
         return $var;
     }

@@ -177,9 +177,14 @@ class Str
         return $string;
     }
 
-    static public function isEmpty($string)
+    static public function isEmpty($var)
     {
-        return $string === null or $string === '';
+        return $var === null or $var === '';
+    }
+
+    static public function isScalar($var)
+    {
+        return is_scalar($var) or is_null($var);
     }
 
     static public function parse($string, $delimiter = '&', $keyValueDelimiter = '=')

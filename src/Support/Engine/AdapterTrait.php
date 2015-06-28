@@ -4,6 +4,7 @@ namespace Greg\Support\Engine;
 
 use Greg\Application\Runner;
 use Greg\Support\Obj;
+use Greg\Support\Str;
 
 trait AdapterTrait
 {
@@ -12,7 +13,7 @@ trait AdapterTrait
     public function adapter($adapter = null)
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__}, function($adapter) {
-            if (is_scalar($adapter)) {
+            if (Str::isScalar($adapter)) {
                 $adapter = [$adapter];
             }
 

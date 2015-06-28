@@ -661,7 +661,7 @@ class Arr
             return $var;
         }
 
-        if (is_scalar($var) or is_null($var)) {
+        if (Str::isScalar($var)) {
             $var = (array)$var;
 
             return $var;

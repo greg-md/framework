@@ -9,7 +9,7 @@ use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
-class Query
+abstract class Query
 {
     use InternalTrait;
 
@@ -37,11 +37,11 @@ class Query
             return [key($name), current($name)];
         }
 
-        if (is_scalar($name) and strpos($name, '\\') !== false) {
+        if (Str::isScalar($name) and strpos($name, '\\') !== false) {
             $name = $name::instance($this->appName());
         }
 
-        if (is_scalar($name) and preg_match('#^(.+?)(?:\s+as\s+([a-z0-9_]+))?$#i', $name, $matches)) {
+        if (Str::isScalar($name) and preg_match('#^(.+?)(?:\s+as\s+([a-z0-9_]+))?$#i', $name, $matches)) {
             return [isset($matches[2]) ? $matches[2] : null, $matches[1]];
         }
 
@@ -75,7 +75,11 @@ class Query
     {
         list($alias, $expr) = $this->fetchAlias($expr);
 
-        $expr = $this->quoteNamedExpr($expr);
+        if ($expr instanceof Query) {
+            $expr = '(' . $expr . ')';
+        } else {
+            $expr = $this->quoteNamedExpr($expr);
+        }
 
         if ($alias) {
             $expr .= ' AS ' . $this->quoteName($alias);
