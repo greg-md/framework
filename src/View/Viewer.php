@@ -108,21 +108,21 @@ class Viewer implements \ArrayAccess
         return $content;
     }
 
-    public function renderName($name, array $params = [])
+    public function renderName($name, array $params = [], $responseObject = true)
     {
-        return $this->renderFileName($this->toFileName($name), $params);
+        return $this->renderFileName($this->toFileName($name), $params, $responseObject);
     }
 
-    public function renderFileName($fileName, array $params = [])
+    public function renderFileName($fileName, array $params = [], $responseObject = true)
     {
         if ($file = $this->getFile($fileName)) {
-            return $this->renderFile($file, $params);
+            return $this->renderFile($file, $params, $responseObject);
         }
 
         throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
     }
 
-    public function renderFile($file, array $params = [])
+    public function renderFile($file, array $params = [], $responseObject = true)
     {
         $viewer = clone $this;
 
@@ -130,7 +130,7 @@ class Viewer implements \ArrayAccess
 
         $viewer->parent($this);
 
-        return $viewer->fetchFile($file);
+        return $viewer->fetchFile($file, $responseObject);
     }
 
     public function partial($name, array $params = [])

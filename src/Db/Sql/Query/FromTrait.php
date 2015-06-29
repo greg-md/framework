@@ -2,6 +2,8 @@
 
 namespace Greg\Db\Sql\Query;
 
+use Greg\Db\Sql\Query;
+
 trait FromTrait
 {
     protected $from = [];
@@ -23,10 +25,22 @@ trait FromTrait
 
         foreach($this->from as $name) {
             $from[] = $this->quoteAliasExpr($name);
+
+            list($alias, $expr) = $this->fetchAlias($name);
+
+            unset($alias);
+
+            if ($expr instanceof Query) {
+                $this->bindParams($expr->bindParams());
+            }
         }
 
         return $from ? 'FROM ' . implode(', ', $from) : '';
     }
 
     abstract protected function quoteAliasExpr($expr);
+
+    abstract protected function fetchAlias($name);
+
+    abstract protected function bindParams(array $params = []);
 }

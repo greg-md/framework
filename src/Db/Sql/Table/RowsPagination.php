@@ -62,6 +62,11 @@ class RowsPagination extends Rows
         return $page > $maxPage ? $maxPage : $page;
     }
 
+    public function hasMorePages()
+    {
+        return $this->page() < $this->maxPage();
+    }
+
     public function total($value = null)
     {
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());

@@ -70,7 +70,7 @@ class Response
         511 => 'Network Authentication Required',                             // RFC6585
     ];
 
-    static public function setCode($code)
+    static public function sendCode($code, $die = false)
     {
         if (Type::isNaturalNumber($code) and Arr::has($codes = static::CODES, $code)) {
             $code .= ' ' . $codes[$code];
@@ -78,13 +78,15 @@ class Response
 
         header('HTTP/1.1 ' . $code);
 
+        $die && die;
+
         return true;
     }
 
-    static public function redirect($url = '/', $code = null, $die = true)
+    static public function sendRedirect($url = '/', $code = null, $die = false)
     {
         if ($code !== null) {
-            static::setCode($code);
+            static::sendCode($code);
         }
 
         if (!$url) {
@@ -98,19 +100,19 @@ class Response
         return true;
     }
 
-    static public function refresh($die = true)
+    static public function sendRefresh($die = false)
     {
-        return static::redirect(Request::uri(), null, $die);
+        return static::sendRedirect(Request::uri(), null, $die);
     }
 
-    static public function referrerRedirect($die = true)
+    static public function sendReferrerRedirect($die = false)
     {
-        return static::redirect(Request::referrer(), null, $die);
+        return static::sendRedirect(Request::referrer(), null, $die);
     }
 
-    static public function json($param = [], $die = true)
+    static public function sendJson($param = [], $die = false)
     {
-        static::setContentType('application/json');
+        static::sendContentType('application/json');
 
         echo json_encode($param);
 
@@ -119,9 +121,9 @@ class Response
         return true;
     }
 
-    static public function html($html, $die = true)
+    static public function sendHtml($html, $die = false)
     {
-        static::setContentType('text/html');
+        static::sendContentType('text/html');
 
         echo $html;
 
@@ -130,9 +132,9 @@ class Response
         return true;
     }
 
-    static public function text($text, $die = true)
+    static public function sendText($text, $die = false)
     {
-        static::setContentType('text/plain');
+        static::sendContentType('text/plain');
 
         echo $text;
 
@@ -141,9 +143,9 @@ class Response
         return true;
     }
 
-    static public function jpeg($image, $quality = 75, $die = true)
+    static public function sendJpeg($image, $quality = 75, $die = false)
     {
-        static::setContentType('image/jpeg');
+        static::sendContentType('image/jpeg');
 
         imagejpeg($image, null, $quality);
 
@@ -152,9 +154,9 @@ class Response
         return true;
     }
 
-    static public function gif($image, $die = true)
+    static public function sendGif($image, $die = false)
     {
-        static::setContentType('image/gif');
+        static::sendContentType('image/gif');
 
         imagegif($image);
 
@@ -163,9 +165,9 @@ class Response
         return true;
     }
 
-    static public function png($image, $die = true)
+    static public function sendPng($image, $die = false)
     {
-        static::setContentType('image/png');
+        static::sendContentType('image/png');
 
         imagepng($image);
 
@@ -174,14 +176,16 @@ class Response
         return true;
     }
 
-    static public function setContentType($type)
+    static public function sendContentType($type, $die = false)
     {
         header('Content-Type: ' . $type);
+
+        $die && die;
 
         return true;
     }
 
-    static public function doConditionalGet($timestamp, $maxAge = 0, $die = true)
+    static public function isModifiedSince($timestamp, $maxAge = 0, $die = false)
     {
         if (!Type::isNaturalNumber($timestamp)) {
             $timestamp = strtotime($timestamp);
@@ -233,7 +237,7 @@ class Response
         }
 
         // Nothing has changed since their last request - serve a 304
-        static::setCode(304);
+        static::sendCode(304);
 
         $die && die;
 

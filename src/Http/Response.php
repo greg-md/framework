@@ -64,6 +64,15 @@ class Response extends \Greg\Support\Http\Response
         return $this;
     }
 
+    public function json($data)
+    {
+        $this->contentType('application/json');
+
+        $this->content(json_encode($data));
+
+        return $this;
+    }
+
     public function send()
     {
         if ($callbacks = $this->callbacks()) {
@@ -85,15 +94,15 @@ class Response extends \Greg\Support\Http\Response
         }
 
         if ($contentType) {
-            $this->setContentType(implode('; ', $contentType));
+            $this->sendContentType(implode('; ', $contentType));
         }
 
         if ($code = $this->code()) {
-            $this->setCode($code);
+            $this->sendCode($code);
         }
 
         if ($location = $this->location()) {
-            $this->redirect($location, null, false);
+            $this->sendRedirect($location);
         }
 
         echo $this->content();

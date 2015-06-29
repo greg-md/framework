@@ -12,7 +12,7 @@ class Helper
     /**
      * @return Response
      */
-    public function redirect()
+    public function response()
     {
         return Response::create($this->appName());
     }
@@ -25,7 +25,12 @@ class Helper
      */
     public function routeRedirect($name, array $params = [], $code = null)
     {
-        return $this->redirect()->route($name, $params, $code);
+        return $this->response()->route($name, $params, $code);
+    }
+
+    public function json($data = [])
+    {
+        return $this->response()->json($data);
     }
 
     public function renderLayout($name, array $params = [])
