@@ -32,6 +32,34 @@ trait WhereTrait
         return $this;
     }
 
+    public function isNull($column)
+    {
+        $expr = $this->quoteExpr($column) . ' IS NULL';
+
+        return $this->whereLogic('AND', $expr);
+    }
+
+    public function orIsNull($column)
+    {
+        $expr = $this->quoteExpr($column) . ' IS NULL';
+
+        return $this->whereLogic('OR', $expr);
+    }
+
+    public function isNotNull($column)
+    {
+        $expr = $this->quoteExpr($column) . ' IS NOT NULL';
+
+        return $this->whereLogic('AND', $expr);
+    }
+
+    public function orIsNotNull($column)
+    {
+        $expr = $this->quoteExpr($column) . ' IS NOT NULL';
+
+        return $this->whereLogic('OR', $expr);
+    }
+
     public function orWhere($expr, $value = null, $_ = null)
     {
         return $this->whereLogic('OR', ...func_get_args());

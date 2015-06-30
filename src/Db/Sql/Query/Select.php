@@ -15,6 +15,8 @@ use Greg\Support\Obj;
  * @method Select whereCol($column, $operator, $value = null)
  * @method Select whereCols(array $columns)
  * @method Select where($expr = null, $value = null, $_ = null)
+ * @method Select isNull($column)
+ * @method Select isNotNull($column)
  */
 class Select extends Query
 {
@@ -98,6 +100,17 @@ class Select extends Query
         return $this;
     }
 
+    public function column($column, $alias = null)
+    {
+        if ($column instanceof \Closure) {
+            $column = $this->app()->binder()->call($column);
+        }
+
+        $this->columns[] = $alias !== null ? [$alias => $column] : $column;
+
+        return $this;
+    }
+
     public function columns($column = null, $_ = null)
     {
         if (func_num_args()) {
@@ -106,7 +119,7 @@ class Select extends Query
                 $column = func_get_args();
             }
 
-            $this->columns = array_merge($this->columns, $column);
+            array_map([$this, 'column'], $column);
 
             return $this;
         }
@@ -206,27 +219,47 @@ class Select extends Query
         return $order ? 'ORDER BY ' . implode(', ', $order) : '';
     }
 
-    public function toString()
+    public function selectToString()
     {
-        $this->clearBindParams();
-
-        $query = [];
-
-        $query[] = 'SELECT';
+        $query = ['SELECT'];
 
         if ($this->distinct()) {
             $query[] = 'DISTINCT';
         }
 
         $columns = $this->columns();
+
         if ($columns) {
             $cols = [];
+
             foreach($columns as $column) {
                 $cols[] = $this->quoteAliasExpr($column);
+
+                list($alias, $expr) = $this->fetchAlias($column);
+
+                unset($alias);
+
+                if ($expr instanceof Query) {
+                    $this->bindParams($expr->bindParams());
+                }
             }
+
             $query[] = implode(', ', $cols);
         } else {
             $query[] = '*';
+        }
+
+        return implode(' ', $query);
+    }
+
+    public function toString()
+    {
+        $this->clearBindParams();
+
+        $query = [];
+
+        if ($select = $this->selectToString()) {
+            $query[] = $select;
         }
 
         if ($from = $this->fromToString()) {
