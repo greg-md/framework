@@ -413,7 +413,7 @@ class Select extends Query
 
             $countQ->columns($storage->expr('1'));
 
-            $countQ = $storage->select('count(*)')->from(['table' => $countQ]);
+            $countQ = $storage->select('count(*)')->from([uniqid('table_') => $countQ]);
         } else {
             $countQ->columns('count(*)');
 
@@ -490,7 +490,7 @@ class Select extends Query
         $table = $this->table();
 
         if (!$table) {
-            throw new \Exception('Undefined table in SELECT query.');
+            throw new \Exception('Undefined table in Select query.');
         }
 
         return $table;
