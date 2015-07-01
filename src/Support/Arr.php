@@ -139,7 +139,7 @@ class Arr
      * @param null $else
      * @return mixed
      */
-    static public function get(array &$array, $key, $else = null)
+    static public function get(array $array, $key, $else = null)
     {
         if (is_array($key)) {
             $return = [];
@@ -371,24 +371,24 @@ class Arr
         return $myRef;
     }
 
-    static public function getIndexArray(array &$array, $index, $else = null)
+    static public function getIndexArray(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bring(static::getIndex($array, $index, $else));
+        return static::bring(static::getIndex($array, $index, $else, $delimiter));
     }
 
-    static public function &getIndexArrayRef(array &$array, $index, $else = null)
+    static public function &getIndexArrayRef(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bringRef(static::getIndexRef($array, $index, $else));
+        return static::bringRef(static::getIndexRef($array, $index, $else, $delimiter));
     }
 
-    static public function getIndexArrayForce(array &$array, $index, $else = null)
+    static public function getIndexArrayForce(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bring(static::getIndexForce($array, $index, $else));
+        return static::bring(static::getIndexForce($array, $index, $else, $delimiter));
     }
 
-    static public function &getIndexArrayForceRef(array &$array, $index, $else = null)
+    static public function &getIndexArrayForceRef(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bringRef(static::getIndexForceRef($array, $index, $else));
+        return static::bringRef(static::getIndexForceRef($array, $index, $else, $delimiter));
     }
 
     static public function required(array &$array, $key)

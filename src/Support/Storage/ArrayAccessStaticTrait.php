@@ -98,24 +98,24 @@ trait ArrayAccessStaticTrait
         return Arr::getIndexForceRef(static::accessor(), $index, $else, $delimiter);
     }
 
-    static public function getIndexArray($index, $else = null)
+    static public function getIndexArray($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArray(static::accessor(), $index, $else);
+        return Arr::getIndexArray(static::accessor(), $index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayRef($index, $else = null)
+    static public function &getIndexArrayRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayRef(static::accessor(), $index, $else);
+        return Arr::getIndexArrayRef(static::accessor(), $index, $else, $delimiter);
     }
 
-    static public function getIndexArrayForce($index, $else = null)
+    static public function getIndexArrayForce($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForce(static::accessor(), $index, $else);
+        return Arr::getIndexArrayForce(static::accessor(), $index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayForceRef($index, $else = null)
+    static public function &getIndexArrayForceRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForceRef(static::accessor(), $index, $else);
+        return Arr::getIndexArrayForceRef(static::accessor(), $index, $else, $delimiter);
     }
 
     static public function required($key)

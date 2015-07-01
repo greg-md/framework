@@ -243,6 +243,10 @@ class Route implements \ArrayAccess
 
         $compiled = $this->fetchFormat($this->format(), $params);
 
+        if (!$compiled) {
+            $compiled = '/';
+        }
+
         if ($params) {
             if ($this->strict()) {
                 $compiled .= '?' . http_build_query($params);
@@ -254,12 +258,8 @@ class Route implements \ArrayAccess
                     return [$this->encode($value), $this->encode($key)];
                 });
 
-                $compiled .= $delimiter . implode($delimiter, Arr::pack($params, $delimiter));
+                $compiled .= ($compiled !== $delimiter ? $delimiter : '') . implode($delimiter, Arr::pack($params, $delimiter));
             }
-        }
-
-        if (!$compiled) {
-            $compiled = '/';
         }
 
         if ($full) {

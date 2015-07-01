@@ -487,19 +487,19 @@ class Request
         return Arr::getIndexArray($_REQUEST, $index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayRefRequest($index, $else = null)
+    static public function &getIndexArrayRefRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayRef($_REQUEST, $index, $else);
+        return Arr::getIndexArrayRef($_REQUEST, $index, $else, $delimiter);
     }
 
-    static public function getIndexArrayForceRequest($index, $else = null)
+    static public function getIndexArrayForceRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForce($_REQUEST, $index, $else);
+        return Arr::getIndexArrayForce($_REQUEST, $index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayForceRefRequest($index, $else = null)
+    static public function &getIndexArrayForceRefRequest($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForceRef($_REQUEST, $index, $else);
+        return Arr::getIndexArrayForceRef($_REQUEST, $index, $else, $delimiter);
     }
 
     static public function requiredRequest($key)

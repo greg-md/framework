@@ -2,6 +2,8 @@
 
 namespace Greg\Support;
 
+use Greg\Support\Http\Request;
+
 class DateTime extends \DateTime
 {
     static public function toCurrentYearInterval($start, $delimiter = ' - ')
@@ -60,5 +62,26 @@ class DateTime extends \DateTime
     static public function toStringTime($time, $second = true)
     {
         return static::formatTime('H:i' . ($second ? ':s' : ''), $time);
+    }
+
+    static public function untilNowTime($time)
+    {
+        return Request::time() - static::toTimestamp($time);
+    }
+
+    static public function passedTimeUntilNow($time, $interval)
+    {
+        return static::passedTimeUntil($time, $interval);
+    }
+
+    static public function passedTimeUntil($time, $interval, $until = 'now')
+    {
+        $time = static::toTimestamp($time);
+
+        $until = static::toTimestamp($until);
+
+        $newTime = strtotime($interval, $time);
+
+        return $newTime <= $until;
     }
 }
