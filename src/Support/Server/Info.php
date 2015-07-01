@@ -21,6 +21,11 @@ class Info
         return static::get('REQUEST_TIME_FLOAT');
     }
 
+    static public function documentRoot()
+    {
+        return static::get('DOCUMENT_ROOT');
+    }
+
     static public function has($key, ...$keys)
     {
         return Arr::has($_SERVER, $key, ...$keys);
