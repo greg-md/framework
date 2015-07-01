@@ -110,6 +110,11 @@ class Response extends \Greg\Support\Http\Response
         return $this;
     }
 
+    public function isHtml()
+    {
+        return $this->contentType() == 'text/html';
+    }
+
     public function contentType($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
