@@ -356,7 +356,7 @@ class Select extends Query
     {
         $item = $this->assoc();
 
-        $items = [$item];
+        $items = $item ? [$item] : [];
 
         $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies, true);
 

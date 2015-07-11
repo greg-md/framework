@@ -852,6 +852,9 @@ class Table
 
     public function toFullFormat(&$items, $rows = false)
     {
+        throw new \Exception('lol');
+        Arr::bringRef($items);
+
         foreach($items as $key => &$item) {
             if ($rows) {
                 $item = $this->createRow($item);

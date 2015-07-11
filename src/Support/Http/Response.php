@@ -185,6 +185,15 @@ class Response
         return true;
     }
 
+    static public function flushContent()
+    {
+        echo str_pad('', 4096);
+        ob_flush();
+        flush();
+
+        return true;
+    }
+
     static public function isModifiedSince($timestamp, $maxAge = 0, $die = false)
     {
         if (!Type::isNaturalNumber($timestamp)) {
