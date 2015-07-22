@@ -122,8 +122,6 @@ class Route implements \ArrayAccess
                             $defaults[$paramName] = $paramDefault;
                         }
 
-                        $paramRegex = $paramRegex ?: '.+';
-
                         $compiled .= "({$paramRegex})" . $matches[$paramRK][$key];
                     } elseif ($subFormat = $matches[$subFormatKey][$key]) {
                         list($subCompiled, $subParams, $subDefaults) = $this->compile($subFormat);
@@ -153,9 +151,23 @@ class Route implements \ArrayAccess
         if (preg_match(Regex::pattern('^((?:\\\:|\\\||[^\:])+?)(?:\:((?:|\\\||[^\|])+?))?(?:\|(.+?))?$'), $param, $matches)) {
             $name = $matches[1];
 
+            $greedy = false;
+
+            $nameLen = mb_strlen($name);
+
+            if ($name[$nameLen - 1] == '?') {
+                $name = mb_substr($name, 0, $nameLen - 1);
+
+                $greedy = true;
+            }
+
             $default = Arr::get($matches, 2);
 
             $regex = Arr::has($matches, 3) ? Regex::disableGroups($matches[3]) : null;
+
+            if (!$regex) {
+                $regex = '.+' . ($greedy ? '?' : '');
+            }
         }
 
         return [$name, $default, $regex];
