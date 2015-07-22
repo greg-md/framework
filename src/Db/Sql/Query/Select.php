@@ -356,11 +356,15 @@ class Select extends Query
     {
         $item = $this->assoc();
 
-        $items = $item ? [$item] : [];
+        if ($item) {
+            $items = [$item];
 
-        $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies, true);
+            $this->getTable()->addFullInfo($items, $references, $relationships, $dependencies, true);
 
-        return $items[0];
+            $item = $items[0];
+        }
+
+        return $item;
     }
 
     public function rows()

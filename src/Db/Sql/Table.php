@@ -325,66 +325,82 @@ class Table
                 $referenceParams = [];
             }
 
-            /*
-            $relationshipTable = $app->loadModel($referenceTableName);
+            $referenceTable = $this->getRelationshipTable($referenceTableName);
 
-            $tableRelationships = $tablesReferences[$relationshipTable->getTableName()];
-            if (!$tableRelationships) {
-                throw new \Exception('Referenced `' . $referenceTableName . '` not found.');
+            $tableReferences = $tablesReferences[$referenceTable->getName()];
+
+            if (!$tableReferences) {
+                throw new \Exception('Reference `' . $referenceTableName . '` not found.');
             }
 
-            foreach($items as &$item) {
-                $itemRefModel = $item['references'];
-                foreach($tableRelationships as $info) {
-                    $columns = [];
-                    foreach($info['Constraint'] as $constraint) {
-                        $columns[] = $constraint['ColumnName'];
-                    }
-                    $itemRefModel[implode('.', $columns)] = null;
+            foreach($tableReferences as $info) {
+                $columns = [];
+
+                foreach($info['Constraint'] as $constraint) {
+                    $columns[] = $constraint['ColumnName'];
+                }
+
+                foreach($items as &$item) {
+                    $item['references'][implode('.', $columns)] = null;
                 }
             }
             unset($item);
 
-            $reColumnInfo = $relationshipTable->columnInfo();
-
             $parts = [];
-            foreach($tableRelationships as $info) {
+
+            foreach($tableReferences as $info) {
                 $columns = [];
+
                 foreach($info['Constraint'] as $constraint) {
                     $columns[] = $constraint['ReferencedColumnName'];
                 }
+
                 $columnsCount = sizeof($columns);
+
                 $columns = implode('.', $columns);
+
                 if (!isset($parts[$columns])) {
                     $parts[$columns] = [];
                 }
+
                 foreach($items as $item) {
                     $itemKeys = [];
+
                     foreach($info['Constraint'] as $constraint) {
                         $columnName = $constraint['ColumnName'];
-                        $key = $item[$modelName][$columnName];
-                        if (!$key and !$reColumnInfo[$constraint['ReferencedColumnName']]['IsNullable']) {
+
+                        $key = $item[$this->getName()][$columnName];
+
+                        if (!$key and !$referenceTable->columns($constraint['ReferencedColumnName'])->allowNull()) {
                             continue 2;
                         }
+
                         if ($key or $columnsCount > 1) {
                             $itemKeys[] = $key;
                         }
                     }
+
                     if (!array_filter($itemKeys)) {
                         continue;
                     }
+
                     $hasKeysCombination = false;
+
                     foreach($parts[$columns] as $keys) {
                         if ($keys === $itemKeys) {
                             $hasKeysCombination = true;
                             break;
                         }
                     }
+
                     if (!$hasKeysCombination) {
                         $parts[$columns][] = $itemKeys;
                     }
                 }
             }
+
+            dd($parts);
+
             foreach($parts as $key => $part) {
                 if (!$part) {
                     unset($parts[$key]);
@@ -394,7 +410,7 @@ class Table
                 continue;
             }
 
-            $query = $relationshipTable->select();
+            $query = $referenceTable->select();
             foreach($parts as $columns => $values) {
                 $query->orWhereRow(explode('.', $columns), $values);
             }
@@ -416,13 +432,13 @@ class Table
             }
             $fetchFull = $referenceParams['fetchFull'];
             if ($fetchFull) {
-                $reItems = $relationshipTable->fetchRowsFull($query,
+                $reItems = $referenceTable->fetchRowsFull($query,
                     $referenceParams['references'], $referenceParams['relationships'], $referenceParams['depends'],
                     $referencedFetchType, $referenceParams['rowClass'], $referenceParams['rowFullClass']);
             } else {
-                $reItems = $relationshipTable->fetchRows($query, $referencedFetchType, $referenceParams['rowClass']);
+                $reItems = $referenceTable->fetchRows($query, $referencedFetchType, $referenceParams['rowClass']);
             }
-            foreach($tableRelationships as $info) {
+            foreach($tableReferences as $info) {
                 $columns = $columns = [];
                 foreach($info['Constraint'] as $constraint) {
                     $columns[] = $constraint['ColumnName'];
@@ -449,7 +465,6 @@ class Table
                 }
                 unset($item);
             }
-            */
         }
         return $this;
     }
@@ -852,8 +867,6 @@ class Table
 
     public function toFullFormat(&$items, $rows = false)
     {
-        Arr::bringRef($items);
-
         foreach($items as $key => &$item) {
             if ($rows) {
                 $item = $this->createRow($item);
