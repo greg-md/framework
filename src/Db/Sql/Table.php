@@ -40,6 +40,8 @@ class Table
 
     protected $relationshipsAliases = [];
 
+    protected $referencesAliases = [];
+
     protected $rowClass = Table\Row::class;
 
     protected $rowFullClass = Table\RowFull::class;
@@ -301,7 +303,7 @@ class Table
         return $this;
     }
 
-    public function addReferences(&$items, $references)
+    public function addReferences(&$items, $references, $rows = false)
     {
         if ($references == '*') {
             $references = array_keys($this->references());
@@ -324,6 +326,14 @@ class Table
 
                 $referenceParams = [];
             }
+
+            $referenceParams = array_merge([
+                'references' => null,
+                'relationships' => null,
+                'dependencies' => '*',
+                'full' => true,
+                'callback' => null,
+            ], $referenceParams);
 
             $referenceTable = $this->getRelationshipTable($referenceTableName);
 
@@ -399,65 +409,68 @@ class Table
                 }
             }
 
-            dd($parts);
-
             foreach($parts as $key => $part) {
                 if (!$part) {
                     unset($parts[$key]);
                 }
             }
+
             if (!$parts) {
                 continue;
             }
 
             $query = $referenceTable->select();
-            foreach($parts as $columns => $values) {
-                $query->orWhereRow(explode('.', $columns), $values);
+
+            if (is_callable($referenceParams['callback'])) {
+                $this->app()->binder()->call($referenceParams['callback'], $query);
             }
 
-            $referenceParams = $this->_toArray($referenceParams);
-            $referenceParams->replacePrepend(array(
-                'fetchType' => $fetchType,
-                'fetchFull' => true,
-                'depends' => '*',
-                'callback' => null,
-            ));
-            $referencedFetchType = $referenceParams['fetchType'];
-            if ($referencedFetchType == self::FETCH_ROWSET_OBJECT) {
-                $referencedFetchType = self::FETCH_ROW_OBJECT;
-            }
-            $callback = $referenceParams['callback'];
-            if (($callback instanceof Closure)) {
-                $callback($query);
-            }
-            $fetchFull = $referenceParams['fetchFull'];
-            if ($fetchFull) {
-                $reItems = $referenceTable->fetchRowsFull($query,
-                    $referenceParams['references'], $referenceParams['relationships'], $referenceParams['depends'],
-                    $referencedFetchType, $referenceParams['rowClass'], $referenceParams['rowFullClass']);
+            $query->where(function(Where $query) use ($parts) {
+                foreach($parts as $columns => $values) {
+                    $query->orWhereCol(explode('.', $columns), $values);
+                }
+            });
+
+            if ($referenceParams['full']) {
+                $referenceItems = $query->{$rows ? 'rowsFull' : 'assocAllFull'}($referenceParams['references'], $referenceParams['relationships'], $referenceParams['dependencies']);
             } else {
-                $reItems = $referenceTable->fetchRows($query, $referencedFetchType, $referenceParams['rowClass']);
+                $referenceItems = $query->{$rows ? 'rows' : 'assocAll'}();
             }
+
             foreach($tableReferences as $info) {
-                $columns = $columns = [];
+                $columns = $rColumns = [];
+
                 foreach($info['Constraint'] as $constraint) {
                     $columns[] = $constraint['ColumnName'];
-                    $columns[] = $constraint['ReferencedColumnName'];
+
+                    $rColumns[] = $constraint['ReferencedColumnName'];
                 }
+
+                $key = implode('.', $columns);
+
+                $key = $this->referencesAliases($key) ?: $key;
+
                 foreach($items as &$item) {
                     $values = [];
+
                     foreach($columns as $column) {
-                        $values[] = $item[$modelName][$column];
+                        $values[] = $item[$this->getName()][$column];
                     }
+
                     if (array_filter($values)) {
-                        $itemRTable = &$item['references'];
-                        foreach($reItems as $reItem) {
+                        foreach($referenceItems as $reItem) {
                             $rValues = [];
-                            foreach($columns as $rColumn) {
-                                $rValues[] = $fetchFull ? $reItem[$referenceTableName][$rColumn] : $reItem[$rColumn];
+
+                            foreach($rColumns as $rColumn) {
+                                if ($referenceParams['full']) {
+                                    $rValues[] = $reItem[$referenceTableName][$rColumn];
+                                } else {
+                                    $rValues[] = $reItem[$rColumn];
+                                }
                             }
+
                             if ($values === $rValues) {
-                                $itemRTable[implode('.', $columns)] = $reItem;
+                                $item['references'][$key] = $reItem;
                                 break;
                             }
                         }
@@ -466,6 +479,7 @@ class Table
                 unset($item);
             }
         }
+
         return $this;
     }
 
@@ -683,7 +697,7 @@ class Table
         return $this;
     }
 
-    public function addDependencies(&$items, $dependencies)
+    public function addDependencies(&$items, $dependencies, $rows = false)
     {
         if ($dependencies == '*') {
             $dependencies = array_keys($this->dependencies());
@@ -1048,6 +1062,11 @@ class Table
     }
 
     public function relationshipsAliases($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function referencesAliases($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
