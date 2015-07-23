@@ -78,7 +78,7 @@ abstract class Query
         if ($expr instanceof Query) {
             $expr = '(' . $expr . ')';
         } else {
-            $expr = $this->quoteNamedExpr($expr);
+            $expr = $this->quoteExpr($expr);
         }
 
         if ($alias) {

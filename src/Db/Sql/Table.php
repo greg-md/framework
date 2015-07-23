@@ -6,12 +6,22 @@ use Greg\Cache\StorageInterface as CacheStorageInterface;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\Table\Column;
+use Greg\Db\Sql\Table\Row;
 use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
 use Greg\Support\Obj;
 use Greg\Support\Url;
 
+/**
+ * Class Table
+ * @package Greg\Db\Sql
+ *
+ * @method beginTransaction()
+ * @method commit()
+ * @method rollBack()
+ * @method lastInsertId($name = null)
+ */
 class Table
 {
     use InternalTrait;
@@ -177,6 +187,63 @@ class Table
     public function insert(array $data = [])
     {
         return $this->storage()->insert($this)->data($data);
+    }
+
+    public function insertData(array $data = [])
+    {
+        $this->insert($data)->exec();
+
+        return $this;
+    }
+
+    public function insertDataFull(array $data = [], $relationships = [])
+    {
+        $row = $this->newRow($data);
+
+        $row->save();
+
+        $relationships && $this->insertDataRelationships($row, $relationships);
+
+        return $this;
+    }
+
+    public function insertDataRelationships(Row $row, $relationships = [])
+    {
+        foreach($relationships as $relationshipPath => $inserts) {
+            list($tableName, $constraintColumns) = explode(':', $relationshipPath, 2);
+
+            $constraintColumns = explode('.', $constraintColumns);
+
+            sort($constraintColumns);
+
+            $table = $this->getRelationshipTable($tableName);
+
+            foreach($this->getTablesRelationships($tableName) as $relationshipInfo) {
+                $relationshipColumns = [];
+
+                $relationshipInsert = [];
+
+                foreach($relationshipInfo['Constraint'] as $constraint) {
+                    $relationshipColumns[] = $constraint['RelationshipColumnName'];
+
+                    $relationshipInsert[$constraint['RelationshipColumnName']] = $row[$constraint['ColumnName']];
+                }
+
+                sort($relationshipColumns);
+
+                if ($constraintColumns != $relationshipColumns) {
+                    continue;
+                }
+
+                foreach($inserts as $insert) {
+                    $table->insertData($relationshipInsert + $insert);
+                }
+
+                break;
+            }
+        }
+
+        return $this;
     }
 
     public function update(array $values = [])
@@ -498,8 +565,6 @@ class Table
             unset($item);
         }
 
-        $tablesRelationships = Arr::group($this->relationships(), 'RelationshipTableName', false);
-
         foreach($relationships as $relationshipTableName => $relationshipParams) {
             if (is_int($relationshipTableName)) {
                 $relationshipTableName = $relationshipParams;
@@ -517,11 +582,7 @@ class Table
 
             $relationshipTable = $this->getRelationshipTable($relationshipTableName);
 
-            $tableRelationships = Arr::get($tablesRelationships, $relationshipTable->getName());
-
-            if (!$tableRelationships) {
-                throw new \Exception('Relationship `' . $relationshipTableName . '` not found.');
-            }
+            $tableRelationships = $this->getTablesRelationships($relationshipTable->getName());
 
             foreach($items as &$item) {
                 foreach($tableRelationships as $info) {
@@ -705,8 +766,6 @@ class Table
 
         $dependencies = Arr::bring($dependencies);
 
-        $relationships = Arr::group($this->relationships(), 'RelationshipTableName', false);
-
         foreach($dependencies as $dependenceName => $dependenceParams) {
             if (is_int($dependenceName)) {
                 $dependenceName = $dependenceParams;
@@ -725,13 +784,7 @@ class Table
 
             $dependenceTable = $dependenceTable::newInstance($this->appName(), $this->storage());
 
-            $dependenceTableName = $dependenceTable->name();
-
-            if (!Arr::has($relationships, $dependenceTableName)) {
-                throw new \Exception('Table `' . $dependenceTableName . '` not found in `' . $this->name() . '` relationships.');
-            }
-
-            $tableRelationships = $relationships[$dependenceTableName];
+            $tableRelationships = $this->getTablesRelationships($dependenceTable->name());
 
             $parts = [];
 
@@ -970,6 +1023,21 @@ class Table
         return $name;
     }
 
+    public function getTablesRelationships($name = null)
+    {
+        $tablesRelationships = Arr::group($this->relationships(), 'RelationshipTableName', false);
+
+        if ($name) {
+            if (!Arr::has($tablesRelationships, $name)) {
+                throw new \Exception('Relationship table `' . $name . '` not found in `' . $this->name() . '`.');
+            }
+
+            return $tablesRelationships[$name];
+        }
+
+        return $tablesRelationships;
+    }
+
     /**
      * @param $name
      * @return Table
@@ -992,11 +1060,6 @@ class Table
         }
 
         return $table;
-    }
-
-    public function lastInsertId($name = null)
-    {
-        return $this->storage()->lastInsertId($name);
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)
@@ -1157,5 +1220,10 @@ class Table
     public function relationshipsTables($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function __call($method, $args = [])
+    {
+        return $this->storage()->{$method}(...$args);
     }
 }

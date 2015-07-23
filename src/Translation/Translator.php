@@ -18,7 +18,7 @@ class Translator implements \ArrayAccess
 
     protected $languages = [];
 
-    protected $languagesUrls = [];
+    protected $newTranslates = [];
 
     public function __construct(array $languages = [], array $translates = [])
     {
@@ -52,26 +52,24 @@ class Translator implements \ArrayAccess
     public function translateKey($key, $text, ...$args)
     {
         if (!$this->has($key)) {
-            //$this->newTranslates[$key] = $text;
+            $this->newTranslates($key, $text);
         }
 
         if (sizeof($args) == 1) {
             $args = Arr::bring($args[0]);
         }
 
-        $customArgs = array_filter($args, function($key) {
-            return !is_int($key);
-        }, ARRAY_FILTER_USE_KEY);
-
         $replacements = [];
 
-        foreach($customArgs as $key => $value) {
-            $replacements['{' . $key . '}'] = $value;
+        foreach($args as $key => $value) {
+            if (!is_int($key)) {
+                $replacements['{' . $key . '}'] = $value;
+
+                unset($args[$key]);
+            }
         }
 
         $text = strtr($text, $replacements);
-
-        $args = array_filter($args, 'is_int', ARRAY_FILTER_USE_KEY);
 
         return sprintf($this->get($key, $text), ...$args);
     }
@@ -92,6 +90,11 @@ class Translator implements \ArrayAccess
     }
 
     public function languages($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function newTranslates($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
