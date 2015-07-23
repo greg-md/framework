@@ -2,6 +2,7 @@
 
 namespace Greg\Translation;
 
+use Greg\Support\Arr;
 use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
@@ -50,6 +51,28 @@ class Translator implements \ArrayAccess
 
     public function translateKey($key, $text, ...$args)
     {
+        if (!$this->has($key)) {
+            //$this->newTranslates[$key] = $text;
+        }
+
+        if (sizeof($args) == 1) {
+            $args = Arr::bring($args[0]);
+        }
+
+        $customArgs = array_filter($args, function($key) {
+            return !is_int($key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        $replacements = [];
+
+        foreach($customArgs as $key => $value) {
+            $replacements['{' . $key . '}'] = $value;
+        }
+
+        $text = strtr($text, $replacements);
+
+        $args = array_filter($args, 'is_int', ARRAY_FILTER_USE_KEY);
+
         return sprintf($this->get($key, $text), ...$args);
     }
 
