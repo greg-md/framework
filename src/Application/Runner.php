@@ -26,6 +26,8 @@ class Runner implements \ArrayAccess
 
     const EVENT_RUN = 'app.run';
 
+    const EVENT_RUN_PATH = 'app.run.path';
+
     const EVENT_DISPATCHING = 'app.dispatching';
 
     const EVENT_ROUTER_DISPATCH = 'app.router.dispatch';
@@ -382,7 +384,9 @@ class Runner implements \ArrayAccess
 
         $path = $path ?: '/';
 
-        $this->listener()->fireRef(static::EVENT_RUN, $path);
+        $this->listener()->fireRef(static::EVENT_RUN);
+
+        $this->listener()->fireRef(static::EVENT_RUN_PATH, $path);
 
         $this->listener()->fire(static::EVENT_DISPATCHING);
 
