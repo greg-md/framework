@@ -15,7 +15,7 @@ class Notifier implements SubscriberInterface
     public function subscribe(Listener $listener)
     {
         $listener->register([
-            //Runner::EVENT_INIT
+
         ], $this);
 
         return $this;

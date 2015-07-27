@@ -48,6 +48,10 @@ class Listener
 
     public function on($event, callable $call, $id = null)
     {
+        if (!Arr::has($this->storage, $event)) {
+            $this->storage[$event] = new \ArrayIterator();
+        }
+
         if ($id !== null) {
             $this->storage[$event][$id] = $call;
         } else {
@@ -88,9 +92,9 @@ class Listener
 
     public function fireArgs($event, array $args = [])
     {
-        $binder = $this->app()->binder();
-
         if (Arr::has($this->storage, $event)) {
+            $binder = $this->app()->binder();
+
             foreach($this->storage[$event] as $function) {
                 $binder->callArgs($function, $args);
             }
@@ -111,12 +115,13 @@ class Listener
 
     public function fireWithArgs($event, array $args = [])
     {
-        $binder = $this->app()->binder();
-
         if (Arr::has($this->storage, $event)) {
+            $binder = $this->app()->binder();
+
             foreach($this->storage[$event] as $function) {
                 $binder->callWithArgs($function, $args);
             }
+
         }
 
         return $this;

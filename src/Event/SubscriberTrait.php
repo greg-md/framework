@@ -30,6 +30,27 @@ trait SubscriberTrait
         return $this;
     }
 
+    public function fireWith($event, ...$args)
+    {
+        return $this->fireWithRef($event, ...$args);
+    }
+
+    public function fireWithRef($event, &...$args)
+    {
+        return $this->fireWithArgs($event, $args);
+    }
+
+    public function fireWithArgs($event, array $args = [])
+    {
+        $method = lcfirst(Str::phpName($event));
+
+        if (method_exists($this, $method)) {
+            $this->app()->binder()->callWithArgs([$this, $method], $args);
+        }
+
+        return $this;
+    }
+
     /**
      * @param Runner $app
      * @return Runner
