@@ -8,14 +8,14 @@ class Url
 {
     const UA = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
 
-    static public function is($url)
+    static public function isFull($url)
     {
         return preg_match('#^(?:https?\:)?//#i', $url);
     }
 
     static public function full($url = '/')
     {
-        if (static::is($url)) {
+        if (static::isFull($url)) {
             return $url;
         }
 
@@ -24,7 +24,7 @@ class Url
 
     static public function fix($url, $secured = false)
     {
-        if (static::is($url)) {
+        if (static::isFull($url)) {
             return $url;
         }
 
@@ -51,6 +51,11 @@ class Url
         $info = parse_url($url);
 
         return $info['scheme'] . '://' . $info['host'];
+    }
+
+    static public function base($url = '/')
+    {
+        return Request::baseUri() . $url;
     }
 
     static public function addQuery($url, $query)

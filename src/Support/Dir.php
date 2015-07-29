@@ -16,4 +16,9 @@ class Dir
 
         return true;
     }
+
+    static public function fixRecursive($dir)
+    {
+        return static::fix($dir, true);
+    }
 }

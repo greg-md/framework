@@ -3,6 +3,7 @@
 namespace Greg\Support\Http;
 
 use Greg\Support\Arr;
+use Greg\Support\Image;
 use Greg\Support\Type;
 
 class Response
@@ -126,6 +127,23 @@ class Response
         static::sendContentType('text/html');
 
         echo $html;
+
+        $die && die;
+
+        return true;
+    }
+
+    static public function sendImageFile($file, $die = false)
+    {
+        $mime = Image::mime($file);
+
+        if (!$mime) {
+            throw new \Exception('File is not an image.');
+        }
+
+        Response::sendContentType($mime);
+
+        readfile($file);
 
         $die && die;
 

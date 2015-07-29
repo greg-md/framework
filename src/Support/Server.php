@@ -1,14 +1,17 @@
 <?php
 
-namespace Greg\Support\Server;
+namespace Greg\Support;
 
-use Greg\Support\Arr;
-
-class Info
+class Server
 {
     static public function scriptName()
     {
         return static::get('SCRIPT_NAME');
+    }
+
+    static public function scriptFile()
+    {
+        return static::get('SCRIPT_FILENAME');
     }
 
     static public function requestTime()

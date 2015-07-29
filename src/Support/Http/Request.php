@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Http;
 
-use Greg\Support\Server\Info;
+use Greg\Support\Server;
 use Greg\Support\Arr;
 
 class Request
@@ -15,27 +15,27 @@ class Request
 
     static public function protocol()
     {
-        return Info::get('SERVER_PROTOCOL');
+        return Server::get('SERVER_PROTOCOL');
     }
 
     static public function clientHost()
     {
-        return Info::get('HTTP_HOST');
+        return Server::get('HTTP_HOST');
     }
 
     static public function serverHost()
     {
-        return Info::get('SERVER_NAME');
+        return Server::get('SERVER_NAME');
     }
 
     static public function serverAdmin()
     {
-        return Info::get('SERVER_ADMIN');
+        return Server::get('SERVER_ADMIN');
     }
 
     static public function secured()
     {
-        return Info::get('HTTPS');
+        return Server::get('HTTPS');
     }
 
     static public function isSecured()
@@ -45,22 +45,22 @@ class Request
 
     static public function with()
     {
-        return Info::get('HTTP_X_REQUESTED_WITH');
+        return Server::get('HTTP_X_REQUESTED_WITH');
     }
 
     static public function port()
     {
-        return Info::get('SERVER_PORT');
+        return Server::get('SERVER_PORT');
     }
 
     static public function agent()
     {
-        return Info::get('HTTP_USER_AGENT');
+        return Server::get('HTTP_USER_AGENT');
     }
 
     static public function ip()
     {
-        return Info::get('REMOTE_ADDR');
+        return Server::get('REMOTE_ADDR');
     }
 
     static public function uri($flag = self::URI_ALL)
@@ -73,7 +73,30 @@ class Request
                 return static::uriQuery();
         }
 
-        return Info::get('REQUEST_URI');
+        return Server::get('REQUEST_URI');
+    }
+
+    static public function baseUri()
+    {
+        $scriptName = Server::scriptName();
+
+        $uriInfo = pathinfo($scriptName);
+
+        $baseUri = $uriInfo['dirname'];
+
+        if (DIRECTORY_SEPARATOR != '/') {
+            $baseUri = str_replace(DIRECTORY_SEPARATOR, '/', $baseUri);
+        }
+
+        if ($baseUri[0] == '.') {
+            $baseUri[0] = '/';
+        }
+
+        if ($baseUri == '/') {
+            $baseUri = null;
+        }
+
+        return $baseUri;
     }
 
     static public function uriPath()
@@ -94,27 +117,27 @@ class Request
 
     static public function referrer()
     {
-        return Info::get('HTTP_REFERER');
+        return Server::get('HTTP_REFERER');
     }
 
     static public function modifiedSince()
     {
-        return Info::get('HTTP_IF_MODIFIED_SINCE');
+        return Server::get('HTTP_IF_MODIFIED_SINCE');
     }
 
     static public function match()
     {
-        return Info::get('HTTP_IF_NONE_MATCH');
+        return Server::get('HTTP_IF_NONE_MATCH');
     }
 
     static public function time()
     {
-        return Info::requestTime();
+        return Server::requestTime();
     }
 
     static public function microTime()
     {
-        return Info::requestMicroTime();
+        return Server::requestMicroTime();
     }
 
     static public function ajax()
