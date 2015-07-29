@@ -2,9 +2,7 @@
 
 namespace Greg\Router;
 
-use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Storage\AccessorTrait;
-use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Regex;
@@ -12,9 +10,15 @@ use Greg\Support\Regex\InNamespace;
 use Greg\Support\Str;
 use Greg\Support\Url;
 
-class Route implements \ArrayAccess
+class Route extends Router implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait, InternalTrait;
+    use AccessorTrait;
+
+    const TYPE_GET = 'get';
+
+    const TYPE_POST = 'post';
+
+    const TYPE_GROUP = 'group';
 
     protected $name = null;
 
@@ -40,6 +44,8 @@ class Route implements \ArrayAccess
 
     protected $lastMatchedPath = [];
 
+    protected $parent = null;
+
     public function __construct($name, $format, $type = null, callable $callback = null)
     {
         $this->name($name);
@@ -56,6 +62,11 @@ class Route implements \ArrayAccess
     static public function create($appName, $name, $format, $type = null, callable $callback = null)
     {
         return static::newInstanceRef($appName, $name, $format, $type, $callback);
+    }
+
+    public function createRoute($name, $format, $type = null, $settings = null)
+    {
+        return parent::createRoute($name, $format, $type, $settings)->parent($this);
     }
 
     public function compileFormat($format)
@@ -197,41 +208,78 @@ class Route implements \ArrayAccess
         return null;
     }
 
-    public function match($path, array &$params = [])
+    public function match($path, array &$matchedParams = [])
     {
-        $pattern = '^' . $this->compiled() . ($this->strict() ? '' : '(.*)') . '$';
+        $pattern = '^' . $this->compiled() . (($this->isGroup() or !$this->strict()) ? '(.*)' : '') . '$';
 
-        $matched = false;
+        $matchedRoute = false;
 
         if (preg_match(Regex::pattern($pattern), $path, $matches)) {
             array_shift($matches);
 
-            $params = $this->defaults();
+            if ($this->isGroup()) {
+                $subPath = array_pop($matches);
 
-            foreach($this->params() as $key => $param) {
-                if (array_key_exists($key, $matches) and !Str::isEmpty($matches[$key])) {
-                    $params[$param] = $this->decode($matches[$key]);
-                } else {
-                    $params[$param] = $this->defaults($param);
+                foreach($this->routes as $route) {
+                    if ($subMatchedRoute = $route->match($subPath)) {
+                        $matchedRoute = $subMatchedRoute;
+
+                        break;
+                    }
                 }
+            } else {
+                $matchedRoute = $this;
             }
 
-            if (!$this->strict()) {
-                $remain = array_pop($matches);
+            if ($matchedRoute) {
+                $params = $this->defaults();
 
-                $remain = Str::splitPath($remain, $this->delimiter());
+                foreach($this->params() as $key => $param) {
+                    if (array_key_exists($key, $matches) and !Str::isEmpty($matches[$key])) {
+                        $params[$param] = $this->decode($matches[$key]);
+                    } else {
+                        $params[$param] = $this->defaults($param);
+                    }
+                }
 
-                $params = array_merge($params, $this->chunkParams($remain));
+                if (!$this->isGroup() and !$this->strict()) {
+                    $remain = array_pop($matches);
+
+                    $remain = Str::splitPath($remain, $this->delimiter());
+
+                    $params = array_merge($params, $this->chunkParams($remain));
+                }
+
+                $this->lastMatchedPath($path);
+
+                $this->lastMatchedParams($params, Obj::PROP_REPLACE);
+
+                if ($matchedRoute !== $this) {
+                    $matchedRoute->lastMatchedPath($path);
+
+                    $matchedRoute->lastMatchedParams($params, Obj::PROP_PREPEND);
+                }
+
+                $matchedParams = $params;
             }
-
-            $this->lastMatchedPath($path);
-
-            $this->lastMatchedParams($params, Obj::PROP_REPLACE);
-
-            $matched = true;
         }
 
-        return $matched;
+        return $matchedRoute;
+    }
+
+    public function isGet()
+    {
+        return $this->type() == static::TYPE_GET;
+    }
+
+    public function isPost()
+    {
+        return $this->type() == static::TYPE_POST;
+    }
+
+    public function isGroup()
+    {
+        return $this->type() == static::TYPE_GROUP;
     }
 
     public function chunkParams($params)
@@ -257,6 +305,12 @@ class Route implements \ArrayAccess
 
         if (!$compiled) {
             $compiled = '/';
+        }
+
+        if ($parent = $this->parent()) {
+            $parentCompiled = $parent->fetchFormat($parent->format(), $params);
+
+            $compiled = $parentCompiled . $compiled;
         }
 
         if ($params) {
@@ -337,14 +391,16 @@ class Route implements \ArrayAccess
                             }
                         }
 
-                        if ($value != $paramDefault) {
-                            $usedParams[] = $paramName;
-                        }
-
+                        $usedParams[] = $paramName;
                     } elseif ($subFormat = $matches[$subFormatKey][$key]) {
-                        $subCompiled = $this->fetchFormat($subFormat, $params, !$matches[$subFormatRK][$key]);
+                        $subFormatRequired = !$matches[$subFormatRK][$key];
+
+                        $subCompiled = $this->fetchFormat($subFormat, $params, $subFormatRequired);
+
                         if (!Str::isEmpty($subCompiled)) {
-                            $compiled[] = $subCompiled;
+                            if ($subFormatRequired or $compiled) {
+                                $compiled[] = $subCompiled;
+                            }
                         }
                     }
                 }
@@ -433,5 +489,36 @@ class Route implements \ArrayAccess
     public function lastMatchedParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
+    }
+
+    public function parent(Route $value = null)
+    {
+        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    /* Magic methods for ArrayAccess interface */
+
+    public function offsetExists($key)
+    {
+        return Arr::has($this->accessor(), $key);
+    }
+
+    public function offsetSet($key, $value)
+    {
+        Arr::set($this->accessor(), $key, $value);
+
+        return $this;
+    }
+
+    public function &offsetGet($key)
+    {
+        return $this->accessor()[$key];
+    }
+
+    public function offsetUnset($key)
+    {
+        Arr::del($this->accessor(), $key);
+
+        return $this;
     }
 }

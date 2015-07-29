@@ -7,6 +7,12 @@ use Greg\Support\Arr;
 
 class Request
 {
+    const URI_ALL =  'all';
+
+    const URI_PATH =  'path';
+
+    const URI_QUERY =  'query';
+
     static public function protocol()
     {
         return Info::get('SERVER_PROTOCOL');
@@ -57,9 +63,33 @@ class Request
         return Info::get('REMOTE_ADDR');
     }
 
-    static public function uri()
+    static public function uri($flag = self::URI_ALL)
     {
+        switch($flag) {
+            case static::URI_PATH;
+                return static::uriPath();
+
+            case static::URI_QUERY;
+                return static::uriQuery();
+        }
+
         return Info::get('REQUEST_URI');
+    }
+
+    static public function uriPath()
+    {
+        list($path) = explode('?', static::uri(), 2);
+
+        return $path;
+    }
+
+    static public function uriQuery()
+    {
+        list($path, $query) = explode('?', static::uri(), 2);
+
+        unset($path);
+
+        return $query;
     }
 
     static public function referrer()

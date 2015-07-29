@@ -379,10 +379,10 @@ class Runner implements \ArrayAccess
     public function run($path = '/')
     {
         if (!func_num_args()) {
-            list($path) = explode('?', Request::uri(), 2);
+            $path = Request::uriPath();
+        } else {
+            $path = $path ?: '/';
         }
-
-        $path = $path ?: '/';
 
         $this->listener()->fireRef(static::EVENT_RUN);
 
@@ -390,7 +390,7 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fire(static::EVENT_DISPATCHING);
 
-        $response = $this->router()->dispatch($path, [
+        $response = $this->router()->dispatchPath($path, [
             Dispatcher::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
             Dispatcher::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
             Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,

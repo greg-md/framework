@@ -53,6 +53,15 @@ class Url
         return $info['scheme'] . '://' . $info['host'];
     }
 
+    static public function addQuery($url, $query)
+    {
+        list($urlPath, $urlQuery) = explode('?', $url, 2);
+
+        $allQuery = array_filter([$urlQuery, $query]);
+
+        return $urlPath . ($allQuery ? '?' . implode('&', $allQuery) : '');
+    }
+
     static public function init($url)
     {
         $ch = curl_init(static::fix($url));

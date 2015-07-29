@@ -48,7 +48,7 @@ class Response extends \Greg\Support\Http\Response
 
     public function route($name, array $params = [], $code = null)
     {
-        $this->location($this->app()->router()->fetch($name, $params));
+        $this->location($this->app()->router()->fetchRoute($name, $params));
 
         if ($code !== null) {
             $this->code($code);
