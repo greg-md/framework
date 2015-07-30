@@ -8,6 +8,7 @@ use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
+use Greg\Support\Server;
 use Greg\Support\Server\Config;
 use Greg\Support\Server\Ini;
 use Greg\Support\Storage\AccessorTrait;
@@ -501,6 +502,16 @@ class Runner implements \ArrayAccess
         }
 
         return $this->accessor()[$key];
+    }
+
+    public function basePath()
+    {
+        return $this['base_path'] ?: realpath(Server::documentRoot() . '/..');
+    }
+
+    public function publicPath()
+    {
+        return $this['public_path'] ?: Server::documentRoot();
     }
 
     /**
