@@ -4,7 +4,47 @@ namespace Greg\Support;
 
 class Image extends File
 {
-    static public function type($file)
+    public function type()
+    {
+        return $this->typeFile($this->file());
+    }
+
+    public function width()
+    {
+        return $this->widthFile($this->file());
+    }
+
+    public function height()
+    {
+        return $this->heightFile($this->file());
+    }
+
+    public function is()
+    {
+        return $this->isFile($this->file());
+    }
+
+    public function get()
+    {
+        return $this->getFile($this->file());
+    }
+
+    public function saveJPEG($image, $fixDir = false, $quality = 75)
+    {
+        return $this->saveJPEGFile($image, $this->file(), $fixDir, $quality);
+    }
+
+    public function saveGIF($image, $fixDir = false)
+    {
+        return $this->saveGIFFile($image, $this->file(), $fixDir);
+    }
+
+    public function savePNG($image, $fixDir = false, $quality = 9, $filters = PNG_NO_FILTER)
+    {
+        return $this->savePNGFile($image, $this->file(), $fixDir, $quality, $filters);
+    }
+
+    static public function typeFile($file)
     {
         $type = function_exists('exif_imagetype') ? @exif_imagetype($file) : null;
 
@@ -24,9 +64,9 @@ class Image extends File
         return image_type_to_extension($type, $point);
     }
 
-    static public function ext($file, $point = false)
+    static public function extFile($file, $point = false)
     {
-        $type = static::type($file);
+        $type = static::typeFile($file);
 
         $ext = static::typeToExt($type, false);
 
@@ -48,38 +88,38 @@ class Image extends File
         return $ext;
     }
 
-    static public function width($file)
+    static public function widthFile($file)
     {
         list($width) = @getimagesize($file);
 
         if (!$width) {
-            $width = imagesx(static::get($file));
+            $width = imagesx(static::getFile($file));
         }
 
         return $width;
     }
 
-    static public function height($file)
+    static public function heightFile($file)
     {
         list($width, $height) = @getimagesize($file);
 
         unset($width);
 
         if (!$height) {
-            $height = imagesy(static::get($file));
+            $height = imagesy(static::getFile($file));
         }
 
         return $height;
     }
 
-    static public function is($file)
+    static public function isFile($file)
     {
-        return static::type($file) ? true : false;
+        return static::typeFile($file) ? true : false;
     }
 
-    static public function mime($file)
+    static public function mimeFile($file)
     {
-        return static::typeToMime(static::type($file));
+        return static::typeToMime(static::typeFile($file));
     }
 
     static public function typeToMime($type)
@@ -87,11 +127,11 @@ class Image extends File
         return image_type_to_mime_type($type);
     }
 
-    static public function get($file)
+    static public function getFile($file)
     {
         $image = null;
 
-        switch(static::type($file)) {
+        switch(static::typeFile($file)) {
             case IMAGETYPE_GIF:
                 $image = imagecreatefromgif($file);
 
@@ -117,9 +157,9 @@ class Image extends File
         return $image;
     }
 
-    static public function saveJPEG($image, $file, $fixDir = false, $quality = 75)
+    static public function saveJPEGFile($image, $file, $fixDir = false, $quality = 75)
     {
-        $fixDir && static::fixDir($file, true);
+        $fixDir && static::fixFileDir($file, true);
 
         imagejpeg($image, $file, $quality);
 
@@ -135,9 +175,9 @@ class Image extends File
         return ob_get_clean();
     }
 
-    static public function saveGIF($image, $file, $fixDir = false)
+    static public function saveGIFFile($image, $file, $fixDir = false)
     {
-        $fixDir && static::fixDir($file, true);
+        $fixDir && static::fixFileDir($file, true);
 
         imagegif($image, $file);
 
@@ -153,9 +193,9 @@ class Image extends File
         return ob_get_clean();
     }
 
-    static public function savePNG($image, $file, $fixDir = false, $quality = 9, $filters = PNG_NO_FILTER)
+    static public function savePNGFile($image, $file, $fixDir = false, $quality = 9, $filters = PNG_NO_FILTER)
     {
-        $fixDir && static::fixDir($file, true);
+        $fixDir && static::fixFileDir($file, true);
 
         imagepng($image, $file, $quality, $filters);
 

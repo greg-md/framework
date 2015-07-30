@@ -135,7 +135,7 @@ class Response
 
     static public function sendImageFile($file, $die = false)
     {
-        $mime = Image::mime($file);
+        $mime = Image::mimeFile($file);
 
         if (!$mime) {
             throw new \Exception('File is not an image.');
