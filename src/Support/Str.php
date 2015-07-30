@@ -130,10 +130,17 @@ class Str
      */
     public static function startsWith($haystack, $needles)
     {
-        Arr::bringRef($needles);
+        foreach (Arr::bring($needles) as $needle) {
+            if (mb_substr($haystack, 0, mb_strlen($needle)) === $needle) return true;
+        }
 
-        foreach ($needles as $needle) {
-            if ($needle != '' && strpos($haystack, $needle) === 0) return true;
+        return false;
+    }
+
+    public static function endsWith($haystack, $needles)
+    {
+        foreach (Arr::bring($needles) as $needle) {
+            if (mb_substr($haystack, -mb_strlen($needle)) === $needle) return true;
         }
 
         return false;

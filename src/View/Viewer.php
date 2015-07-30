@@ -8,6 +8,7 @@ use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
+use Greg\Support\Str;
 
 class Viewer implements \ArrayAccess
 {
@@ -22,6 +23,11 @@ class Viewer implements \ArrayAccess
     protected $content = null;
 
     protected $parent = null;
+
+    /**
+     * @var CompilerInterface[]|callable[]
+     */
+    protected $compilers = [];
 
     public function __construct($paths = [], array $param = [])
     {
@@ -205,19 +211,62 @@ class Viewer implements \ArrayAccess
             throw new \Exception('You can render only files.');
         }
 
-        ob_start();
+        $compiler = $this->getCompilerByFile($file);
 
-        try {
-            $this->includeFile($file);
+        if ($compiler) {
+            $data = $compiler->fetchFile($file);
+        } else {
+            ob_start();
 
-            $data = ob_get_clean();
-        } catch (\Exception $e) {
-            ob_end_clean();
+            try {
+                $this->includeFile($file);
 
-            throw $e;
+                $data = ob_get_clean();
+            } catch (\Exception $e) {
+                ob_end_clean();
+
+                throw $e;
+            }
         }
 
         return $responseObject ? Response::create($this->appName(), $data) : $data;
+    }
+
+    public function getCompilerByFile($file)
+    {
+        foreach($this->compilers as $extension => $compiler) {
+            if (Str::endsWith($file, $extension)) {
+                return $this->getCompiler($extension);
+            }
+        }
+
+        return false;
+    }
+
+    public function getCompiler($extension)
+    {
+        if (!Arr::has($this->compilers, $extension)) {
+            throw new \Exception('View compiler for extension `' . $extension . '` not found.');
+        }
+
+        $compiler = &$this->compilers[$extension];
+
+        if (is_callable($compiler)) {
+            $compiler = $this->app()->binder()->call($compiler);
+        }
+
+        if (!($compiler instanceof CompilerInterface)) {
+            throw new \Exception('View compiler for extension `' . $extension . '` should be an instance of `CompilerInterface`.');
+        }
+
+        return $compiler;
+    }
+
+    public function setCompiler($extension, $compiler)
+    {
+        $this->compilers[$extension] = $compiler;
+
+        return $this;
     }
 
     public function fetchLayouts($content, $layout, $_ = null)
@@ -313,7 +362,7 @@ class Viewer implements \ArrayAccess
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function layouts($value = null, $type = Obj::PROP_REPLACE)
+    public function layouts($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
