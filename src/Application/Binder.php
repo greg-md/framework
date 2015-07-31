@@ -2,7 +2,7 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
@@ -105,45 +105,15 @@ class Binder
             $expectedArgs = array_slice($expectedArgs, sizeof($args));
         }
 
-        if ($newArgs = $this->fetchExpectedArgs($expectedArgs)) {
+        $newArgs = Obj::fetchExpectedArgs($expectedArgs, [], function(\ReflectionParameter $expectedArg) {
+            return $this->expectedArg($expectedArg);
+        });
+
+        if ($newArgs) {
             $args = array_merge($args, $newArgs);
         }
 
         return $args;
-    }
-
-    public function fetchExpectedArgs(array $expectedArgs, array $customArgs = [])
-    {
-        $assocArgs = [];
-
-        foreach($customArgs as $key => $value) {
-            if (is_int($key)) {
-                $assocArgs[get_class($value)] = $value;
-            } else {
-                $assocArgs[$key] = $value;
-            }
-        }
-
-        /* @var $expectedArgs \ReflectionParameter[] */
-        $expectedArgs = array_reverse($expectedArgs);
-
-        $returnArgs = [];
-
-        foreach ($expectedArgs as $expectedArg) {
-            if (!$returnArgs and !$expectedArg->getClass() and $expectedArg->isOptional()) {
-                continue;
-            }
-
-            if ($assocArgs and $expectedType = $expectedArg->getClass() and Arr::has($assocArgs, $expectedType->getName())) {
-                $returnArgs[] = $assocArgs[$expectedType->getName()];
-            } else {
-                $returnArgs[] = $this->expectedArg($expectedArg);
-            }
-        }
-
-        $returnArgs = array_reverse($returnArgs);
-
-        return $returnArgs;
     }
 
     public function callWith(callable $callable, ...$args)
@@ -161,7 +131,9 @@ class Binder
         $funcArgs = [];
 
         if ($expectedArgs = Obj::expectedArgs($callable)) {
-            $funcArgs = $this->fetchExpectedArgs($expectedArgs, $args);
+            $funcArgs = Obj::fetchExpectedArgs($expectedArgs, $args, function(\ReflectionParameter $expectedArg) {
+                return $this->expectedArg($expectedArg);
+            });
         }
 
         return call_user_func_array($callable, $funcArgs);
@@ -178,12 +150,7 @@ class Binder
                 throw new \Exception('`' . $className . '` is not registered in binder.');
             }
         } else {
-            if (!$expectedArg->isOptional()) {
-                throw new \Exception('Argument `' . $expectedArg->getName() . '` is required in `'
-                    . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
-            }
-
-            $arg = $expectedArg->getDefaultValue();
+            $arg = Obj::expectedArg($expectedArg);
         }
 
         return $arg;

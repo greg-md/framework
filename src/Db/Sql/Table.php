@@ -7,7 +7,7 @@ use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\Table\Column;
 use Greg\Db\Sql\Table\Row;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
 use Greg\Support\Obj;

@@ -2,7 +2,7 @@
 
 namespace Greg\Html\Head;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Html\Element;
 use Greg\Support\Storage\AccessorTrait;
 

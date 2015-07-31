@@ -3,7 +3,7 @@
 namespace Greg\Router;
 
 use Greg\Support\Arr;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Str;
 
 abstract class Router

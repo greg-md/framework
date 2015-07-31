@@ -3,7 +3,7 @@
 namespace Greg\Component\Layout;
 
 use Greg\Application\Runner;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;

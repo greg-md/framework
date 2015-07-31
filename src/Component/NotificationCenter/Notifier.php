@@ -6,7 +6,7 @@ use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
 use Greg\Event\SubscriberTrait;
 use Greg\Support\Arr;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 
 class Notifier implements SubscriberInterface
 {

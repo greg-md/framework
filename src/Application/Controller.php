@@ -2,7 +2,7 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 
 abstract class Controller
 {

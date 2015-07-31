@@ -1,16 +1,15 @@
 <?php
 
-namespace Greg\Translation;
+namespace Greg\Support\Translation;
 
 use Greg\Support\Arr;
-use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Obj;
 
 class Translator implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait, InternalTrait;
+    use AccessorTrait, ArrayAccessTrait;
 
     protected $language = 'en';
 
@@ -27,11 +26,6 @@ class Translator implements \ArrayAccess
         $this->storage($translates);
 
         return $this;
-    }
-
-    static public function create($appName, array $languages = [], array $translates = [])
-    {
-        return static::newInstanceRef($appName, $languages, $translates);
     }
 
     public function isLanguage($language)

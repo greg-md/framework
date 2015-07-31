@@ -4,7 +4,7 @@ namespace Greg\Cache\Storage;
 
 use Greg\Cache\StorageInterface;
 use Greg\Cache\StorageTrait;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Http\Request;
 use Greg\Support\Arr;
 use Greg\Support\Obj;

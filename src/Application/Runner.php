@@ -3,7 +3,7 @@
 namespace Greg\Application;
 
 use Greg\Composer\Autoload\ClassLoader;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
@@ -16,7 +16,7 @@ use Greg\Support\Storage\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;
-use Greg\Translation\Translator;
+use Greg\Support\Translation\Translator;
 use Greg\View\Viewer;
 
 class Runner implements \ArrayAccess
@@ -224,7 +224,7 @@ class Runner implements \ArrayAccess
     public function initTranslator()
     {
         // Load Translator
-        $this->translator($model = Translator::create($this->appName(),
+        $this->translator($model = new Translator(
                             $this->getIndexArray('translator.languages'),
                             $this->getIndexArray('translator.translates')));
 

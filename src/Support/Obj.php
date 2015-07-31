@@ -58,6 +58,73 @@ class Obj
         return ($value instanceof ArrayReference) ? $value->get() : $value;
     }
 
+    static public function callWith(callable $callable, ...$args)
+    {
+        return static::callWithRef($callable, ...$args);
+    }
+
+    static public function callWithRef(callable $callable, &...$args)
+    {
+        return static::callWithArgs($callable, $args);
+    }
+
+    static public function callWithArgs(callable $callable, array $args = [])
+    {
+        $funcArgs = [];
+
+        if ($expectedArgs = static::expectedArgs($callable)) {
+            $funcArgs = static::fetchExpectedArgs($expectedArgs, $args);
+        }
+
+        return call_user_func_array($callable, $funcArgs);
+    }
+
+    static public function fetchExpectedArgs(array $expectedArgs, array $customArgs = [], callable $expectedCallback = null)
+    {
+        $assocArgs = [];
+
+        foreach($customArgs as $key => $value) {
+            if (is_int($key)) {
+                $assocArgs[get_class($value)] = $value;
+            } else {
+                $assocArgs[$key] = $value;
+            }
+        }
+
+        /* @var $expectedArgs \ReflectionParameter[] */
+        $expectedArgs = array_reverse($expectedArgs);
+
+        $returnArgs = [];
+
+        foreach ($expectedArgs as $expectedArg) {
+            if (!$returnArgs and !$expectedArg->getClass() and $expectedArg->isOptional()) {
+                continue;
+            }
+
+            if ($assocArgs and $expectedType = $expectedArg->getClass() and Arr::has($assocArgs, $expectedType->getName())) {
+                $returnArgs[] = $assocArgs[$expectedType->getName()];
+            } else {
+                $returnArgs[] = is_callable($expectedCallback) ? call_user_func_array($expectedCallback, [$expectedArg]) : static::expectedArg($expectedArg);
+            }
+        }
+
+        $returnArgs = array_reverse($returnArgs);
+
+        return $returnArgs;
+    }
+
+    static public function expectedArg(\ReflectionParameter $expectedArg)
+    {
+        if (!$expectedArg->isOptional()) {
+            throw new \Exception('Argument `' . $expectedArg->getName() . '` is required in `'
+                . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
+        }
+
+        $arg = $expectedArg->getDefaultValue();
+
+        return $arg;
+    }
+
     /**
      * @param $return
      * @param $var

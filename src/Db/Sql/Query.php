@@ -4,7 +4,7 @@ namespace Greg\Db\Sql;
 
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 use Greg\Support\Str;

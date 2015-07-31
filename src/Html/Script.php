@@ -2,7 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Arr;
 

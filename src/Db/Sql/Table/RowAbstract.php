@@ -3,7 +3,7 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Storage\ArrayObject;
 use Greg\Support\Debug;
 use Greg\Support\Obj;

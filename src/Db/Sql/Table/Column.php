@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql\Table;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 

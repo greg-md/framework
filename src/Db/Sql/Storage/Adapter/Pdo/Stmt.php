@@ -3,7 +3,7 @@
 namespace Greg\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Type;
 

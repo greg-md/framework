@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Support\Engine;
+namespace Greg\Engine;
 
 use Greg\Support\Storage\AccessorStaticTrait;
 use Greg\Support\Storage\ArrayAccessStaticTrait;

@@ -2,7 +2,7 @@
 
 namespace Greg\Mailer\Protocol;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Support\ErrorHandler;
 use Greg\Support\Obj;
 

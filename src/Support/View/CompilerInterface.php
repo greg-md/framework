@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\View;
+namespace Greg\Support\View;
 
 interface CompilerInterface
 {

@@ -4,10 +4,23 @@ namespace Greg\Support\Http;
 
 use Greg\Support\Arr;
 use Greg\Support\Image;
+use Greg\Support\Obj;
 use Greg\Support\Type;
 
 class Response
 {
+    protected $contentType = 'text/html';
+
+    protected $charset = 'UTF-8';
+
+    protected $location = null;
+
+    protected $code = null;
+
+    protected $content = null;
+
+    protected $callbacks = [];
+
     const CODES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -70,6 +83,115 @@ class Response
         510 => 'Not Extended',                                                // RFC2774
         511 => 'Network Authentication Required',                             // RFC6585
     ];
+
+    public function __construct($content = null, $contentType = null)
+    {
+        if ($content !== null) {
+            $this->content($content);
+        }
+
+        if ($contentType !== null) {
+            $this->contentType($contentType);
+        }
+
+        return $this;
+    }
+
+    public function with(callable $callable)
+    {
+        $this->callbacks()[] = $callable;
+
+        return $this;
+    }
+
+    public function json($data)
+    {
+        $this->contentType('application/json');
+
+        $this->content(json_encode($data));
+
+        return $this;
+    }
+
+    public function send()
+    {
+        if ($callbacks = $this->callbacks()) {
+            foreach($callbacks as $callback) {
+                $this->callCallback($callback);
+            }
+        }
+
+        $contentType = [];
+
+        if ($type = $this->contentType()) {
+            $contentType[] = $type;
+        }
+
+        if ($charset = $this->charset()) {
+            $contentType[] = 'charset=' . $charset;
+        }
+
+        if ($contentType) {
+            $this->sendContentType(implode('; ', $contentType));
+        }
+
+        if ($code = $this->code()) {
+            $this->sendCode($code);
+        }
+
+        if ($location = $this->location()) {
+            $this->sendRedirect($location);
+        }
+
+        echo $this->content();
+
+        return $this;
+    }
+
+    protected function callCallback(callable $callback)
+    {
+        return Obj::callWith($callback, $this);
+    }
+
+    public function isHtml()
+    {
+        return $this->contentType() == 'text/html';
+    }
+
+    public function contentType($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function charset($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function location($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function code($value = null)
+    {
+        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+    }
+
+    public function content($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    protected function &callbacks($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function __toString()
+    {
+        return $this->content();
+    }
 
     static public function sendCode($code, $die = false)
     {

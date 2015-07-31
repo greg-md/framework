@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Support\Engine;
+namespace Greg\Engine;
 
 use Greg\Application\Runner;
 use Greg\Support\Debug;

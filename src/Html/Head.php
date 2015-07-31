@@ -2,7 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Engine\InternalTrait;
+use Greg\Engine\InternalTrait;
 use Greg\Html\Head\Link;
 use Greg\Html\Head\Meta;
 use Greg\Html\Head\Style;

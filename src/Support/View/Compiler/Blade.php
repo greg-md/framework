@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Greg\View\Compiler;
+namespace Greg\Support\View\Compiler;
 
 use Greg\Support\File;
 use Greg\Support\Obj;
 use Greg\Support\Regex\InNamespace;
-use Greg\View\Compiler;
+use Greg\Support\View\Compiler;
 
 class Blade extends Compiler
 {
