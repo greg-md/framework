@@ -40,6 +40,11 @@ class File
         return Dir::fix(dirname($file), $recursive);
     }
 
+    static public function fixFileDirRecursive($file)
+    {
+        return static::fixFileDir($file, true);
+    }
+
     public function file($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());

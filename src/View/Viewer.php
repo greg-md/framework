@@ -14,8 +14,6 @@ class Viewer implements \ArrayAccess
 {
     use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
-    protected $extension = '.php';
-
     protected $paths = [];
 
     protected $layouts = [];
@@ -50,15 +48,6 @@ class Viewer implements \ArrayAccess
         return $this->fetch($name, ...$this->layouts());
     }
 
-    public function fetchIfExists($name, $layout = null, $_ = null)
-    {
-        if ($this->fileExists($this->toFileName($name))) {
-            return $this->fetch(...func_get_args());
-        }
-
-        return null;
-    }
-
     public function fetch($name, $layout = null, $_ = null)
     {
         $content = $this->fetchName($name);
@@ -78,16 +67,20 @@ class Viewer implements \ArrayAccess
 
     public function fetchName($name, $responseObject = true)
     {
-        return $this->fetchFileName($this->toFileName($name), $responseObject);
-    }
-
-    public function fetchFileName($fileName, $responseObject = true)
-    {
-        if ($file = $this->getFile($fileName)) {
+        if ($file = $this->getFile($name)) {
             return $this->fetchFile($file, $responseObject);
         }
 
-        throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
+        throw new \Exception('View file `' . $name . '` does not exist in view paths.');
+    }
+
+    public function fetchNameIfExists($name, $responseObject = true)
+    {
+        if ($file = $this->getFile($name)) {
+            return $this->fetchFile($file, $responseObject);
+        }
+
+        return null;
     }
 
     public function renderLayout($name, array $params = [])
@@ -116,16 +109,11 @@ class Viewer implements \ArrayAccess
 
     public function renderName($name, array $params = [], $responseObject = true)
     {
-        return $this->renderFileName($this->toFileName($name), $params, $responseObject);
-    }
-
-    public function renderFileName($fileName, array $params = [], $responseObject = true)
-    {
-        if ($file = $this->getFile($fileName)) {
+        if ($file = $this->getFile($name)) {
             return $this->renderFile($file, $params, $responseObject);
         }
 
-        throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
+        throw new \Exception('View file `' . $name . '` does not exist in view paths.');
     }
 
     public function renderFile($file, array $params = [], $responseObject = true)
@@ -146,16 +134,11 @@ class Viewer implements \ArrayAccess
 
     public function partialName($name, array $params = [])
     {
-        return $this->partialFileName($this->toFileName($name), $params);
-    }
-
-    public function partialFileName($fileName, array $params = [])
-    {
-        if ($file = $this->getFile($fileName)) {
+        if ($file = $this->getFile($name)) {
             return $this->partialFile($file, $params);
         }
 
-        throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
+        throw new \Exception('View file `' . $name . '` does not exist in view paths.');
     }
 
     public function partialFile($file, array $params = [])
@@ -176,16 +159,11 @@ class Viewer implements \ArrayAccess
 
     public function partialNameLoop($name, array $items, array $params = [])
     {
-        return $this->partialFileNameLoop($this->toFileName($name), $items, $params);
-    }
-
-    public function partialFileNameLoop($fileName, array $items, array $params = [])
-    {
-        if ($file = $this->getFile($fileName)) {
+        if ($file = $this->getFile($name)) {
             return $this->partialFileLoop($file, $items, $params);
         }
 
-        throw new \Exception('View file `' . $fileName . '` does not exist in view paths.');
+        throw new \Exception('View file `' . $name . '` does not exist in view paths.');
     }
 
     public function partialFileLoop($file, array $items, array $params = [])
@@ -207,40 +185,63 @@ class Viewer implements \ArrayAccess
 
     public function fetchFile($file, $responseObject = true)
     {
-        if (!is_file($file)) {
-            throw new \Exception('You can render only files.');
-        }
+        $compiler = $this->findCompilerByFile($file);
 
-        $compiler = $this->getCompilerByFile($file);
-
-        if ($compiler) {
-            $data = $compiler->fetchFile($file);
-        } else {
-            ob_start();
-
-            try {
-                $this->includeFile($file);
-
-                $data = ob_get_clean();
-            } catch (\Exception $e) {
-                ob_end_clean();
-
-                throw $e;
-            }
-        }
+        $data = $this->loadFile($compiler ? $compiler->getCompiledFile($file) : $file);
 
         return $responseObject ? Response::create($this->appName(), $data) : $data;
     }
 
-    public function getCompilerByFile($file)
+    public function loadFile($___file)
     {
-        foreach($this->compilers as $extension => $compiler) {
+        if (!file_exists($___file)) {
+            throw new \Exception('View file not found.');
+        }
+
+        ob_start();
+
+        try {
+            include $___file;
+
+            $data = ob_get_clean();
+        } catch (\Exception $e) {
+            ob_end_clean();
+
+            throw $e;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param $file
+     * @return bool|CompilerInterface|Compiler\Blade
+     * @throws \Exception
+     */
+    public function findCompilerByFile($file)
+    {
+        $compilers = $this->compilers;
+
+        uksort($compilers, function($a, $b) {
+            return gmp_cmp($a, $b) * -1;
+        });
+
+        foreach($compilers as $extension => $compiler) {
             if (Str::endsWith($file, $extension)) {
                 return $this->getCompiler($extension);
             }
         }
 
         return false;
+    }
+
+    public function getCompilerByFile($file)
+    {
+        if (!$compiler = $this->findCompilerByFile($file)) {
+            throw new \Exception('Compiler was not found for this file.');
+        }
+
+        return $compiler;
     }
 
     public function getCompiler($extension)
@@ -299,19 +300,7 @@ class Viewer implements \ArrayAccess
         return $content;
     }
 
-    public function includeFile($file)
-    {
-        include $file;
-
-        return $this;
-    }
-
-    public function fileExists($fileName)
-    {
-        return $this->getFile($fileName) !== false;
-    }
-
-    public function getFile($fileName)
+    public function getFile($name)
     {
         $paths = $this->paths();
 
@@ -319,12 +308,16 @@ class Viewer implements \ArrayAccess
             throw new \Exception('Undefined view paths.');
         }
 
-        foreach ($paths as $path) {
-            if (is_dir($path)) {
-                $file = $path . DIRECTORY_SEPARATOR . ltrim($fileName, '\/');
+        $extensions = $this->getExtensions();
 
-                if (is_file($file)) {
-                    return $file;
+        foreach($paths as $path) {
+            if (is_dir($path)) {
+                foreach($extensions as $extension) {
+                    $file = $path . DIRECTORY_SEPARATOR . ltrim($name . $extension, '\/');
+
+                    if (is_file($file)) {
+                        return $file;
+                    }
                 }
             }
         }
@@ -332,9 +325,20 @@ class Viewer implements \ArrayAccess
         return false;
     }
 
-    public function toFileName($name)
+    public function getExtensions()
     {
-        return $name . $this->extension();
+        $extensions = $this->getCompilersExtensions();
+
+        if (!in_array('.php', $extensions)) {
+            $extensions[] = '.php';
+        }
+
+        return $extensions;
+    }
+
+    public function getCompilersExtensions()
+    {
+        return array_keys($this->compilers);
     }
 
     public function assign($key, $value = null)
@@ -350,11 +354,6 @@ class Viewer implements \ArrayAccess
     public function __get($key)
     {
         return $this->get($key);
-    }
-
-    public function extension($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function paths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
