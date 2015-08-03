@@ -2,92 +2,37 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query;
-use Greg\Support\Debug;
+use Greg\Engine\InternalTrait;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Str;
 
-class Delete extends Query
+class Delete extends \Greg\Support\Db\Sql\Query\Delete
 {
-    use FromTrait, WhereTrait;
+    use InternalTrait;
 
-    protected $delete = [];
-
-    public function from($table = null, $delete = false)
+    static public function create($appName, StorageInterface $storage)
     {
-        if (func_num_args()) {
-            $this->from[] = $table;
-
-            if ($delete) {
-                $this->delete[] = $table;
-            }
-
-            return $this;
-        }
-
-        return $this->from;
+        return static::newInstanceRef($appName, $storage);
     }
 
-    public function delete($from = null)
+    protected function fetchAlias($name)
     {
-        if (func_num_args()) {
-            $this->delete[] = $from;
+        /* @var $name string|array|InternalTrait */
 
-            return $this;
+        if (Str::isScalar($name) and strpos($name, '\\') !== false) {
+            $name = $name::instance($this->appName());
         }
 
-        return $this->delete;
+        return parent::fetchAlias($name);
     }
 
-    public function exec()
+    protected function newWhere()
     {
-        $stmt = $this->storage()->prepare($this->toString());
-
-        $this->bindParamsToStmt($stmt);
-
-        return $stmt->execute();
+        return Where::create($this->appName(), $this->storage());
     }
 
-    public function toString()
+    protected function callCallable(callable $callable, ...$args)
     {
-        $query = [
-            'DELETE',
-        ];
-
-        $delete = $this->delete();
-
-        if ($delete) {
-            $data = [];
-
-            foreach($delete as $table) {
-                list($alias, $expr) = $this->fetchAlias($table);
-
-                $data[] = $alias ? $this->quoteName($alias) : $this->quoteNamedExpr($expr);
-            }
-
-            $query[] = implode(', ', $data);
-        }
-
-        $from = $this->fromToString();
-
-        if ($from) {
-            $query[] = $from;
-        }
-
-        $where = $this->whereToString();
-
-        if ($where) {
-            $query[] = $where;
-        }
-
-        return implode(' ', $query);
-    }
-
-    public function __toString()
-    {
-        return $this->toString();
-    }
-
-    public function __debugInfo()
-    {
-        return Debug::fixInfo($this, get_object_vars($this), false);
+        return $this->app()->binder()->call($callable, ...$args);
     }
 }

@@ -1,21 +1,25 @@
 <?php
 
-namespace Greg\Cache;
+namespace Greg\Support\Cache;
 
-use Greg\Application\Runner;
-use Greg\Http\Request;
+use Greg\Support\Http\Request;
 
-trait StorageTrait
+abstract class Storage implements StorageInterface
 {
     public function fetch($id, callable $callable, $expire = 0)
     {
         if ($this->expired($id, $expire)) {
-            $this->save($id, $result = $this->app()->binder()->call($callable));
+            $this->save($id, $result = $this->callCallable($callable));
         } else {
             $result = $this->load($id);
         }
 
         return $result;
+    }
+
+    protected function callCallable(callable $callable)
+    {
+        return call_user_func_array($callable, []);
     }
 
     public function expired($id, $expire = 0)
@@ -38,18 +42,4 @@ trait StorageTrait
 
         return false;
     }
-
-    /**
-     * @param Runner $app
-     * @return Runner
-     */
-    abstract public function app(Runner $app = null);
-
-    abstract public function save($id, $data = null);
-
-    abstract public function load($id);
-
-    abstract public function modified($id);
-
-    abstract public function delete($ids = []);
 }

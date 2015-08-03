@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Testing;
+namespace Greg\Support\Testing;
 
 class Package
 {

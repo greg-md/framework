@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Cache;
+namespace Greg\Support\Cache;
 
 interface StorageInterface
 {

@@ -1,17 +1,7 @@
 <?php
 
-/*
- * This file is part of Composer.
- *
- * (c) Nils Adermann <naderman@naderman.de>
- *     Jordi Boggiano <j.boggiano@seld.be>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-namespace Greg\Composer\Autoload;
+namespace Greg\Support\Autoload;
 
-use Greg\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 /**
@@ -19,7 +9,7 @@ use Greg\Support\Obj;
  *
  * See https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
  *
- *     $loader = new \Composer\Autoload\ClassLoader();
+ *     $loader = new \Greg\Support\Autoload\ClassLoader();
  *
  *     // register classes with namespaces
  *     $loader->add('Symfony\Component', __DIR__.'/component');
@@ -44,8 +34,6 @@ use Greg\Support\Obj;
  */
 class ClassLoader
 {
-    use InternalTrait;
-
     // PSR-4
     protected $prefixLengthsPsr4 = [];
     protected $prefixDirsPsr4 = [];
@@ -65,11 +53,6 @@ class ClassLoader
         }
 
         return $this;
-    }
-
-    static public function create($appName, array $psr4 = [])
-    {
-        return static::newInstanceRef($appName, $psr4);
     }
 
     public function getPrefixes()
@@ -293,7 +276,7 @@ class ClassLoader
     public function loadClass($class)
     {
         if ($file = $this->findFile($class) and is_file($file)) {
-            includeFile($file);
+            ___includeFile($file);
 
             return true;
         }
@@ -390,7 +373,7 @@ class ClassLoader
         }
 
         // PSR-0 include paths.
-        if ($this->useIncludePath && $file = stream_resolve_include_path($logicalPathPsr0)) {
+        if ($this->useIncludePath() && $file = stream_resolve_include_path($logicalPathPsr0)) {
             return $file;
         }
 
@@ -417,9 +400,9 @@ class ClassLoader
  *
  * Prevents access to $this/self from included files.
  */
-if (!function_exists('includeFile')) {
-    function includeFile($file)
+if (!function_exists('___includeFile')) {
+    function ___includeFile($___file)
     {
-        return include $file;
+        return include $___file;
     }
 }

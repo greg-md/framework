@@ -2,7 +2,7 @@
 
 namespace Greg\Application;
 
-use Greg\Composer\Autoload\ClassLoader;
+use Greg\Support\Autoload\ClassLoader;
 use Greg\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Http\Request;
@@ -117,12 +117,12 @@ class Runner implements \ArrayAccess
 
         // Session ini
         if ($sessionIni = $this->getIndexArray('session.ini')) {
-            Session::ini($sessionIni);
+            Server\Session::ini($sessionIni);
         }
 
         // Session persistent
         if ($this->hasIndex('session.persistent')) {
-            Session::persistent((bool)$this->getIndex('session.persistent'));
+            Server\Session::persistent((bool)$this->getIndex('session.persistent'));
         }
 
         return $this;
@@ -168,7 +168,7 @@ class Runner implements \ArrayAccess
     public function initLoader()
     {
         // Load ClassLoader
-        $this->loader($model = ClassLoader::create($this->appName(), $this->getIndexArray('loader.paths')));
+        $this->loader($model = new ClassLoader($this->getIndexArray('loader.paths')));
 
         // Register the ClassLoader to autoload
         $model->register(true);
@@ -204,7 +204,7 @@ class Runner implements \ArrayAccess
     public function initSession()
     {
         // Load Session
-        $this->session($model = Session::newInstance($this->appName()));
+        $this->session($model = new Server\Session);
 
         // Add Session to Binder
         $this->binder()->setObject($model);
@@ -551,10 +551,10 @@ class Runner implements \ArrayAccess
     }
 
     /**
-     * @param Session $session
-     * @return Session|bool
+     * @param Server\Session $session
+     * @return Server\Session|bool
      */
-    public function session(Session $session = null)
+    public function session(Server\Session $session = null)
     {
         return $this->memory('session', ...func_get_args());
     }

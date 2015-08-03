@@ -1,12 +1,12 @@
 <?php
 
-namespace Greg\Db\Sql;
+namespace Greg\Support\Db\Sql;
 
 use Greg\Support\Cache\StorageInterface as CacheStorageInterface;
-use Greg\Db\Sql\Query\Expr;
-use Greg\Db\Sql\Query\Where;
-use Greg\Db\Sql\Table\Column;
-use Greg\Db\Sql\Table\Row;
+use Greg\Support\Db\Sql\Query\Expr;
+use Greg\Support\Db\Sql\Query\Where;
+use Greg\Support\Db\Sql\Table\Column;
+use Greg\Support\Db\Sql\Table\Row;
 use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
@@ -15,7 +15,7 @@ use Greg\Support\Url;
 
 /**
  * Class Table
- * @package Greg\Db\Sql
+ * @package Greg\Support\Db\Sql
  *
  * @method beginTransaction()
  * @method commit()
@@ -285,7 +285,7 @@ class Table
     /**
      * @param array $data
      * @param bool $reset
-     * @return \Greg\Db\Sql\Table\Row
+     * @return \Greg\Support\Db\Sql\Table\Row
      * @throws \Exception
      */
     public function createRow(array $data, $reset = true)
@@ -318,7 +318,7 @@ class Table
 
     /**
      * @param $data
-     * @return \Greg\Db\Sql\Table\Row[]|\Greg\Db\Sql\Table\Rows
+     * @return \Greg\Support\Db\Sql\Table\Row[]|\Greg\Support\Db\Sql\Table\Rows
      * @throws \Exception
      */
     public function createRows(array $data = [])
@@ -337,7 +337,7 @@ class Table
      * @param $total
      * @param $page
      * @param $limit
-     * @return \Greg\Db\Sql\Table\Row[]|\Greg\Db\Sql\Table\RowsPagination
+     * @return \Greg\Support\Db\Sql\Table\Row[]|\Greg\Support\Db\Sql\Table\RowsPagination
      * @throws \Exception
      */
     public function createRowsPagination($items, $total, $page = null, $limit = null)

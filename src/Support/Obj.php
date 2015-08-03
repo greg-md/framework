@@ -103,8 +103,10 @@ class Obj
 
             if ($assocArgs and $expectedType = $expectedArg->getClass() and Arr::has($assocArgs, $expectedType->getName())) {
                 $returnArgs[] = $assocArgs[$expectedType->getName()];
+            } elseif (is_callable($expectedCallback)) {
+                $returnArgs[] = call_user_func_array($expectedCallback, [$expectedArg]);
             } else {
-                $returnArgs[] = is_callable($expectedCallback) ? call_user_func_array($expectedCallback, [$expectedArg]) : static::expectedArg($expectedArg);
+                $returnArgs[] = static::expectedArg($expectedArg);
             }
         }
 

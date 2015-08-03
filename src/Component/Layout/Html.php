@@ -12,7 +12,7 @@ use Greg\Html\Head;
 use Greg\Html\Script;
 use Greg\Http\Response;
 use Greg\Support\Obj;
-use Greg\Support\Tool\Minify;
+//use Greg\Support\Tool\Minify;
 use Greg\View\Viewer;
 
 class Html implements SubscriberInterface
@@ -70,7 +70,8 @@ class Html implements SubscriberInterface
         }
 
         if ($this->minifyHtml() and $response->contentType() == 'text/html') {
-            $response->content(Minify::html($response->content()));
+            // Disabled because of performance.
+            //$response->content(Minify::html($response->content()));
         }
 
         return $this;

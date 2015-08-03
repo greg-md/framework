@@ -1,14 +1,11 @@
 <?php
 
-namespace Greg\Component\NotificationCenter;
+namespace Greg\Support\NotificationCenter;
 
-use Greg\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 class Notification
 {
-    use InternalTrait;
-
     const TYPE_INFO = 'info';
 
     const TYPE_SUCCESS = 'success';
@@ -38,34 +35,6 @@ class Notification
         }
 
         $this->settings($settings);
-    }
-
-    /**
-     * @param $appName
-     * @param Notifier $notifier
-     * @param null $message
-     * @param null $type
-     * @param array $settings
-     * @return Notification
-     * @throws \Exception
-     */
-    static public function create($appName, Notifier $notifier, $message = null, $type = null, array $settings = [])
-    {
-        return static::newInstanceRef($appName, $notifier, $message, $type, $settings);
-    }
-
-    public function flash()
-    {
-        $this->notifier()->toFlash($this);
-
-        return $this;
-    }
-
-    public function db()
-    {
-        $this->notifier()->toDb($this);
-
-        return $this;
     }
 
     public function info()
