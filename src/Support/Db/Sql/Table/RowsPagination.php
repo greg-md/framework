@@ -30,11 +30,6 @@ class RowsPagination extends Rows
         return parent::__construct($table, $items);
     }
 
-    static public function create($appName, $tableName, $items = [], $total = null, $page = null, $limit = null)
-    {
-        return static::newInstanceRef($appName, $tableName, $items, $total, $page, $limit);
-    }
-
     public function maxPage()
     {
         $maxPage = 1;

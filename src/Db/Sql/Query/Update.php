@@ -2,112 +2,37 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query;
-use Greg\Support\Debug;
+use Greg\Engine\InternalTrait;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Str;
 
-/**
- * Class Update
- * @package Greg\Db\Sql\Query
- *
- * @method Update whereCol($column, $value = null, $operator = '=')
- */
-class Update extends Query
+class Update extends \Greg\Support\Db\Sql\Query\Update
 {
-    use WhereTrait;
+    use InternalTrait;
 
-    protected $tables = [];
-
-    protected $set = [];
-
-    public function table($table)
+    static public function create($appName, StorageInterface $storage)
     {
-        $this->tables[] = $table;
-
-        return $this;
+        return static::newInstanceRef($appName, $storage);
     }
 
-    public function set(array $values = [])
+    protected function fetchAlias($name)
     {
-        if (func_num_args()) {
-            $this->set = array_merge($this->set, $values);
+        /* @var $name string|array|InternalTrait */
 
-            return $this;
+        if (Str::isScalar($name) and strpos($name, '\\') !== false) {
+            $name = $name::instance($this->appName());
         }
 
-        return $this->set;
+        return parent::fetchAlias($name);
     }
 
-    public function tables($tables = null, $_ = null)
+    protected function newWhere()
     {
-        if (func_num_args()) {
-
-            if (!is_array($tables)) {
-                $tables = func_get_args();
-            }
-
-            $this->tables = array_merge($this->tables, $tables);
-
-            return $this;
-        }
-
-        return $this->tables;
+        return Where::create($this->appName(), $this->storage());
     }
 
-    public function exec()
+    protected function callCallable(callable $callable, ...$args)
     {
-        $stmt = $this->storage()->prepare($this->toString());
-
-        $this->bindParamsToStmt($stmt);
-
-        return $stmt->execute();
-    }
-
-    public function toString()
-    {
-        $query = [
-            'UPDATE',
-        ];
-
-        if (!$this->tables) {
-            throw new \Exception('Undefined update tables.');
-        }
-
-        $tables = [];
-
-        foreach($this->tables as $name) {
-            $tables[] = $this->quoteAliasExpr($name);
-        }
-
-        $query[] = implode(', ', $tables);
-
-        if (!$this->set) {
-            throw new \Exception('Undefined update set.');
-        }
-
-        $query[] = 'SET';
-
-        $query[] = implode(', ', array_map(function($expr) {
-            return $this->quoteName($expr) . ' = ?';
-        }, array_keys($this->set)));
-
-        $this->bindParams(array_values($this->set));
-
-        $where = $this->whereToString();
-
-        if ($where) {
-            $query[] = $where;
-        }
-
-        return implode(' ', $query);
-    }
-
-    public function __toString()
-    {
-        return $this->toString();
-    }
-
-    public function __debugInfo()
-    {
-        return Debug::fixInfo($this, get_object_vars($this), false);
+        return $this->app()->binder()->call($callable, ...$args);
     }
 }

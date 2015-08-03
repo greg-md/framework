@@ -103,7 +103,7 @@ class Select extends Query
     public function column($column, $alias = null)
     {
         if ($column instanceof \Closure) {
-            $column = $this->app()->binder()->call($column);
+            $column = $this->callCallable($column);
         }
 
         $this->columns[] = $alias !== null ? [$alias => $column] : $column;
@@ -415,7 +415,7 @@ class Select extends Query
         if ($countQ->hasGroup()) {
             $storage = $this->getTable()->storage();
 
-            $countQ->columns($storage->expr('1'));
+            $countQ->columns(new Expr('1'));
 
             $countQ = $storage->select('count(*)')->from([uniqid('table_') => $countQ]);
         } else {

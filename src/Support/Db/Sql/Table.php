@@ -7,7 +7,6 @@ use Greg\Support\Db\Sql\Query\Expr;
 use Greg\Support\Db\Sql\Query\Where;
 use Greg\Support\Db\Sql\Table\Column;
 use Greg\Support\Db\Sql\Table\Row;
-use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\DateTime;
 use Greg\Support\Obj;
@@ -24,8 +23,6 @@ use Greg\Support\Url;
  */
 class Table
 {
-    use InternalTrait;
-
     protected $prefix = null;
 
     protected $name = null;
@@ -270,7 +267,7 @@ class Table
 
     public function exists($column, $value)
     {
-        return $this->select($this->storage()->expr(1))->whereCol($column, $value)->exists();
+        return $this->select(new Expr(1))->whereCol($column, $value)->exists();
     }
 
     public function newRow(array $data = [])
@@ -280,6 +277,16 @@ class Table
         $row->isNew(true);
 
         return $row;
+    }
+
+    protected function loadClassInstance($className, ...$args)
+    {
+        return Obj::loadInstanceArgs($className, ...$args);
+    }
+
+    protected function callCallable(callable $callable, ...$args)
+    {
+        return call_user_func_array($callable, $args);
     }
 
     /**
@@ -304,7 +311,7 @@ class Table
             $data = array_merge($rowData, $data);
         }
 
-        return $this->app()->binder()->loadInstance($class, $this, $data);
+        return $this->loadClassInstance($class, $this, $data);
     }
 
     public function createRowFull(array $data)
@@ -313,7 +320,7 @@ class Table
             throw new \Exception('Undefined table row full class.');
         }
 
-        return $this->app()->binder()->loadInstance($class, $this, $data);
+        return $this->loadClassInstance($class, $this, $data);
     }
 
     /**
@@ -329,7 +336,7 @@ class Table
             throw new \Exception('Undefined table row set class.');
         }
 
-        return $this->app()->binder()->loadInstance($class, $this, $data);
+        return $this->loadClassInstance($class, $this, $data);
     }
 
     /**
@@ -348,7 +355,7 @@ class Table
             throw new \Exception('Undefined table row set pagination class.');
         }
 
-        return $this->app()->binder()->loadInstance($class, $this, $items, $total, $page, $limit);
+        return $this->loadClassInstance($class, $this, $items, $total, $page, $limit);
     }
 
     public function addFullInfo(&$items, $references = null, $relationships = null, $dependencies = '*', $rows = false)
@@ -489,7 +496,7 @@ class Table
             $query = $referenceTable->select();
 
             if (is_callable($referenceParams['callback'])) {
-                $this->app()->binder()->call($referenceParams['callback'], $query);
+                $this->callCallable($referenceParams['callback'], $query);
             }
 
             $query->where(function(Where $query) use ($parts) {
@@ -602,7 +609,7 @@ class Table
             $query = $relationshipTable->select();
 
             if (is_callable($relationshipParams['callback'])) {
-                $this->app()->binder()->call($relationshipParams['callback'], $query);
+                $this->callCallable($relationshipParams['callback'], $query);
             }
 
             if ($query->limit()) {
@@ -780,9 +787,7 @@ class Table
             $dependenceInfo = $this->dependencies($dependenceName);
 
             /* @var $dependenceTable string|Table */
-            $dependenceTable = $dependenceInfo['table'];
-
-            $dependenceTable = $dependenceTable::newInstance($this->appName(), $this->storage());
+            $dependenceTable = $this->getRelationshipTable($dependenceInfo['table']);
 
             $tableRelationships = $this->getTablesRelationships($dependenceTable->name());
 
@@ -1052,11 +1057,7 @@ class Table
         }
 
         if (is_callable($table)) {
-            $table = $this->app()->binder()->call($table);
-        }
-
-        if (!is_object($table)) {
-            $table = $table::instance($this->appName());
+            $table = $this->callCallable($table);
         }
 
         return $table;

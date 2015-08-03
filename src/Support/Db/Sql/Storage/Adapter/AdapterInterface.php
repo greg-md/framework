@@ -24,11 +24,12 @@ interface AdapterInterface
 
     /**
      * @param $query
+     * @param array $options
      * @return StmtInterface
      */
-    public function prepare($query);
+    public function prepare($query, array $options = []);
 
-    public function query();
+    public function query($statement);
 
     public function quote($string, $type = Storage::PARAM_STR);
 

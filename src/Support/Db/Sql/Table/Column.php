@@ -2,14 +2,11 @@
 
 namespace Greg\Support\Db\Sql\Table;
 
-use Greg\Engine\InternalTrait;
 use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class Column
 {
-    use InternalTrait;
-
     const TYPE_TINYINT = 'tinyint';
 
     const TYPE_SMALLINT = 'smallint';
@@ -105,11 +102,6 @@ class Column
         return $this;
     }
 
-    static public function create($appName, $name, $type = null, $length = null, $isUnsigned = null, $allowNull = null, $def = null, $comment = null)
-    {
-        return static::newInstanceRef($appName, $name, $type, $length, $isUnsigned, $allowNull, $def, $comment);
-    }
-
     static public function getNumericLength($type)
     {
         // phpStorm bug fix
@@ -130,7 +122,7 @@ class Column
 
     public function getMinValue()
     {
-        if ($this->isNumeric($this->type())) {
+        if ($this->isNumeric()) {
             if ($this->unsigned()) {
                 return 0;
             }
@@ -216,11 +208,4 @@ class Column
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
-
-    /*
-    public function autoIncrement($value = null)
-    {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-    */
 }

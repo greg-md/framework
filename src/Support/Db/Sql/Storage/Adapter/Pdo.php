@@ -2,14 +2,11 @@
 
 namespace Greg\Support\Db\Sql\Storage\Adapter;
 
-use Greg\Engine\InternalTrait;
 use Greg\Support\Obj;
 
 class Pdo extends \PDO implements AdapterInterface
 {
     protected $stmtClass = Pdo\Stmt::class;
-
-    use InternalTrait;
 
     public function init()
     {
@@ -41,7 +38,7 @@ class Pdo extends \PDO implements AdapterInterface
         return $this;
     }
 
-    public function prepare($query, $options = [])
+    public function prepare($query, array $options = [])
     {
         $stmt = parent::prepare($query, $options);
 

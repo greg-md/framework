@@ -6,7 +6,7 @@ use Greg\Engine\InternalTrait;
 
 abstract class Storage implements StorageInterface
 {
-    use StorageTrait, InternalTrait;
+    use InternalTrait;
 
     const PARAM_BOOL = 5;
 

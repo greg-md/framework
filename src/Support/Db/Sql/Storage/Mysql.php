@@ -44,11 +44,6 @@ class Mysql extends Storage
         return $this;
     }
 
-    static public function create($appName, $dns, $username = null, $password = null, array $options = [])
-    {
-        return static::newInstanceRef($appName, $dns, $username, $password, $options);
-    }
-
     public function getTableSchema($tableName)
     {
         $info = $this->getTableInfo($tableName);
@@ -85,7 +80,7 @@ class Mysql extends Storage
                 $autoIncrement = $columnInfo['Field'];
             }
 
-            $column = Table\Column::create($this->appName(), $columnInfo['Field']);
+            $column = new Table\Column($columnInfo['Field']);
 
             if (preg_match('#^([a-z]+)(?:\(([0-9]+)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
                 $column->type($matches[1]);
@@ -236,13 +231,18 @@ class Mysql extends Storage
             $columns = func_get_args();
         }
 
-        $query = Select::newInstance($this->appName(), $this);
+        $query = $this->newSelect();
 
         if ($columns) {
             $query->columns($columns);
         }
 
         return $query;
+    }
+
+    protected function newSelect()
+    {
+        return new Select($this);
     }
 
     /**
@@ -252,13 +252,18 @@ class Mysql extends Storage
      */
     public function insert($into = null)
     {
-        $query = Insert::newInstance($this->appName(), $this);
+        $query = $this->newInsert();
 
         if ($into !== null) {
             $query->into($into);
         }
 
         return $query;
+    }
+
+    protected function newInsert()
+    {
+        return new Insert($this);
     }
 
     /**
@@ -268,13 +273,18 @@ class Mysql extends Storage
      */
     public function delete($from = null, $delete = false)
     {
-        $query = Delete::newInstance($this->appName(), $this);
+        $query = $this->newDelete();
 
         if ($from !== null) {
             $query->from($from, $delete);
         }
 
         return $query;
+    }
+
+    protected function newDelete()
+    {
+        return new Delete($this);
     }
 
     /**
@@ -284,13 +294,18 @@ class Mysql extends Storage
      */
     public function update($table = null)
     {
-        $query = Update::newInstance($this->appName(), $this);
+        $query = $this->newUpdate();
 
         if ($table !== null) {
             $query->table($table);
         }
 
         return $query;
+    }
+
+    protected function newUpdate()
+    {
+        return new Update($this);
     }
 
     public function beginTransaction()
@@ -402,8 +417,7 @@ class Mysql extends Storage
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__},function($adapter) {
             if (!is_object($adapter)) {
-                /* @var $adapter \Greg\Engine\InternalTrait */
-                $adapter = $adapter::newInstance($this->appName(), $this->dns(), $this->username(), $this->password(), $this->options());
+                $adapter = new $adapter($this->dns(), $this->username(), $this->password(), $this->options());
             }
 
             return $adapter;

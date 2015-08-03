@@ -61,7 +61,7 @@ class Sqlite extends Storage
         return $stmt->fetch() ? true : false;
 
         /*
-        return $this->select($this->expr('1'))
+        return $this->select(new Expr('1'))
                     ->from('sqlite_master')
                     ->whereCol('type', 'table')
                     ->whereCol('name', 'Cache')
@@ -133,7 +133,7 @@ class Sqlite extends Storage
         return $stmt->fetch() ? true : false;
 
         /*
-        return $this->select($this->expr('1'))
+        return $this->select(new Expr('1'))
             ->from('Cache')
             ->whereCol('Id', md5($id))
             ->limit(1)

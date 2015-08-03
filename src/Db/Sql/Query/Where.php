@@ -2,25 +2,37 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query;
-use Greg\Support\Debug;
+use Greg\Engine\InternalTrait;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Str;
 
-class Where extends Query
+class Where extends \Greg\Support\Db\Sql\Query\Where
 {
-    use WhereTrait;
+    use InternalTrait;
 
-    public function toString()
+    static public function create($appName, StorageInterface $storage)
     {
-        return $this->whereToString(false);
+        return static::newInstanceRef($appName, $storage);
     }
 
-    public function __toString()
+    protected function fetchAlias($name)
     {
-        return $this->toString();
+        /* @var $name string|array|InternalTrait */
+
+        if (Str::isScalar($name) and strpos($name, '\\') !== false) {
+            $name = $name::instance($this->appName());
+        }
+
+        return parent::fetchAlias($name);
     }
 
-    public function __debugInfo()
+    protected function newWhere()
     {
-        return Debug::fixInfo($this, get_object_vars($this), false);
+        return Where::create($this->appName(), $this->storage());
+    }
+
+    protected function callCallable(callable $callable, ...$args)
+    {
+        return $this->app()->binder()->call($callable, ...$args);
     }
 }

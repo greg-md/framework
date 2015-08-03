@@ -327,6 +327,7 @@ class Runner implements \ArrayAccess
         /* @var $class InternalTrait */
         $class = $binder ? $binder->loadInstanceArgs($className, $args) : Obj::loadInstanceArgs($className, $args);
 
+        die('Remain here, need to add InternalInterface and check it!');
         $class->appName($this->appName());
 
         if (method_exists($class, 'init')) {

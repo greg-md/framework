@@ -3,7 +3,6 @@
 namespace Greg\Support\Db\Sql\Table;
 
 use Greg\Support\Db\Sql\Table;
-use Greg\Engine\InternalTrait;
 use Greg\Support\Storage\ArrayObject;
 use Greg\Support\Debug;
 use Greg\Support\Obj;
@@ -17,8 +16,6 @@ use Greg\Support\Obj;
  */
 abstract class RowAbstract extends ArrayObject
 {
-    use InternalTrait;
-
     protected $table = null;
 
     public function __construct(Table $table, $data = [])
@@ -28,11 +25,6 @@ abstract class RowAbstract extends ArrayObject
         parent::__construct($data);
 
         return $this;
-    }
-
-    static public function create($appName, $tableName, $data = [])
-    {
-        return static::newInstanceRef($appName, $tableName, $data);
     }
 
     public function getTableName()

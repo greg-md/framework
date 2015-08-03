@@ -21,9 +21,4 @@ class Pdo extends \Greg\Support\Db\Sql\Storage\Adapter\Pdo
 
         return $this;
     }
-
-    static public function create($appName, $dns, $username = null, $password = null, $options = [])
-    {
-        return static::newInstanceRef($appName, $dns, $username, $password, $options);
-    }
 }

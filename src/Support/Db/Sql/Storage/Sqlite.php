@@ -27,11 +27,6 @@ class Sqlite extends Storage
         return $this;
     }
 
-    static public function create($appName, $path, $adapter = null)
-    {
-        return static::newInstanceRef($appName, $path, $adapter);
-    }
-
     /**
      * @param null $columns
      * @param null $_
@@ -44,13 +39,18 @@ class Sqlite extends Storage
             $columns = func_get_args();
         }
 
-        $query = Select::newInstance($this->appName(), $this);
+        $query = $this->newSelect();
 
         if ($columns) {
             $query->columns($columns);
         }
 
         return $query;
+    }
+
+    protected function newSelect()
+    {
+        return new Select($this);
     }
 
     /**
@@ -60,13 +60,18 @@ class Sqlite extends Storage
      */
     public function insert($into = null)
     {
-        $query = Insert::newInstance($this->appName(), $this);
+        $query = $this->newInsert();
 
         if ($into !== null) {
             $query->into($into);
         }
 
         return $query;
+    }
+
+    protected function newInsert()
+    {
+        return new Insert($this);
     }
 
     /**
@@ -77,13 +82,18 @@ class Sqlite extends Storage
      */
     public function delete($from = null, $delete = false)
     {
-        $query = Delete::newInstance($this->appName(), $this);
+        $query = $this->newDelete();
 
         if ($from !== null) {
             $query->from($from);
         }
 
         return $query;
+    }
+
+    protected function newDelete()
+    {
+        return new Delete($this);
     }
 
     /**
@@ -93,13 +103,18 @@ class Sqlite extends Storage
      */
     public function update($table = null)
     {
-        $query = Update::newInstance($this->appName(), $this);
+        $query = $this->newUpdate();
 
         if ($table !== null) {
             $query->table($table);
         }
 
         return $query;
+    }
+
+    protected function newUpdate()
+    {
+        return new Update($this);
     }
 
     public function getTableSchema($tableName)
@@ -205,8 +220,7 @@ class Sqlite extends Storage
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__}, function($adapter) {
             if (!is_object($adapter)) {
-                /* @var $adapter \Greg\Engine\InternalTrait */
-                $adapter = $adapter::newInstance($this->appName(), $this->path());
+                $adapter = new $adapter($this->path());
             }
 
             return $adapter;

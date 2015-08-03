@@ -2,123 +2,32 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Db\Sql\Query;
-use Greg\Support\Debug;
-use Greg\Support\Obj;
+use Greg\Engine\InternalTrait;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Str;
 
-class Insert extends Query
+class Insert extends \Greg\Support\Db\Sql\Query\Insert
 {
-    protected $into = null;
+    use InternalTrait;
 
-    protected $columns = [];
-
-    protected $values = [];
-
-    protected $select = null;
-
-    public function into($name = null)
+    static public function create($appName, StorageInterface $storage)
     {
-        if (func_num_args()) {
-            $this->into = $name;
+        return static::newInstanceRef($appName, $storage);
+    }
 
-            return $this;
+    protected function fetchAlias($name)
+    {
+        /* @var $name string|array|InternalTrait */
+
+        if (Str::isScalar($name) and strpos($name, '\\') !== false) {
+            $name = $name::instance($this->appName());
         }
 
-        return $this->into;
+        return parent::fetchAlias($name);
     }
 
-    /**
-     * @param $data
-     * @return Insert
-     */
-    public function data($data)
+    protected function callCallable(callable $callable, ...$args)
     {
-        $this->columns(array_keys($data), true);
-
-        $this->values($data, true);
-
-        return $this;
-    }
-
-    public function exec()
-    {
-        $stmt = $this->storage()->prepare($this->toString());
-
-        $this->bindParamsToStmt($stmt);
-
-        return $stmt->execute();
-    }
-
-    public function toString()
-    {
-        $query = [
-            'INSERT INTO',
-        ];
-
-        $into = $this->into();
-        if (!$into) {
-            throw new \Exception('Undefined insert table.');
-        }
-
-        list($intoAlias, $intoName) = $this->fetchAlias($into);
-
-        unset($intoAlias);
-
-        $query[] = $this->quoteNamedExpr($intoName);
-
-        $columns = $this->columns();
-
-        $quoteColumns = array_map(function($column) {
-            return $this->quoteNamedExpr($column);
-        }, $columns);
-
-        if (!$quoteColumns) {
-            throw new \Exception('Undefined insert columns.');
-        }
-
-        $query[] = '(' . implode(', ', $quoteColumns) . ')';
-
-        $select = $this->select();
-
-        if ($select) {
-            $query[] = $select;
-        } else {
-            $values = [];
-            foreach($columns as $column) {
-                $values[] = $this->values($column);
-            }
-            $this->bindParams($values);
-
-            $query[] = 'VALUES';
-
-            $query[] = '(' . implode(', ', str_split(str_repeat('?', sizeof($columns)))) . ')';
-        }
-
-        return implode(' ', $query);
-    }
-
-    public function __toString()
-    {
-        return $this->toString();
-    }
-
-    public function columns($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function select($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function __debugInfo()
-    {
-        return Debug::fixInfo($this, get_object_vars($this), false);
+        return $this->app()->binder()->call($callable, ...$args);
     }
 }

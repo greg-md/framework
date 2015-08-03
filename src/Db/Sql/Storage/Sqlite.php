@@ -2,219 +2,38 @@
 
 namespace Greg\Db\Sql\Storage;
 
-use Greg\Db\Sql\Storage;
-use Greg\Db\Sql\Storage\Adapter\AdapterInterface;
-use Greg\Db\Sql\Storage\Sqlite\Query\Insert;
-use Greg\Db\Sql\Storage\Sqlite\Query\Select;
-use Greg\Db\Sql\Storage\Sqlite\Query\Delete;
-use Greg\Db\Sql\Storage\Sqlite\Query\Update;
-use Greg\Support\Obj;
+use Greg\Db\Sql\Query\Delete;
+use Greg\Db\Sql\Query\Insert;
+use Greg\Db\Sql\Query\Select;
+use Greg\Db\Sql\Query\Update;
+use Greg\Engine\InternalTrait;
 
-class Sqlite extends Storage
+class Sqlite extends \Greg\Support\Db\Sql\Storage\Sqlite
 {
-    protected $path = null;
-
-    protected $adapter = Sqlite\Adapter\Pdo::class;
-
-    public function __construct($path, $adapter = null)
-    {
-        $this->path($path);
-
-        if ($adapter !== null) {
-            $this->adapter($adapter);
-        }
-
-        return $this;
-    }
+    use InternalTrait;
 
     static public function create($appName, $path, $adapter = null)
     {
         return static::newInstanceRef($appName, $path, $adapter);
     }
 
-    /**
-     * @param null $columns
-     * @param null $_
-     * @return Select
-     * @throws \Exception
-     */
-    public function select($columns = null, $_ = null)
+    protected function newSelect()
     {
-        if (!is_array($columns)) {
-            $columns = func_get_args();
-        }
-
-        $query = Select::newInstance($this->appName(), $this);
-
-        if ($columns) {
-            $query->columns($columns);
-        }
-
-        return $query;
+        return Select::newInstance($this->appName(), $this);
     }
 
-    /**
-     * @param null $into
-     * @return Insert
-     * @throws \Exception
-     */
-    public function insert($into = null)
+    protected function newInsert()
     {
-        $query = Insert::newInstance($this->appName(), $this);
-
-        if ($into !== null) {
-            $query->into($into);
-        }
-
-        return $query;
+        return Insert::newInstance($this->appName(), $this);
     }
 
-    /**
-     * @param null $from
-     * @param bool $delete
-     * @return Delete
-     * @throws \Exception
-     */
-    public function delete($from = null, $delete = false)
+    protected function newDelete()
     {
-        $query = Delete::newInstance($this->appName(), $this);
-
-        if ($from !== null) {
-            $query->from($from);
-        }
-
-        return $query;
+        return Delete::newInstance($this->appName(), $this);
     }
 
-    /**
-     * @param null $table
-     * @return Update
-     * @throws \Exception
-     */
-    public function update($table = null)
+    protected function newUpdate()
     {
-        $query = Update::newInstance($this->appName(), $this);
-
-        if ($table !== null) {
-            $query->table($table);
-        }
-
-        return $query;
-    }
-
-    public function getTableSchema($tableName)
-    {
-
-    }
-
-    public function getTableInfo($tableName)
-    {
-
-    }
-
-    public function getTableReferences($tableName)
-    {
-
-    }
-
-    public function getTableRelationships($tableName)
-    {
-
-    }
-
-    public function beginTransaction()
-    {
-        return $this->adapter()->beginTransaction();
-    }
-
-    public function commit()
-    {
-        return $this->adapter()->commit();
-    }
-
-    public function errorCode()
-    {
-        return $this->adapter()->errorCode();
-    }
-
-    public function errorInfo()
-    {
-        return $this->adapter()->errorInfo();
-    }
-
-    public function exec($query)
-    {
-        return $this->adapter()->exec($query);
-    }
-
-    public function getAttribute($name)
-    {
-        return $this->adapter()->getAttribute($name);
-    }
-
-    public function inTransaction()
-    {
-        return $this->adapter()->inTransaction();
-    }
-
-    public function lastInsertId($name = null)
-    {
-        return $this->adapter()->lastInsertId($name);
-    }
-
-    /**
-     * @param $query
-     * @param array $options
-     * @return Adapter\StmtInterface
-     */
-    public function prepare($query, $options = [])
-    {
-        return $this->adapter()->prepare($query, $options = []);
-    }
-
-    public function query($query, $mode = null, $_ = null)
-    {
-        return $this->adapter()->query(...func_get_args());
-    }
-
-    public function quote($string, $type = self::PARAM_STR)
-    {
-        return $this->adapter()->quote($string, $type);
-    }
-
-    public function rollBack()
-    {
-        return $this->adapter()->rollBack();
-    }
-
-    public function setAttribute($name, $value)
-    {
-        return $this->adapter()->setAttribute($name, $value);
-    }
-
-    public function path($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    /**
-     * @param AdapterInterface $value
-     * @return AdapterInterface|null
-     */
-    public function adapter(AdapterInterface $value = null)
-    {
-        return Obj::fetchCallableVar($this, $this->{__FUNCTION__}, function($adapter) {
-            if (!is_object($adapter)) {
-                /* @var $adapter \Greg\Engine\InternalTrait */
-                $adapter = $adapter::newInstance($this->appName(), $this->path());
-            }
-
-            return $adapter;
-        }, ...func_get_args());
-    }
-
-    public function __call($method, array $args = [])
-    {
-        return $this->adapter()->$method(...$args);
+        return Update::newInstance($this->appName(), $this);
     }
 }
