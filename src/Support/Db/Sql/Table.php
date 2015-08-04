@@ -2,15 +2,16 @@
 
 namespace Greg\Support\Db\Sql;
 
-use Greg\Support\Cache\StorageInterface as CacheStorageInterface;
+use Greg\Support\Cache\StorageInterface;
 use Greg\Support\Db\Sql\Query\Expr;
 use Greg\Support\Db\Sql\Query\Where;
 use Greg\Support\Db\Sql\Table\Column;
 use Greg\Support\Db\Sql\Table\Row;
-use Greg\Support\Arr;
-use Greg\Support\DateTime;
-use Greg\Support\Obj;
-use Greg\Support\Url;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\System\DateTime;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Url;
 
 /**
  * Class Table
@@ -23,6 +24,8 @@ use Greg\Support\Url;
  */
 class Table
 {
+    use InternalTrait;
+
     protected $prefix = null;
 
     protected $name = null;
@@ -277,16 +280,6 @@ class Table
         $row->isNew(true);
 
         return $row;
-    }
-
-    protected function loadClassInstance($className, ...$args)
-    {
-        return Obj::loadInstanceArgs($className, ...$args);
-    }
-
-    protected function callCallable(callable $callable, ...$args)
-    {
-        return call_user_func_array($callable, $args);
     }
 
     /**
@@ -1171,19 +1164,19 @@ class Table
     }
 
     /**
-     * @param StorageInterface $value
-     * @return StorageInterface|null
+     * @param \Greg\Support\Db\Sql\StorageInterface $value
+     * @return \Greg\Support\Db\Sql\StorageInterface|null
      */
-    public function storage(StorageInterface $value = null)
+    public function storage(\Greg\Support\Db\Sql\StorageInterface $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     /**
-     * @param CacheStorageInterface $value
-     * @return CacheStorageInterface|null
+     * @param StorageInterface $value
+     * @return StorageInterface|null
      */
-    public function cacheStorage(CacheStorageInterface $value = null)
+    public function cacheStorage(StorageInterface $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

@@ -3,7 +3,7 @@
 namespace Greg\Support\Db\Sql\Query;
 
 use Greg\Support\Db\Sql\Query;
-use Greg\Support\Debug;
+use Greg\Support\Tool\Debug;
 
 class Where extends Query
 {

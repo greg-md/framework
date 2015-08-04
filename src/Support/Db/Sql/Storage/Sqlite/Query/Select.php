@@ -2,18 +2,9 @@
 
 namespace Greg\Support\Db\Sql\Storage\Sqlite\Query;
 
+use Greg\Support\Db\Sql\Storage\Mysql\Query\SelectTrait;
+
 class Select extends \Greg\Support\Db\Sql\Query\Select
 {
-    protected function parseLimit(&$query)
-    {
-        if ($this->limit()) {
-            $query[] = 'LIMIT ' . $this->limit();
-        }
-
-        if ($this->offset()) {
-            $query[] = 'OFFSET ' . $this->offset();
-        }
-
-        return $this;
-    }
+    use SelectTrait;
 }

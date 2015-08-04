@@ -4,7 +4,7 @@ namespace Greg\Db\Sql\Query;
 
 use Greg\Engine\InternalTrait;
 use Greg\Support\Db\Sql\StorageInterface;
-use Greg\Support\Str;
+use Greg\Support\Tool\Str;
 
 class Insert extends \Greg\Support\Db\Sql\Query\Insert
 {
@@ -24,10 +24,5 @@ class Insert extends \Greg\Support\Db\Sql\Query\Insert
         }
 
         return parent::fetchAlias($name);
-    }
-
-    protected function callCallable(callable $callable, ...$args)
-    {
-        return $this->app()->binder()->call($callable, ...$args);
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Greg\Support\Db\Sql\Table;
 
-use Greg\Support\Db\Sql\Table;
-
 class Rows extends RowAbstract
 {
     public function toArray($recursive = true)

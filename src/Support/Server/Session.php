@@ -2,8 +2,8 @@
 
 namespace Greg\Support\Server;
 
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class Session
 {
@@ -90,12 +90,12 @@ class Session
 
     static public function iniSet($var, $value)
     {
-        return Ini::set('session.' . $var, $value);
+        return ServerIni::set('session.' . $var, $value);
     }
 
     static public function iniGet($var)
     {
-        return Ini::get('session.' . $var);
+        return ServerIni::get('session.' . $var);
     }
 
     static public function id($id = null)

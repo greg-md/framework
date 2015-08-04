@@ -2,10 +2,10 @@
 
 namespace Greg\Support\Http;
 
-use Greg\Support\Server;
-use Greg\Support\Arr;
+use Greg\Support\Server\Server;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
+use Greg\Support\Tool\Arr;
 
 class Request implements \ArrayAccess
 {

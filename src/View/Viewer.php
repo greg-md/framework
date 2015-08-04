@@ -14,14 +14,9 @@ class Viewer extends \Greg\Support\View\Viewer
         return static::newInstanceRef($appName, $paths, $param);
     }
 
-    protected function createResponse($content)
+    protected function newResponse($content)
     {
         return Response::create($this->appName(), $content);
-    }
-
-    protected function callCompiler(callable $compiler)
-    {
-        return $this->app()->binder()->call($compiler);
     }
 
     public function __call($method, array $args = [])

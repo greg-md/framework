@@ -19,21 +19,21 @@ class Mysql extends \Greg\Support\Db\Sql\Storage\Mysql
 
     protected function newSelect()
     {
-        return Select::newInstance($this->appName(), $this);
+        return Select::create($this->appName(), $this);
     }
 
     protected function newInsert()
     {
-        return Insert::newInstance($this->appName(), $this);
+        return Insert::create($this->appName(), $this);
     }
 
     protected function newDelete()
     {
-        return Delete::newInstance($this->appName(), $this);
+        return Delete::create($this->appName(), $this);
     }
 
     protected function newUpdate()
     {
-        return Update::newInstance($this->appName(), $this);
+        return Update::create($this->appName(), $this);
     }
 }

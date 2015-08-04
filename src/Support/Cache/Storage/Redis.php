@@ -4,8 +4,8 @@ namespace Greg\Support\Cache\Storage;
 
 use Greg\Support\Cache\Storage;
 use Greg\Support\Http\Request;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 /**
  * Class Redis

@@ -2,19 +2,22 @@
 
 namespace Greg\Support\Db\Sql\Storage;
 
-use Greg\Support\Db\Sql\Storage;
 use Greg\Support\Db\Sql\Storage\Adapter\AdapterInterface;
+use Greg\Support\Db\Sql\Storage\Mysql\Query\Delete;
 use Greg\Support\Db\Sql\Storage\Mysql\Query\Insert;
 use Greg\Support\Db\Sql\Storage\Mysql\Query\Select;
-use Greg\Support\Db\Sql\Storage\Mysql\Query\Delete;
 use Greg\Support\Db\Sql\Storage\Mysql\Query\Update;
-use Greg\Support\Db\Sql\Table;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
-use Greg\Support\Str;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Db\Sql\Table\Column;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Str;
 
-class Mysql extends Storage
+class Mysql implements StorageInterface
 {
+    use InternalTrait;
+
     protected $dns = null;
 
     protected $dbName = null;
@@ -80,7 +83,7 @@ class Mysql extends Storage
                 $autoIncrement = $columnInfo['Field'];
             }
 
-            $column = new Table\Column($columnInfo['Field']);
+            $column = new Column($columnInfo['Field']);
 
             if (preg_match('#^([a-z]+)(?:\(([0-9]+)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
                 $column->type($matches[1]);
@@ -417,7 +420,7 @@ class Mysql extends Storage
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__},function($adapter) {
             if (!is_object($adapter)) {
-                $adapter = new $adapter($this->dns(), $this->username(), $this->password(), $this->options());
+                $adapter = $this->loadClassInstance($adapter, $this->dns(), $this->username(), $this->password(), $this->options());
             }
 
             return $adapter;

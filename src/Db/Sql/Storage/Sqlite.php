@@ -2,10 +2,10 @@
 
 namespace Greg\Db\Sql\Storage;
 
-use Greg\Db\Sql\Query\Delete;
-use Greg\Db\Sql\Query\Insert;
-use Greg\Db\Sql\Query\Select;
-use Greg\Db\Sql\Query\Update;
+use Greg\Db\Sql\Storage\Sqlite\Query\Delete;
+use Greg\Db\Sql\Storage\Sqlite\Query\Insert;
+use Greg\Db\Sql\Storage\Sqlite\Query\Select;
+use Greg\Db\Sql\Storage\Sqlite\Query\Update;
 use Greg\Engine\InternalTrait;
 
 class Sqlite extends \Greg\Support\Db\Sql\Storage\Sqlite
@@ -19,21 +19,21 @@ class Sqlite extends \Greg\Support\Db\Sql\Storage\Sqlite
 
     protected function newSelect()
     {
-        return Select::newInstance($this->appName(), $this);
+        return Select::create($this->appName(), $this);
     }
 
     protected function newInsert()
     {
-        return Insert::newInstance($this->appName(), $this);
+        return Insert::create($this->appName(), $this);
     }
 
     protected function newDelete()
     {
-        return Delete::newInstance($this->appName(), $this);
+        return Delete::create($this->appName(), $this);
     }
 
     protected function newUpdate()
     {
-        return Update::newInstance($this->appName(), $this);
+        return Update::create($this->appName(), $this);
     }
 }

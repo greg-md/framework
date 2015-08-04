@@ -2,16 +2,17 @@
 
 namespace Greg\Support\View;
 
-use Greg\Http\Response;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Http\Response;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
-use Greg\Support\Str;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Str;
 
 class Viewer implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait;
+    use AccessorTrait, ArrayAccessTrait, InternalTrait;
 
     protected $paths = [];
 
@@ -174,10 +175,10 @@ class Viewer implements \ArrayAccess
             $content[] = $viewer->fetchFile($file, false);
         }
 
-        return $this->createResponse(implode('', $content));
+        return $this->newResponse(implode('', $content));
     }
 
-    protected function createResponse($content)
+    protected function newResponse($content)
     {
         return new Response($content);
     }
@@ -188,7 +189,7 @@ class Viewer implements \ArrayAccess
 
         $content = $this->loadFile($compiler ? $compiler->getCompiledFile($file) : $file);
 
-        return $responseObject ? $this->createResponse($content) : $content;
+        return $responseObject ? $this->newResponse($content) : $content;
     }
 
     public function loadFile($___file)
@@ -252,7 +253,7 @@ class Viewer implements \ArrayAccess
         $compiler = &$this->compilers[$extension];
 
         if (is_callable($compiler)) {
-            $compiler = $this->callCompiler($compiler);
+            $compiler = $this->callCallable($compiler);
         }
 
         if (!($compiler instanceof CompilerInterface)) {
@@ -260,11 +261,6 @@ class Viewer implements \ArrayAccess
         }
 
         return $compiler;
-    }
-
-    protected function callCompiler(callable $compiler)
-    {
-        return call_user_func_array($compiler, []);
     }
 
     public function setCompiler($extension, $compiler)

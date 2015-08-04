@@ -2,8 +2,6 @@
 
 namespace Greg\Support\Db\Sql\Table;
 
-use Greg\Support\Db\Sql\Table;
-
 class RowFull extends RowAbstract
 {
     /**

@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Regex;
 
-use Greg\Support\Obj;
+use Greg\Support\Tool\Obj;
 
 class InNamespace
 {

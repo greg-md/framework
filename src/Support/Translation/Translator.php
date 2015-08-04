@@ -2,10 +2,10 @@
 
 namespace Greg\Support\Translation;
 
-use Greg\Support\Arr;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class Translator implements \ArrayAccess
 {

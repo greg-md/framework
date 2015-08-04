@@ -12,9 +12,4 @@ class Sqlite extends \Greg\Support\Cache\Storage\Sqlite
     {
         return static::newInstanceRef($appName, $path);
     }
-
-    protected function callCallable(callable $callable)
-    {
-        return $this->app()->binder()->call($callable);
-    }
 }

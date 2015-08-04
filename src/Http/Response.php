@@ -30,9 +30,4 @@ class Response extends \Greg\Support\Http\Response
 
         return $this;
     }
-
-    protected function callCallback(callable $callback)
-    {
-        return $this->app()->binder()->callWith($callback, $this);
-    }
 }

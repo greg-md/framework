@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Storage;
 
-use Greg\Support\Obj;
+use Greg\Support\Tool\Obj;
 
 trait AccessorStaticTrait
 {

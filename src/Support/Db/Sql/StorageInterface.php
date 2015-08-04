@@ -4,6 +4,20 @@ namespace Greg\Support\Db\Sql;
 
 interface StorageInterface
 {
+    const PARAM_BOOL = 5;
+
+    const PARAM_NULL = 0;
+
+    const PARAM_INT = 1;
+
+    const PARAM_STR = 2;
+
+    const PARAM_LOB = 3;
+
+    const PARAM_STMT = 4;
+
+    const FETCH_ORI_NEXT = 0;
+
     /**
      * @param null $columns
      * @param null $_
@@ -66,7 +80,7 @@ interface StorageInterface
 
     public function query($query, $mode = null, $_ = null);
 
-    public function quote($string, $type = Storage::PARAM_STR);
+    public function quote($string, $type = StorageInterface::PARAM_STR);
 
     public function rollBack();
 

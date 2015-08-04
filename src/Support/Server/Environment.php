@@ -2,8 +2,8 @@
 
 namespace Greg\Support\Server;
 
-use Greg\Support\Arr;
-use Greg\Support\Str;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Str;
 
 class Environment
 {

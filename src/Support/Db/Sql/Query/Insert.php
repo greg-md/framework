@@ -3,8 +3,8 @@
 namespace Greg\Support\Db\Sql\Query;
 
 use Greg\Support\Db\Sql\Query;
-use Greg\Support\Debug;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Debug;
+use Greg\Support\Tool\Obj;
 
 class Insert extends Query
 {

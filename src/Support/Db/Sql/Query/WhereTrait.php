@@ -3,7 +3,7 @@
 namespace Greg\Support\Db\Sql\Query;
 
 use Greg\Support\Db\Sql\StorageInterface;
-use Greg\Support\Arr;
+use Greg\Support\Tool\Arr;
 
 trait WhereTrait
 {

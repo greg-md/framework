@@ -4,7 +4,7 @@ namespace Greg\Db\Sql\Query;
 
 use Greg\Engine\InternalTrait;
 use Greg\Support\Db\Sql\StorageInterface;
-use Greg\Support\Str;
+use Greg\Support\Tool\Str;
 
 class Select extends \Greg\Support\Db\Sql\Query\Select
 {
@@ -29,10 +29,5 @@ class Select extends \Greg\Support\Db\Sql\Query\Select
     protected function newWhere()
     {
         return Where::create($this->appName(), $this->storage());
-    }
-
-    protected function callCallable(callable $callable, ...$args)
-    {
-        return $this->app()->binder()->call($callable, ...$args);
     }
 }

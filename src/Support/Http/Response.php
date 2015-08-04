@@ -2,13 +2,16 @@
 
 namespace Greg\Support\Http;
 
-use Greg\Support\Arr;
-use Greg\Support\Image;
-use Greg\Support\Obj;
-use Greg\Support\Type;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\System\Image;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Type;
 
 class Response
 {
+    use InternalTrait;
+
     protected $contentType = 'text/html';
 
     protected $charset = 'UTF-8';
@@ -117,7 +120,7 @@ class Response
     {
         if ($callbacks = $this->callbacks()) {
             foreach($callbacks as $callback) {
-                $this->callCallback($callback);
+                $this->callCallable($callback);
             }
         }
 
@@ -146,11 +149,6 @@ class Response
         echo $this->content();
 
         return $this;
-    }
-
-    protected function callCallback(callable $callback)
-    {
-        return Obj::callWith($callback, $this);
     }
 
     public function isHtml()

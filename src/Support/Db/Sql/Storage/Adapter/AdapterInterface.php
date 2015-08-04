@@ -3,6 +3,7 @@
 namespace Greg\Support\Db\Sql\Storage\Adapter;
 
 use Greg\Support\Db\Sql\Storage;
+use Greg\Support\Db\Sql\StorageInterface;
 
 interface AdapterInterface
 {
@@ -31,7 +32,7 @@ interface AdapterInterface
 
     public function query($statement);
 
-    public function quote($string, $type = Storage::PARAM_STR);
+    public function quote($string, $type = StorageInterface::PARAM_STR);
 
     public function rollBack();
 

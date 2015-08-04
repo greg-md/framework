@@ -2,7 +2,7 @@
 
 namespace Greg\Support\NotificationCenter;
 
-use Greg\Support\Obj;
+use Greg\Support\Tool\Obj;
 
 class Notification
 {

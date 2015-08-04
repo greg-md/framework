@@ -2,11 +2,14 @@
 
 namespace Greg\Support\Application;
 
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class Binder
 {
+    use InternalTrait;
+
     protected $storage = [];
 
     protected $singletons = [];
@@ -159,11 +162,6 @@ class Binder
         }
 
         return $object;
-    }
-
-    protected function loadClassInstance($className, ...$args)
-    {
-        return Obj::loadInstanceArgs($className, ...$args);
     }
 
     public function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)

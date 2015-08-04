@@ -3,13 +3,16 @@
 
 namespace Greg\Support\View\Compiler;
 
-use Greg\Support\File;
-use Greg\Support\Obj;
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Regex\InNamespace;
-use Greg\Support\View\Compiler;
+use Greg\Support\System\File;
+use Greg\Support\Tool\Obj;
+use Greg\Support\View\CompilerInterface;
 
-class Blade extends Compiler
+class Blade implements CompilerInterface
 {
+    use InternalTrait;
+
     protected $cachePath = null;
 
     protected $compilers = [
@@ -112,7 +115,7 @@ class Blade extends Compiler
                     $callable = [$this, $callable];
                 }
 
-                $content = call_user_func_array($callable, [$content]);
+                $content = $this->callCallable($callable, $content);
             }
         }
 

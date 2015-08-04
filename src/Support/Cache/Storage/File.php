@@ -3,10 +3,10 @@
 namespace Greg\Support\Cache\Storage;
 
 use Greg\Support\Cache\Storage;
-use Greg\Http\Request;
+use Greg\Support\Http\Request;
 use Greg\Support\Storage\AccessorTrait;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class File extends Storage
 {

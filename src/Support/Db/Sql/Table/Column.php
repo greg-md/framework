@@ -2,8 +2,8 @@
 
 namespace Greg\Support\Db\Sql\Table;
 
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class Column
 {

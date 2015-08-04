@@ -4,8 +4,8 @@ namespace Greg\Support\Db\Sql\Query;
 
 use Greg\Support\Db\Sql\Query;
 use Greg\Support\Db\Sql\Table;
-use Greg\Support\Debug;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Debug;
+use Greg\Support\Tool\Obj;
 
 /**
  * Class Select
@@ -422,9 +422,9 @@ class Select extends Query
             $countQ->columns('count(*)');
 
             if (!$countQ->hasWhere()) {
-                $countQ->clearJoinLeft();
+                //$countQ->clearJoinLeft();
 
-                $countQ->clearJoinRight();
+                //$countQ->clearJoinRight();
             }
         }
 

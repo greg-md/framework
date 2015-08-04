@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Server;
 
-use Greg\Support\Arr;
+use Greg\Support\Tool\Arr;
 
 class IncludePath
 {

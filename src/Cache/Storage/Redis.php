@@ -12,9 +12,4 @@ class Redis extends \Greg\Support\Cache\Storage\Redis
     {
         return static::newInstanceRef($appName, $host, $port, $prefix, $timeout);
     }
-
-    protected function callCallable(callable $callable)
-    {
-        return $this->app()->binder()->call($callable);
-    }
 }

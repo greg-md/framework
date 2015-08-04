@@ -2,10 +2,13 @@
 
 namespace Greg\Support\Cache;
 
+use Greg\Support\Engine\InternalTrait;
 use Greg\Support\Http\Request;
 
 abstract class Storage implements StorageInterface
 {
+    use InternalTrait;
+
     public function fetch($id, callable $callable, $expire = 0)
     {
         if ($this->expired($id, $expire)) {
@@ -15,11 +18,6 @@ abstract class Storage implements StorageInterface
         }
 
         return $result;
-    }
-
-    protected function callCallable(callable $callable)
-    {
-        return call_user_func_array($callable, []);
     }
 
     public function expired($id, $expire = 0)

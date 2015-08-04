@@ -2,14 +2,17 @@
 
 namespace Greg\Router;
 
-class Dispatcher extends Router
-{
-    public function __construct(array $routes = [])
-    {
-        $this->addMore($routes);
+use Greg\Engine\InternalTrait;
 
-        return $this;
-    }
+/**
+ * Class Dispatcher
+ * @package Greg\Router
+ *
+ * @method Route createRoute($name, $format, $type = null, $settings = null)
+ */
+class Dispatcher extends \Greg\Support\Router\Dispatcher implements RouterInterface
+{
+    use RouterTrait, InternalTrait;
 
     static public function create($appName, array $routes = [])
     {

@@ -12,9 +12,4 @@ class Pdo extends \Greg\Support\Db\Sql\Storage\Adapter\Pdo
 
         return $this;
     }
-
-    static public function create($appName, $path)
-    {
-        return static::newInstanceRef($appName, $path);
-    }
 }

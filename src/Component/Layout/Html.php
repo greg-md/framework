@@ -2,17 +2,15 @@
 
 namespace Greg\Component\Layout;
 
-use Greg\Application\Runner;
 use Greg\Engine\InternalTrait;
-use Greg\Event\Listener;
-use Greg\Event\SubscriberInterface;
-use Greg\Event\SubscriberTrait;
-use Greg\Html\ElementClass;
-use Greg\Html\Head;
-use Greg\Html\Script;
 use Greg\Http\Response;
-use Greg\Support\Obj;
-//use Greg\Support\Tool\Minify;
+use Greg\Support\Event\ListenerInterface;
+use Greg\Support\Event\SubscriberInterface;
+use Greg\Support\Event\SubscriberTrait;
+use Greg\Support\Html\ElementClass;
+use Greg\Support\Html\Head;
+use Greg\Support\Html\Script;
+use Greg\Support\Tool\Obj;
 use Greg\View\Viewer;
 
 class Html implements SubscriberInterface
@@ -41,20 +39,7 @@ class Html implements SubscriberInterface
 
     protected $views = [];
 
-    public function __bind()
-    {
-        $this->htmlClass(ElementClass::newInstance($this->appName()));
-
-        $this->head(Head::newInstance($this->appName()));
-
-        $this->bodyClass(ElementClass::newInstance($this->appName()));
-
-        $this->script(Script::newInstance($this->appName()));
-
-        return $this;
-    }
-
-    public function subscribe(Listener $listener)
+    public function subscribe(ListenerInterface $listener)
     {
         $listener->register([
             Runner::EVENT_DISPATCHED
@@ -83,7 +68,7 @@ class Html implements SubscriberInterface
      */
     public function htmlClass(ElementClass $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchEmptyVar($this, $this->{__FUNCTION__}, function() { return new ElementClass(); }, ...func_get_args());
     }
 
     /**
@@ -92,7 +77,7 @@ class Html implements SubscriberInterface
      */
     public function head(Head $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchEmptyVar($this, $this->{__FUNCTION__}, function() { return new Head(); }, ...func_get_args());
     }
 
     public function headOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
@@ -111,7 +96,7 @@ class Html implements SubscriberInterface
      */
     public function bodyClass(ElementClass $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchEmptyVar($this, $this->{__FUNCTION__}, function() { return new ElementClass(); }, ...func_get_args());
     }
 
     public function &bodyOpen($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
@@ -130,7 +115,7 @@ class Html implements SubscriberInterface
      */
     public function script(Script $value = null)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Obj::fetchEmptyVar($this, $this->{__FUNCTION__}, function() { return new Script(); }, ...func_get_args());
     }
 
     public function minifyHtml($value = null)

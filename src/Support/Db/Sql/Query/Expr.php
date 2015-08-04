@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Db\Sql\Query;
 
-use Greg\Support\Obj;
+use Greg\Support\Tool\Obj;
 
 class Expr
 {

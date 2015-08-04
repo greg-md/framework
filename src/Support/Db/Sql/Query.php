@@ -4,12 +4,15 @@ namespace Greg\Support\Db\Sql;
 
 use Greg\Support\Db\Sql\Query\Expr;
 use Greg\Support\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
-use Greg\Support\Str;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Str;
 
 abstract class Query
 {
+    use InternalTrait;
+
     protected $quoteNameWith = '`';
 
     protected $storage = null;
@@ -163,11 +166,6 @@ abstract class Query
         $this->params = [];
 
         return $this;
-    }
-
-    protected function callCallable(callable $callable, ...$args)
-    {
-        return call_user_func_array($callable, $args);
     }
 
     /**

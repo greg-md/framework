@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Autoload;
 
-use Greg\Support\Obj;
+use Greg\Support\Tool\Obj;
 
 /**
  * ClassLoader implements a PSR-0 class loader

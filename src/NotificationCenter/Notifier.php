@@ -2,9 +2,18 @@
 
 namespace Greg\NotificationCenter;
 
-use Greg\Support\Arr;
 use Greg\Engine\InternalTrait;
+use Greg\Support\Tool\Arr;
 
+/**
+ * Class Notifier
+ * @package Greg\NotificationCenter
+ *
+ * @method Notification info($message = null, array $settings = [])
+ * @method Notification success($message = null, array $settings = [])
+ * @method Notification error($message = null, array $settings = [])
+ * @method Notification warning($message = null, array $settings = [])
+ */
 class Notifier extends \Greg\Support\NotificationCenter\Notifier
 {
     use InternalTrait;

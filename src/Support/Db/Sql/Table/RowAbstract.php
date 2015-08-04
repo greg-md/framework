@@ -4,8 +4,8 @@ namespace Greg\Support\Db\Sql\Table;
 
 use Greg\Support\Db\Sql\Table;
 use Greg\Support\Storage\ArrayObject;
-use Greg\Support\Debug;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Debug;
+use Greg\Support\Tool\Obj;
 
 /**
  * Class RowAbstract

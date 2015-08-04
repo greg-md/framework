@@ -3,7 +3,7 @@
 namespace Greg\Application;
 
 use Greg\Engine\InternalTrait;
-use Greg\Event\SubscriberInterface;
+use Greg\Support\Event\SubscriberInterface;
 
 class Components
 {

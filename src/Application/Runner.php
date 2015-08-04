@@ -2,20 +2,21 @@
 
 namespace Greg\Application;
 
-use Greg\Support\Autoload\ClassLoader;
 use Greg\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
 use Greg\Router\Dispatcher;
-use Greg\Support\Server;
-use Greg\Support\Server\Config;
-use Greg\Support\Server\Ini;
+use Greg\Support\Autoload\ClassLoader;
+use Greg\Support\Server\Server;
+use Greg\Support\Server\ServerConfig;
+use Greg\Support\Server\ServerIni;
+use Greg\Support\Server\Session;
 use Greg\Support\Storage\AccessorTrait;
 use Greg\Support\Storage\ArrayAccessTrait;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
-use Greg\Support\Str;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
+use Greg\Support\Tool\Str;
 use Greg\Support\Translation\Translator;
 use Greg\View\Viewer;
 
@@ -107,22 +108,22 @@ class Runner implements \ArrayAccess
     {
         // Server ini
         if ($serverIni = $this->getIndexArray('server.ini')) {
-            Ini::param($serverIni);
+            ServerIni::param($serverIni);
         }
 
         // Server config
         if ($serverConfig = $this->getIndexArray('server.config')) {
-            Config::param($serverConfig);
+            ServerConfig::param($serverConfig);
         }
 
         // Session ini
         if ($sessionIni = $this->getIndexArray('session.ini')) {
-            Server\Session::ini($sessionIni);
+            Session::ini($sessionIni);
         }
 
         // Session persistent
         if ($this->hasIndex('session.persistent')) {
-            Server\Session::persistent((bool)$this->getIndex('session.persistent'));
+            Session::persistent((bool)$this->getIndex('session.persistent'));
         }
 
         return $this;
@@ -140,7 +141,7 @@ class Runner implements \ArrayAccess
     public function initBinder()
     {
         // Load Binder
-        $this->binder($model = Binder::create($this->appName()));
+        $this->binder($model = Binder::newInstance($this->appName()));
 
         // Add Binder to Binder
         $model->setObject($model);
@@ -204,7 +205,7 @@ class Runner implements \ArrayAccess
     public function initSession()
     {
         // Load Session
-        $this->session($model = new Server\Session);
+        $this->session($model = new Session());
 
         // Add Session to Binder
         $this->binder()->setObject($model);
@@ -327,8 +328,9 @@ class Runner implements \ArrayAccess
         /* @var $class InternalTrait */
         $class = $binder ? $binder->loadInstanceArgs($className, $args) : Obj::loadInstanceArgs($className, $args);
 
-        die('Remain here, need to add InternalInterface and check it!');
-        $class->appName($this->appName());
+        if (method_exists($class, 'appName')) {
+            $class->appName($this->appName());
+        }
 
         if (method_exists($class, 'init')) {
             $binder ? $binder->call([$class, 'init']) : $class->init();
@@ -552,10 +554,10 @@ class Runner implements \ArrayAccess
     }
 
     /**
-     * @param Server\Session $session
-     * @return Server\Session|bool
+     * @param Session $session
+     * @return Session|bool
      */
-    public function session(Server\Session $session = null)
+    public function session(Session $session = null)
     {
         return $this->memory('session', ...func_get_args());
     }

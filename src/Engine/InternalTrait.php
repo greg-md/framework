@@ -3,8 +3,8 @@
 namespace Greg\Engine;
 
 use Greg\Application\Runner;
-use Greg\Support\Debug;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Debug;
+use Greg\Support\Tool\Obj;
 
 trait InternalTrait
 {
@@ -90,6 +90,21 @@ trait InternalTrait
     public function appName($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    protected function callCallable(callable $callable, ...$args)
+    {
+        return $this->app()->binder()->callArgs($callable, $args);
+    }
+
+    protected function callCallableWith(callable $callable, ...$args)
+    {
+        return $this->app()->binder()->callWithArgs($callable, $args);
+    }
+
+    protected function loadClassInstance($className, ...$args)
+    {
+        return $this->app()->loadInstanceArgs($className, $args);
     }
 
     public function _()

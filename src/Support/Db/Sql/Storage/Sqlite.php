@@ -2,16 +2,19 @@
 
 namespace Greg\Support\Db\Sql\Storage;
 
-use Greg\Support\Db\Sql\Storage;
 use Greg\Support\Db\Sql\Storage\Adapter\AdapterInterface;
+use Greg\Support\Db\Sql\Storage\Sqlite\Query\Delete;
 use Greg\Support\Db\Sql\Storage\Sqlite\Query\Insert;
 use Greg\Support\Db\Sql\Storage\Sqlite\Query\Select;
-use Greg\Support\Db\Sql\Storage\Sqlite\Query\Delete;
 use Greg\Support\Db\Sql\Storage\Sqlite\Query\Update;
-use Greg\Support\Obj;
+use Greg\Support\Db\Sql\StorageInterface;
+use Greg\Support\Engine\InternalTrait;
+use Greg\Support\Tool\Obj;
 
-class Sqlite extends Storage
+class Sqlite implements StorageInterface
 {
+    use InternalTrait;
+
     protected $path = null;
 
     protected $adapter = Sqlite\Adapter\Pdo::class;
@@ -220,7 +223,7 @@ class Sqlite extends Storage
     {
         return Obj::fetchCallableVar($this, $this->{__FUNCTION__}, function($adapter) {
             if (!is_object($adapter)) {
-                $adapter = new $adapter($this->path());
+                $adapter = $this->loadClassInstance($adapter, $this->path());
             }
 
             return $adapter;

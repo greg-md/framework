@@ -3,8 +3,8 @@
 namespace Greg\Support\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Support\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Support\Arr;
-use Greg\Support\Type;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Type;
 
 class Stmt extends \PDOStatement implements StmtInterface
 {

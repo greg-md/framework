@@ -3,19 +3,14 @@
 namespace Greg\Application;
 
 use Greg\Engine\InternalTrait;
-use Greg\Support\Arr;
-use Greg\Support\Obj;
+use Greg\Support\Tool\Arr;
+use Greg\Support\Tool\Obj;
 
 class Binder extends \Greg\Support\Application\Binder
 {
     use InternalTrait;
 
     protected $instancesPrefixes = [];
-
-    static public function create($appName)
-    {
-        return static::newInstanceRef($appName);
-    }
 
     protected function loadClassInstance($className, ...$args)
     {

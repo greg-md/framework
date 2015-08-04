@@ -2,7 +2,7 @@
 
 namespace Greg\Support\Storage;
 
-use Greg\Support\Arr;
+use Greg\Support\Tool\Arr;
 
 trait ArrayAccessStaticTrait
 {

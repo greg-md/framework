@@ -2,15 +2,15 @@
 
 namespace Greg\Support\Db\Sql\Storage\Adapter;
 
-use Greg\Support\Db\Sql\Storage;
+use Greg\Support\Db\Sql\StorageInterface;
 
 interface StmtInterface
 {
     public function bindColumn($column, &$param, $type = null, $length = null, $options = null);
 
-    public function bindParam($param, &$var, $type = Storage::PARAM_STR, $length = null, $options = null);
+    public function bindParam($param, &$var, $type = StorageInterface::PARAM_STR, $length = null, $options = null);
 
-    public function bindValue($param, $value, $type = Storage::PARAM_STR);
+    public function bindValue($param, $value, $type = StorageInterface::PARAM_STR);
 
     public function closeCursor();
 
@@ -24,7 +24,7 @@ interface StmtInterface
 
     public function execute($params = null);
 
-    public function fetch($style = null, $orientation = Storage::FETCH_ORI_NEXT, $offset = 0);
+    public function fetch($style = null, $orientation = StorageInterface::FETCH_ORI_NEXT, $offset = 0);
 
     public function fetchAll($style = null, $argument = null, $args = []);
 

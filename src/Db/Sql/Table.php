@@ -8,16 +8,6 @@ class Table extends \Greg\Support\Db\Sql\Table
 {
     use InternalTrait;
 
-    protected function loadClassInstance($className, ...$args)
-    {
-        return $this->app()->loadInstance($className, ...$args);
-    }
-
-    protected function callCallable(callable $callable, ...$args)
-    {
-        return $this->app()->binder()->call($callable, ...$args);
-    }
-
     public function getRelationshipTable($name)
     {
         /* @var $table Table */
