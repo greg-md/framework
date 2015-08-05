@@ -6,8 +6,8 @@ use Greg\Engine\InternalTrait;
 use Greg\Event\Listener;
 use Greg\Http\Request;
 use Greg\Http\Response;
-use Greg\Router\Dispatcher;
-use Greg\Support\Autoload\ClassLoader;
+use Greg\Router\Router;
+use Greg\Support\Loader\ClassLoader;
 use Greg\Support\Server\Server;
 use Greg\Support\Server\ServerConfig;
 use Greg\Support\Server\ServerIni;
@@ -202,6 +202,15 @@ class Runner implements \ArrayAccess
         return $this;
     }
 
+    public function getListener()
+    {
+        if (!$model = $this->listener()) {
+            throw new \Exception('Application listener was not initiated.');
+        }
+
+        return $model;
+    }
+
     public function initSession()
     {
         // Load Session
@@ -211,15 +220,6 @@ class Runner implements \ArrayAccess
         $this->binder()->setObject($model);
 
         return $this;
-    }
-
-    public function getListener()
-    {
-        if (!$model = $this->listener()) {
-            throw new \Exception('Application listener was not initiated.');
-        }
-
-        return $model;
     }
 
     public function initTranslator()
@@ -269,7 +269,7 @@ class Runner implements \ArrayAccess
     public function initRouter()
     {
         // Load Dispatcher
-        $this->router($model = Dispatcher::create($this->appName(), $this->getArray('router.routes')));
+        $this->router($model = Router::create($this->appName(), $this->getArray('router.routes')));
 
         // Add Dispatcher to Binder
         $this->binder()->setObject($model);
@@ -394,11 +394,11 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fire(static::EVENT_DISPATCHING);
 
-        $response = $this->router()->dispatchPath($path, [
-            Dispatcher::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
-            Dispatcher::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
-            Dispatcher::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
-        ], $route);
+        $response = $this->router()->dispatchPath($path, $route, [
+            Router::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
+            Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
+            Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
+        ]);
 
         if (Str::isScalar($response)) {
             $response = Response::create($this->appName(), $response);
@@ -590,10 +590,10 @@ class Runner implements \ArrayAccess
     }
 
     /**
-     * @param Dispatcher $router
-     * @return Dispatcher|bool
+     * @param Router $router
+     * @return Router|bool
      */
-    public function router(Dispatcher $router = null)
+    public function router(Router $router = null)
     {
         return $this->memory('router', ...func_get_args());
     }

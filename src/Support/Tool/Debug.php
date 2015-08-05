@@ -4,8 +4,21 @@ namespace Greg\Support\Tool;
 
 class Debug
 {
+    static protected $running = false;
+
+    /**
+     * @var \SplObjectStorage|null
+     */
+    static protected $parents = null;
+
     static public function fixInfo($object, $vars, $full = true)
     {
+        if (!static::$parents) {
+            static::$parents = new \SplObjectStorage();
+        }
+
+        static::$parents->attach($object);
+
         $return = [];
 
         $reflection = new \ReflectionClass($object);
@@ -17,6 +30,14 @@ class Debug
         $return = array_merge($return, static::fetchVars($object, $reflection->getStaticProperties(), $full));
 
         $return = array_merge($return, static::fetchVars($object, $vars, $full));
+
+        if (static::$parents) {
+            static::$parents->detach($object);
+
+            if (!static::$parents->count()) {
+                static::$parents = null;
+            }
+        }
 
         return $return;
     }
@@ -36,7 +57,15 @@ class Debug
                 $key[] = 'static';
             }
 
-            $return[implode(':', $key)] = (!$full and is_object($value)) ? get_class($value) . ' Object' : $value;
+            if (is_object($value)) {
+                if (static::$parents and static::$parents->contains($value)) {
+                    $value = get_class($value) . ' Object *RECURSIVE*';
+                } elseif (!$full) {
+                    $value = get_class($value) . ' Object';
+                }
+            }
+
+            $return[implode(':', $key)] = $value;
         }
 
         return $return;

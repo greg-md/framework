@@ -8,7 +8,7 @@ use Greg\Support\Tool\Obj;
 
 trait InternalTrait
 {
-    protected $appName = 'default';
+    protected $appName = 'greg';
 
     /**
      * @param $appName

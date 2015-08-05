@@ -5,12 +5,12 @@ namespace Greg\Router;
 use Greg\Engine\InternalTrait;
 
 /**
- * Class Dispatcher
+ * Class Router
  * @package Greg\Router
  *
  * @method Route createRoute($name, $format, $type = null, $settings = null)
  */
-class Dispatcher extends \Greg\Support\Router\Dispatcher implements RouterInterface
+class Router extends \Greg\Support\Router\Router implements RouterInterface
 {
     use RouterTrait, InternalTrait;
 

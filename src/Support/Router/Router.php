@@ -4,7 +4,7 @@ namespace Greg\Support\Router;
 
 use Greg\Support\Engine\InternalTrait;
 
-class Dispatcher
+class Router
 {
     use RouterTrait, InternalTrait;
 

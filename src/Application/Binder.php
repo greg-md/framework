@@ -12,11 +12,6 @@ class Binder extends \Greg\Support\Application\Binder
 
     protected $instancesPrefixes = [];
 
-    protected function loadClassInstance($className, ...$args)
-    {
-        return $this->app()->loadInstance($className, ...$args);
-    }
-
     public function get($name)
     {
         $object = parent::get($name);

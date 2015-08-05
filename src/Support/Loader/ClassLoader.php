@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Support\Autoload;
+namespace Greg\Support\Loader;
 
 use Greg\Support\Tool\Obj;
 
@@ -9,7 +9,7 @@ use Greg\Support\Tool\Obj;
  *
  * See https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
  *
- *     $loader = new \Greg\Support\Autoload\ClassLoader();
+ *     $loader = new \Greg\Support\Loader\ClassLoader();
  *
  *     // register classes with namespaces
  *     $loader->add('Symfony\Component', __DIR__.'/component');

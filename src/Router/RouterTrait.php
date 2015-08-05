@@ -13,7 +13,7 @@ trait RouterTrait
         return Route::create($this->appName(), $name, $format, $type);
     }
 
-    public function dispatchPath($path, array $events = [], &$foundRoute = null)
+    public function dispatchPath($path, &$foundRoute = null, array $events = [])
     {
         $listener = $this->app()->listener();
 
