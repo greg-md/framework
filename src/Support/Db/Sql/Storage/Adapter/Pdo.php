@@ -38,7 +38,7 @@ class Pdo extends \PDO implements AdapterInterface
         return $this;
     }
 
-    public function prepare($query, array $options = [])
+    public function prepare($query, $options = null)
     {
         $stmt = parent::prepare($query, $options);
 

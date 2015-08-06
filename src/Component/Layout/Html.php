@@ -2,6 +2,7 @@
 
 namespace Greg\Component\Layout;
 
+use Greg\Application\Runner;
 use Greg\Engine\InternalTrait;
 use Greg\Http\Response;
 use Greg\Support\Event\ListenerInterface;

@@ -28,10 +28,6 @@ class Runner implements \ArrayAccess
 
     const EVENT_RUN = 'app.run';
 
-    const EVENT_RUN_PATH = 'app.run.path';
-
-    const EVENT_DISPATCHING = 'app.dispatching';
-
     const EVENT_ROUTER_DISPATCH = 'app.router.dispatch';
 
     const EVENT_ROUTER_DISPATCHING = 'app.router.dispatching';
@@ -47,6 +43,8 @@ class Runner implements \ArrayAccess
     protected $controllersPrefixes = [];
 
     protected $extended = [];
+
+    protected $path = null;
 
     public function __construct(array $settings = [], $appName = null)
     {
@@ -388,11 +386,9 @@ class Runner implements \ArrayAccess
             $path = $path ?: '/';
         }
 
+        $this->path($path);
+
         $this->listener()->fireRef(static::EVENT_RUN);
-
-        $this->listener()->fireRef(static::EVENT_RUN_PATH, $path);
-
-        $this->listener()->fire(static::EVENT_DISPATCHING);
 
         $response = $this->router()->dispatchPath($path, $route, [
             Router::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
@@ -589,6 +585,11 @@ class Runner implements \ArrayAccess
         return $this->memory('components', ...func_get_args());
     }
 
+    public function getLastRunPath()
+    {
+        return $this->path();
+    }
+
     /**
      * @param Router $router
      * @return Router|bool
@@ -606,5 +607,10 @@ class Runner implements \ArrayAccess
     public function extended($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    protected function path($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

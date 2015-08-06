@@ -119,7 +119,7 @@ class Obj
     {
         if (!$expectedArg->isOptional()) {
             throw new \Exception('Argument `' . $expectedArg->getName() . '` is required in `'
-                . $expectedArg->getDeclaringClass() . '::' . $expectedArg->getDeclaringFunction() . '`');
+                . $expectedArg->getDeclaringClass()->getName() . '::' . $expectedArg->getDeclaringFunction()->getName() . '`');
         }
 
         $arg = $expectedArg->getDefaultValue();

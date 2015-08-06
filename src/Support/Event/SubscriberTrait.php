@@ -6,8 +6,6 @@ use Greg\Support\Tool\Str;
 
 trait SubscriberTrait
 {
-    abstract public function subscribe(ListenerInterface $listener);
-
     public function fire($event, ...$args)
     {
         return $this->fireRef($event, ...$args);

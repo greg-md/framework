@@ -11,7 +11,6 @@ use Greg\Support\Tool\Obj;
  * Class Redis
  * @package Greg\Support\Cache\Storage
  *
- * @method array getKeys($search)
  */
 class Redis extends Storage
 {
@@ -99,7 +98,7 @@ class Redis extends Storage
 
             $adapter->delete($ids);
         } else {
-            $ids = $this->getKeys('*');
+            $ids = $this->getAdapter()->getKeys('*');
 
             $adapter->setOption(\Redis::OPT_PREFIX, '');
 

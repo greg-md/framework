@@ -28,9 +28,9 @@ interface AdapterInterface
      * @param array $options
      * @return StmtInterface
      */
-    public function prepare($query, array $options = []);
+    public function prepare($query, $options = null);
 
-    public function query($statement);
+    public function query();
 
     public function quote($string, $type = StorageInterface::PARAM_STR);
 

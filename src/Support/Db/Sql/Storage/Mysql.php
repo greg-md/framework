@@ -157,7 +157,7 @@ class Mysql implements StorageInterface
         return $references;
     }
 
-    public function getTableRelationships($tableName)
+    public function getTableRelationships($tableName, $rules = false)
     {
         $query = $this->select()
             ->from(['KCU' => 'information_schema.KEY_COLUMN_USAGE'], [
@@ -182,12 +182,14 @@ class Mysql implements StorageInterface
             ->order('KCU.ORDINAL_POSITION')
             ->order('KCU.POSITION_IN_UNIQUE_CONSTRAINT');
 
-        $query->from(['RC' => 'information_schema.REFERENTIAL_CONSTRAINTS'], [
-                'UPDATE_RULE',
-                'DELETE_RULE',
-            ])
-            ->where('KCU.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA')
-            ->where('KCU.CONSTRAINT_NAME = RC.CONSTRAINT_NAME');
+        if ($rules) {
+            $query->from(['RC' => 'information_schema.REFERENTIAL_CONSTRAINTS'], [
+                    'UPDATE_RULE',
+                    'DELETE_RULE',
+                ])
+                ->where('KCU.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA')
+                ->where('KCU.CONSTRAINT_NAME = RC.CONSTRAINT_NAME');
+        }
 
         $query->where('TC.CONSTRAINT_TYPE = "FOREIGN KEY"');
 
@@ -207,9 +209,14 @@ class Mysql implements StorageInterface
                     'TableName' => $item['REFERENCED_TABLE_NAME'],
                     'RelationshipTableSchema' => $item['TABLE_SCHEMA'],
                     'RelationshipTableName' => $item['TABLE_NAME'],
-                    'OnUpdate' => $item['UPDATE_RULE'],
-                    'OnDelete' => $item['DELETE_RULE'],
+                    //'OnUpdate' => $item['UPDATE_RULE'],
+                    //'OnDelete' => $item['DELETE_RULE'],
                 ];
+
+                if ($rules) {
+                    $relationships[$item['CONSTRAINT_NAME']]['OnUpdate'] = $item['UPDATE_RULE'];
+                    $relationships[$item['CONSTRAINT_NAME']]['OnDelete'] = $item['DELETE_RULE'];
+                }
             }
 
             $relationships[$item['CONSTRAINT_NAME']]['Constraint'][$item['POSITION_IN_UNIQUE_CONSTRAINT']] = [
