@@ -1,1 +1,0 @@
-# Greg PHP Support
