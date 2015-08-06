@@ -22,6 +22,7 @@
     "require": {
         "greg-md/support": "dev-master"
     },
+    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Greg\\": "src/"
