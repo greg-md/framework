@@ -18,6 +18,16 @@ class Blade extends \Greg\Support\View\Compiler\Blade
         $this->statements([
             'partialLoop' => 'compilePartialLoop',
             'route' => 'compileRoute',
+            'translate' => 'compileTranslate',
+            'translateKey' => 'compileTranslateKey',
+            'translateRaw' => 'compileTranslateRaw',
+            'translateRawKey' => 'compileTranslateRawKey',
+            'fetchNameIfExists' => 'compileFetchNameIfExists',
+        ]);
+
+        $this->emptyStatements([
+            'content' => 'compileContent',
+            'language' => 'compileLanguage',
         ]);
 
         return $this;
@@ -25,11 +35,46 @@ class Blade extends \Greg\Support\View\Compiler\Blade
 
     public function compilePartialLoop($expr)
     {
-        return '<?php echo $this->partialLoop(' . $expr . '); ?>';
+        return $this->compileRawEcho('$this->partialLoop(' . $expr . ')');
     }
 
     public function compileRoute($expr)
     {
-        return '<?php echo $this->app()->router()->fetchRoute(' . $expr . '); ?>';
+        return $this->compileContentEcho('$this->app()->router()->fetchRoute(' . $expr . ')');
+    }
+
+    public function compileContent()
+    {
+        return $this->compileRawEcho('$this->content()');
+    }
+
+    public function compileTranslate($expr)
+    {
+        return $this->compileContentEcho('$this->app()->translator()->translate(' . $expr . ')');
+    }
+
+    public function compileTranslateKey($expr)
+    {
+        return $this->compileContentEcho('$this->app()->translator()->translateKey(' . $expr . ')');
+    }
+
+    public function compileTranslateRaw($expr)
+    {
+        return $this->compileRawEcho('$this->app()->translator()->translate(' . $expr . ')');
+    }
+
+    public function compileTranslateRawKey($expr)
+    {
+        return $this->compileRawEcho('$this->app()->translator()->translateKey(' . $expr . ')');
+    }
+
+    public function compileLanguage()
+    {
+        return $this->compileContentEcho('$this->app()->translator()->language()');
+    }
+
+    public function compileFetchNameIfExists($expr)
+    {
+        return $this->compileRawEcho('$this->fetchNameIfExists(' . $expr . ')');
     }
 }

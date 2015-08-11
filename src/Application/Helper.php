@@ -42,4 +42,14 @@ class Helper
     {
         return $this->app()->viewer()->render(...func_get_args());
     }
+
+    public function translate($key, ...$args)
+    {
+        return $this->app()->translator()->translate($key, ...$args);
+    }
+
+    public function translateKey($key, $text, ...$args)
+    {
+        return $this->app()->translator()->translateKey($key, $text, ...$args);
+    }
 }
