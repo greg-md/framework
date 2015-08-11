@@ -94,12 +94,12 @@ trait InternalTrait
 
     protected function callCallable(callable $callable, ...$args)
     {
-        return $this->app()->binder()->callArgs($callable, $args);
+        return call_user_func_array($callable, $this->app()->binder()->getCallableArgs($callable, $args));
     }
 
     protected function callCallableWith(callable $callable, ...$args)
     {
-        return $this->app()->binder()->callWithArgs($callable, $args);
+        return call_user_func_array($callable, $this->app()->binder()->getCallableMixedArgs($callable, $args));
     }
 
     protected function loadClassInstance($className, ...$args)
