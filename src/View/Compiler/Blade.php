@@ -23,6 +23,7 @@ class Blade extends \Greg\Support\View\Compiler\Blade
             'translateRaw' => 'compileTranslateRaw',
             'translateRawKey' => 'compileTranslateRawKey',
             'fetchNameIfExists' => 'compileFetchNameIfExists',
+            'baseUrl' => 'compileBaseUrl',
         ]);
 
         $this->emptyStatements([
@@ -76,5 +77,10 @@ class Blade extends \Greg\Support\View\Compiler\Blade
     public function compileFetchNameIfExists($expr)
     {
         return $this->compileRawEcho('$this->fetchNameIfExists(' . $expr . ')');
+    }
+
+    public function compileBaseUrl($expr)
+    {
+        return $this->compileContentEcho('\Greg\Support\Tool\Url::base(' . $expr . ')');
     }
 }
