@@ -16,6 +16,7 @@ class Blade extends \Greg\Support\View\Compiler\Blade
     public function init()
     {
         $this->statements([
+            'action' => 'compileAction',
             'partialLoop' => 'compilePartialLoop',
             'route' => 'compileRoute',
             'translate' => 'compileTranslate',
@@ -24,6 +25,8 @@ class Blade extends \Greg\Support\View\Compiler\Blade
             'translateRawKey' => 'compileTranslateRawKey',
             'fetchNameIfExists' => 'compileFetchNameIfExists',
             'baseUrl' => 'compileBaseUrl',
+            'fixUrl' => 'compileFixUrl',
+            'fullUrl' => 'compileFullUrl',
         ]);
 
         $this->emptyStatements([
@@ -32,6 +35,11 @@ class Blade extends \Greg\Support\View\Compiler\Blade
         ]);
 
         return $this;
+    }
+
+    public function compileAction($expr)
+    {
+        return $this->compileRawEcho('$this->app()->action(' . $expr . ')');
     }
 
     public function compilePartialLoop($expr)
@@ -82,5 +90,15 @@ class Blade extends \Greg\Support\View\Compiler\Blade
     public function compileBaseUrl($expr)
     {
         return $this->compileContentEcho('\Greg\Support\Tool\Url::base(' . $expr . ')');
+    }
+
+    public function compileFixUrl($expr)
+    {
+        return $this->compileContentEcho('\Greg\Support\Tool\Url::fix(' . $expr . ')');
+    }
+
+    public function compileFullUrl($expr)
+    {
+        return $this->compileContentEcho('\Greg\Support\Tool\Url::full(' . $expr . ')');
     }
 }

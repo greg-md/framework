@@ -19,6 +19,15 @@ class Viewer extends \Greg\Support\View\Viewer
         return Response::create($this->appName(), $content);
     }
 
+    public function __get($key)
+    {
+        if ($this->has($key)) {
+            return $this->get($key);
+        }
+
+        return $this->app()->get($key);
+    }
+
     public function __call($method, array $args = [])
     {
         $components = $this->app()->components();
