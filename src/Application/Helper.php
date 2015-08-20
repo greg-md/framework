@@ -28,9 +28,27 @@ class Helper
         return $this->response()->route($name, $params, $code);
     }
 
+    /**
+     * @return Response
+     */
+    public function back()
+    {
+        return $this->response()->back();
+    }
+
     public function json($data = [])
     {
         return $this->response()->json($data);
+    }
+
+    public function success($message, $data = [])
+    {
+        return $this->response()->success($message, $data);
+    }
+
+    public function error($message, $data = [])
+    {
+        return $this->response()->error($message, $data);
     }
 
     public function renderLayout($name, array $params = [])
