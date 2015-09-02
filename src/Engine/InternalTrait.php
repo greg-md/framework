@@ -107,6 +107,11 @@ trait InternalTrait
         return $this->app()->loadInstanceArgs($className, $args);
     }
 
+    public function scopeCallable(callable $callable)
+    {
+        return $this->app()->binder()->call($callable);
+    }
+
     public function _()
     {
         return $this->app()->helper();
