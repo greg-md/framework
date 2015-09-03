@@ -390,11 +390,15 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fireRef(static::EVENT_RUN);
 
-        $response = $this->router()->dispatchPath($path, $route, [
-            Router::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
-            Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
-            Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
-        ]);
+        try {
+            $response = $this->router()->dispatchPath($path, $route, [
+                Router::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
+                Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
+                Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
+            ]);
+        } catch (\Exception $e) {
+            $response = $this->dispatchError($e, [], $route);
+        }
 
         if (Str::isScalar($response)) {
             $response = Response::create($this->appName(), $response);
@@ -408,10 +412,12 @@ class Runner implements \ArrayAccess
         return $response;
     }
 
-    protected function dispatchError(\Exception $exception, array $params = [])
+    protected function dispatchError(\Exception $exception, array $params = [], &$route = null)
     {
         if ($error = $this->getIndexArray('error')) {
-            return $this->router()->createRoute('error', '', null, $error)->dispatch([
+            $route = $this->router()->createRoute('error', '', null, $error);
+
+            return $route->dispatch([
                     'exception' => $exception,
                 ] + $params, false);
         }
