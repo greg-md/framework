@@ -28,7 +28,7 @@ class Binder extends \Greg\Support\Application\Binder
     {
         $array = $this->instancesPrefixes();
 
-        return Arr::has($array, function($value) use ($className) {
+        return Arr::hasRef($array, function($value) use ($className) {
             return strpos($className, $value) === 0;
         });
     }

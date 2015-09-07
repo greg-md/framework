@@ -23,7 +23,7 @@ trait RouterTrait
 
                 $listener->fireWith(RouterInterface::EVENT_DISPATCHING, $matchedRoute);
 
-                if (Arr::has($events, RouterInterface::EVENT_DISPATCHING)) {
+                if (Arr::hasRef($events, RouterInterface::EVENT_DISPATCHING)) {
                     $listener->fireWith($events[RouterInterface::EVENT_DISPATCHING], $matchedRoute);
                 }
 
@@ -31,7 +31,7 @@ trait RouterTrait
 
                 $listener->fireWith(RouterInterface::EVENT_DISPATCHED, $matchedRoute);
 
-                if (Arr::has($events, RouterInterface::EVENT_DISPATCHED)) {
+                if (Arr::hasRef($events, RouterInterface::EVENT_DISPATCHED)) {
                     $listener->fireWith($events[RouterInterface::EVENT_DISPATCHED], $matchedRoute);
                 }
 
