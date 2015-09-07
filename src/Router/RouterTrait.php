@@ -17,12 +17,6 @@ trait RouterTrait
     {
         $listener = $this->app()->listener();
 
-        $listener->fireRef(RouterInterface::EVENT_DISPATCH, $path);
-
-        if (Arr::has($events, RouterInterface::EVENT_DISPATCH)) {
-            $listener->fireRef($events[RouterInterface::EVENT_DISPATCH], $path);
-        }
-
         foreach($this->getRoutes() as $route) {
             if ($matchedRoute = $route->match($path)) {
                 $foundRoute = $matchedRoute;

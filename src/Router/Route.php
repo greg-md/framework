@@ -17,25 +17,29 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
         return static::newInstanceRef($appName, $name, $format, $type, $callback);
     }
 
-    public function dispatch(array $params = [], $catchException = true)
+    public function dispatch(array $params = [])
     {
-        if ($callback = $this->callback()) {
-            return $this->callCallable($callback, $this);
-        }
+        try {
+            if ($callback = $this->callback()) {
+                return $this->callCallable($callback, $params + $this->lastMatchedParams(), $this);
+            }
 
-        if ($action = $this->action()) {
-            list($controller, $action) = explode('@', $action);
+            if ($action = $this->action()) {
+                list($controller, $action) = explode('@', $action);
 
-            $controller = Str::spinalCase($controller);
+                $controller = Str::spinalCase($controller);
 
-            $action = Str::spinalCase($action);
+                $action = Str::spinalCase($action);
 
-            $params = [
-                    'controller' => $controller,
-                    'action' => $action,
-                ] + $this->lastMatchedParams() + $params;
+                $params = [
+                        'controller' => $controller,
+                        'action' => $action,
+                    ] + $params + $this->lastMatchedParams();
 
-            return $this->app()->action($action, $controller, $params, $catchException);
+                return $this->app()->action($action, $controller, $params);
+            }
+        } catch (\Exception $e) {
+            return $this->dispatchException($e);
         }
 
         return null;

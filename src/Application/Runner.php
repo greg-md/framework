@@ -28,8 +28,6 @@ class Runner implements \ArrayAccess
 
     const EVENT_RUN = 'app.run';
 
-    const EVENT_ROUTER_DISPATCH = 'app.router.dispatch';
-
     const EVENT_ROUTER_DISPATCHING = 'app.router.dispatching';
 
     const EVENT_ROUTER_DISPATCHED = 'app.router.dispatched';
@@ -267,7 +265,7 @@ class Runner implements \ArrayAccess
     public function initRouter()
     {
         // Load Dispatcher
-        $this->router($model = Router::create($this->appName(), $this->getArray('router.routes')));
+        $this->router($model = Router::create($this->appName(), $this->getIndexArray('router.routes'), $this->getIndexArray('router.onError')));
 
         // Add Dispatcher to Binder
         $this->binder()->setObject($model);
@@ -390,15 +388,10 @@ class Runner implements \ArrayAccess
 
         $this->listener()->fireRef(static::EVENT_RUN);
 
-        try {
-            $response = $this->router()->dispatchPath($path, $route, [
-                Router::EVENT_DISPATCH => static::EVENT_ROUTER_DISPATCH,
-                Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
-                Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
-            ]);
-        } catch (\Exception $e) {
-            $response = $this->dispatchError($e, [], $route);
-        }
+        $response = $this->router()->dispatchPath($path, $route, [
+            Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
+            Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
+        ]);
 
         if (Str::isScalar($response)) {
             $response = Response::create($this->appName(), $response);
@@ -412,20 +405,7 @@ class Runner implements \ArrayAccess
         return $response;
     }
 
-    protected function dispatchError(\Exception $exception, array $params = [], &$route = null)
-    {
-        if ($error = $this->getIndexArray('error')) {
-            $route = $this->router()->createRoute('error', '', null, $error);
-
-            return $route->dispatch([
-                    'exception' => $exception,
-                ] + $params, false);
-        }
-
-        throw $exception;
-    }
-
-    public function action($name = null, $controllerName = null, array $params = [], $catchException = true)
+    public function action($name = null, $controllerName = null, array $params = [])
     {
         $name = $name ?: 'index';
 
@@ -433,27 +413,17 @@ class Runner implements \ArrayAccess
 
         Arr::bringRef($controllerName);
 
-        try {
-            $controller = $this->loadController($controllerName);
+        $controller = $this->loadController($controllerName);
 
-            $actionName = Str::phpName($name);
+        $actionName = Str::phpName($name);
 
-            if (!method_exists($controller, $actionName)) {
-                throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
-            }
-
-            $request = Request::create($this->appName(), $params);
-
-            return $this->binder()->callWith([$controller, $actionName], $request);
-        } catch (\Exception $e) {
-            if ($catchException) {
-                return $this->dispatchError($e, [
-                    'from' => 'app.action',
-                ]);
-            }
-
-            throw $e;
+        if (!method_exists($controller, $actionName)) {
+            throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
         }
+
+        $request = Request::create($this->appName(), $params);
+
+        return $this->binder()->callWith([$controller, $actionName], $request);
     }
 
     public function loadController($name)

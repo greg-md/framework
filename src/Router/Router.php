@@ -14,8 +14,8 @@ class Router extends \Greg\Support\Router\Router implements RouterInterface
 {
     use RouterTrait, InternalTrait;
 
-    static public function create($appName, array $routes = [])
+    static public function create($appName, array $routes = [], array $onError = [])
     {
-        return static::newInstanceRef($appName, $routes);
+        return static::newInstanceRef($appName, $routes, $onError);
     }
 }
