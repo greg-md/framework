@@ -29,6 +29,15 @@ class Helper
     }
 
     /**
+     * @param $uri
+     * @return Response
+     */
+    public function redirect($uri)
+    {
+        return $this->response()->location($uri);
+    }
+
+    /**
      * @return Response
      */
     public function back()
