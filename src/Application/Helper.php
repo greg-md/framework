@@ -40,6 +40,14 @@ class Helper
     /**
      * @return Response
      */
+    public function refresh()
+    {
+        return $this->response()->refresh();
+    }
+
+    /**
+     * @return Response
+     */
     public function back()
     {
         return $this->response()->back();

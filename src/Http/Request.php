@@ -22,6 +22,8 @@ class Request extends \Greg\Support\Http\Request
 
         $info['POST'] = $_POST;
 
+        $info['REQUEST'] = $_REQUEST;
+
         $info['FILES'] = $_FILES;
 
         return $info;

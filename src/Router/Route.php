@@ -3,6 +3,7 @@
 namespace Greg\Router;
 
 use Greg\Engine\InternalTrait;
+use Greg\Http\Request;
 use Greg\Support\Tool\Obj;
 use Greg\Support\Tool\Str;
 
@@ -31,12 +32,14 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
 
                 $action = Str::spinalCase($action);
 
-                $params = [
+                $routeParams = $this->lastMatchedParams();
+
+                $request = Request::create($this->appName(), [
                         'controller' => $controller,
                         'action' => $action,
-                    ] + $params + $this->lastMatchedParams();
+                    ] + $params + $routeParams);
 
-                return $this->app()->action($action, $controller, $params);
+                return $this->app()->action($action, $controller, $request, ...array_values($routeParams));
             }
         } catch (\Exception $e) {
             return $this->dispatchException($e);
