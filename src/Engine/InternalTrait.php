@@ -16,7 +16,7 @@ trait InternalTrait
      * @return static
      * @throws \Exception
      */
-    static public function newInstance($appName, ...$args)
+    static public function newInstance($appName = 'greg', ...$args)
     {
         return static::newInstanceRef($appName, ...$args);
     }
@@ -27,7 +27,7 @@ trait InternalTrait
      * @return static
      * @throws \Exception
      */
-    static protected function newInstanceRef($appName = 'default', &...$args)
+    static protected function newInstanceRef($appName = 'greg', &...$args)
     {
         /* @var $app \Greg\Application\Runner */
         $app = Memory::get($appName . '@app');
@@ -44,7 +44,7 @@ trait InternalTrait
      * @return static
      * @throws \Exception
      */
-    static public function instance($appName = 'default')
+    static public function instance($appName = 'greg')
     {
         /* @var $app \Greg\Application\Runner */
         $app = Memory::get($appName . '@app');
