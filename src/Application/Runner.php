@@ -405,7 +405,7 @@ class Runner implements \ArrayAccess
         return $response;
     }
 
-    public function action($name = null, $controllerName = null, ...$params)
+    public function action($name = null, $controllerName = null, array $params = [], ...$others)
     {
         $name = $name ?: 'index';
 
@@ -421,7 +421,9 @@ class Runner implements \ArrayAccess
             throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
         }
 
-        return $this->binder()->callWith([$controller, $actionName], ...$params);
+        $request = Request::create($this->appName(), $params);
+
+        return $this->binder()->callWith([$controller, $actionName], $request, ...array_values($params), ...$others);
     }
 
     public function loadController($name)

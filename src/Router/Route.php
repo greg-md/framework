@@ -21,8 +21,14 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
     public function dispatch(array $params = [])
     {
         try {
+            $routeParams = $this->lastMatchedParams();
+
+            $allParams = $routeParams + $params;
+
             if ($callback = $this->callback()) {
-                return $this->callCallable($callback, $params + $this->lastMatchedParams(), $this);
+                $request = Request::create($this->appName(), $params);
+
+                return $this->callCallableWith($callback, $request, ...array_values($allParams), ...[$this]);
             }
 
             if ($action = $this->action()) {
@@ -32,14 +38,13 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
 
                 $action = Str::spinalCase($action);
 
-                $routeParams = $this->lastMatchedParams();
+                $allParams += [
+                    'controller' => $controller,
+                    'action' => $action,
+                    'route' => $this,
+                ];
 
-                $request = Request::create($this->appName(), [
-                        'controller' => $controller,
-                        'action' => $action,
-                    ] + $params + $routeParams);
-
-                return $this->app()->action($action, $controller, $request, ...array_values($routeParams));
+                return $this->app()->action($action, $controller, $allParams, $this);
             }
         } catch (\Exception $e) {
             return $this->dispatchException($e);
