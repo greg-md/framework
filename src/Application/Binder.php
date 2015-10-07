@@ -26,9 +26,7 @@ class Binder extends \Greg\Support\Application\Binder
 
     public function isInstancePrefix($className)
     {
-        $array = $this->instancesPrefixes();
-
-        return Arr::hasRef($array, function($value) use ($className) {
+        return Arr::has($this->instancesPrefixes(), function($value) use ($className) {
             return strpos($className, $value) === 0;
         });
     }
