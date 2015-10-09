@@ -26,7 +26,7 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
             $allParams = $routeParams + $params;
 
             if ($callback = $this->callback()) {
-                $request = Request::create($this->appName(), $params);
+                $request = Request::create($this->appName(), $allParams);
 
                 return $this->callCallableWith($callback, $request, ...array_values($allParams), ...[$this]);
             }
@@ -41,7 +41,6 @@ class Route extends \Greg\Support\Router\Route implements RouterInterface
                 $allParams += [
                     'controller' => $controller,
                     'action' => $action,
-                    'route' => $this,
                 ];
 
                 return $this->app()->action($action, $controller, $allParams, $this);
