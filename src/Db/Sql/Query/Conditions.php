@@ -6,7 +6,7 @@ use Greg\Engine\InternalTrait;
 use Greg\Support\Db\Sql\StorageInterface;
 use Greg\Support\Tool\Str;
 
-class Select extends \Greg\Support\Db\Sql\Query\Select
+class Conditions extends \Greg\Support\Db\Sql\Query\Conditions
 {
     use InternalTrait;
 
@@ -28,6 +28,6 @@ class Select extends \Greg\Support\Db\Sql\Query\Select
 
     protected function newConditions()
     {
-        return Where::create($this->appName(), $this->storage());
+        return Conditions::create($this->appName(), $this->storage());
     }
 }

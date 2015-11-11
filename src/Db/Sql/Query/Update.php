@@ -26,7 +26,7 @@ class Update extends \Greg\Support\Db\Sql\Query\Update
         return parent::fetchAlias($name);
     }
 
-    protected function newWhere()
+    protected function newConditions()
     {
         return Where::create($this->appName(), $this->storage());
     }

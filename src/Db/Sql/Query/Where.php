@@ -26,7 +26,7 @@ class Where extends \Greg\Support\Db\Sql\Query\Where
         return parent::fetchAlias($name);
     }
 
-    protected function newWhere()
+    protected function newConditions()
     {
         return Where::create($this->appName(), $this->storage());
     }

@@ -26,7 +26,7 @@ class Delete extends \Greg\Support\Db\Sql\Query\Delete
         return parent::fetchAlias($name);
     }
 
-    protected function newWhere()
+    protected function newConditions()
     {
         return Where::create($this->appName(), $this->storage());
     }
