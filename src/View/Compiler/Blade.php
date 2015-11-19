@@ -17,6 +17,7 @@ class Blade extends \Greg\Support\View\Compiler\Blade
     {
         $this->statements([
             'action' => 'compileAction',
+            'partial' => 'compilePartial',
             'partialLoop' => 'compilePartialLoop',
             'route' => 'compileRoute',
             'translate' => 'compileTranslate',
@@ -44,6 +45,11 @@ class Blade extends \Greg\Support\View\Compiler\Blade
     public function compileAction($expr)
     {
         return $this->compileRawEcho('$this->app()->action(' . $expr . ')');
+    }
+
+    public function compilePartial($expr)
+    {
+        return $this->compileRawEcho('$this->partial(' . $expr . ')');
     }
 
     public function compilePartialLoop($expr)
