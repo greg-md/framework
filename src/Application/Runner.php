@@ -379,7 +379,7 @@ class Runner implements \ArrayAccess
     public function run($path = '/')
     {
         if (!func_num_args()) {
-            $path = Request::uriPath();
+            $path = Request::relativeUriPath();
         } else {
             $path = $path ?: '/';
         }

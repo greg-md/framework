@@ -62,12 +62,12 @@ abstract class Controller
         return $this->response()->json($data);
     }
 
-    public function success($message, $data = [])
+    public function success($message = null, $data = [])
     {
         return $this->response()->success($message, $data);
     }
 
-    public function error($message, $data = [])
+    public function error($message = null, $data = [])
     {
         return $this->response()->error($message, $data);
     }
