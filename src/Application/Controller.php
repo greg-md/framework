@@ -2,10 +2,10 @@
 
 namespace Greg\Application;
 
-use Greg\Engine\InternalTrait;
-use Greg\Http\Request;
-use Greg\Http\Response;
-use Greg\NotificationCenter\Notifier;
+use Greg\Application\Engine\InternalTrait;
+use Greg\Application\Http\Request;
+use Greg\Application\Http\Response;
+use Greg\Application\NotificationCenter\Notifier;
 
 abstract class Controller
 {

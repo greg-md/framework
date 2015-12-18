@@ -2,8 +2,8 @@
 
 namespace Greg\Application;
 
-use Greg\Engine\InternalTrait;
-use Greg\Support\Event\SubscriberInterface;
+use Greg\Application\Engine\InternalTrait;
+use Greg\Event\SubscriberInterface;
 
 class Components
 {

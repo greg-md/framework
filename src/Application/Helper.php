@@ -2,8 +2,8 @@
 
 namespace Greg\Application;
 
-use Greg\Engine\InternalTrait;
-use Greg\Http\Response;
+use Greg\Application\Engine\InternalTrait;
+use Greg\Application\Http\Response;
 
 class Helper
 {

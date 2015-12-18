@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql\Storage\Sqlite\Query;
 
-use Greg\Support\Db\Sql\Storage\Sqlite\Query\SelectTrait;
+use Greg\Db\Sql\Storage\Mysql\Query\SelectTrait;
 
 class Select extends \Greg\Db\Sql\Query\Select
 {

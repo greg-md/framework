@@ -2,57 +2,30 @@
 
 namespace Greg\NotificationCenter;
 
-use Greg\Engine\InternalTrait;
-use Greg\Support\Tool\Arr;
-
-/**
- * Class Notifier
- * @package Greg\NotificationCenter
- *
- * @method Notification info($message = null, array $settings = [])
- * @method Notification success($message = null, array $settings = [])
- * @method Notification error($message = null, array $settings = [])
- * @method Notification warning($message = null, array $settings = [])
- */
-class Notifier extends \Greg\Support\NotificationCenter\Notifier
+class Notifier
 {
-    use InternalTrait;
-
-    public function getFlash()
+    public function info($message = null, array $settings = [])
     {
-        $notifications = (array)$this->app()->session()->flash('notifications');
-
-        foreach($notifications as &$notification) {
-            $message = Arr::get($notification, 'message');
-            $type = Arr::get($notification, 'type');
-            $settings = Arr::get($notification, 'settings');
-
-            $notification = Notification::create($this->appName(), $this, $message, $type, $settings);
-        }
-
-        return $notifications;
+        return $this->newNotification($message, Notification::TYPE_INFO, $settings);
     }
 
-    public function toFlash(Notification $notification)
+    public function success($message = null, array $settings = [])
     {
-        $this->app()->session()->flashIndex('notifications.', [
-            'type' => $notification->type(),
-            'message' => $notification->message(),
-            'settings' => $notification->settings(),
-        ]);
-
-        return $this;
+        return $this->newNotification($message, Notification::TYPE_SUCCESS, $settings);
     }
 
-    public function renderFlash($name, $params = [])
+    public function error($message = null, array $settings = [])
     {
-        return $this->app()->viewer()->partial($name, [
-                'notifications' => $this->getFlash(),
-            ] + $params);
+        return $this->newNotification($message, Notification::TYPE_ERROR, $settings);
+    }
+
+    public function warning($message = null, array $settings = [])
+    {
+        return $this->newNotification($message, Notification::TYPE_WARNING, $settings);
     }
 
     protected function newNotification($message = null, $type = null, array $settings = [])
     {
-        return Notification::create($this->appName(), $this, $message, $type, $settings);
+        return new Notification($this, $message, $type, $settings);
     }
 }

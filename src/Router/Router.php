@@ -4,18 +4,28 @@ namespace Greg\Router;
 
 use Greg\Engine\InternalTrait;
 
-/**
- * Class Router
- * @package Greg\Router
- *
- * @method Route createRoute($name, $format, $type = null, $settings = null)
- */
-class Router extends \Greg\Support\Router\Router implements RouterInterface
+class Router
 {
     use RouterTrait, InternalTrait;
 
-    static public function create($appName, array $routes = [], array $onError = [])
+    public function __construct(array $routes = [], array $onError = [])
     {
-        return static::newInstanceRef($appName, $routes, $onError);
+        $this->addMore($routes);
+
+        $this->onError($onError);
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param string $format
+     * @param null $type
+     * @param callable|array $settings
+     * @return Route
+     */
+    public function createRoute($name, $format, $type = null, $settings = null)
+    {
+        return $this->_createRoute($name, $format, $type, $settings)->router($this);
     }
 }
