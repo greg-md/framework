@@ -7,5 +7,9 @@
 $app = (new \Greg\Application\Runner($settings = [])->init();
 
 // Run the application
-echo $app->run();
+$response = $app->run();
+
+// Send response
+$response->send();
+
 ```
