@@ -13,15 +13,7 @@
             "role": "Developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/greg-md/support"
-        }
-    ],
-    "require": {
-        "greg-md/support": "dev-master"
-    },
+    "require": {},
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
