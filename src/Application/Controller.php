@@ -14,12 +14,12 @@ abstract class Controller
     /**
      * @return Response
      */
-    public function response()
+    protected function response()
     {
         return Response::create($this->appName());
     }
 
-    public function redirect($location = null)
+    protected function redirect($location = null)
     {
         $response = $this->response();
 
@@ -36,7 +36,7 @@ abstract class Controller
      * @param null $code
      * @return Response
      */
-    public function routeRedirect($name, array $params = [], $code = null)
+    protected function routeRedirect($name, array $params = [], $code = null)
     {
         return $this->response()->route($name, $params, $code);
     }
@@ -44,7 +44,7 @@ abstract class Controller
     /**
      * @return Response
      */
-    public function refresh()
+    protected function refresh()
     {
         return $this->response()->refresh();
     }
@@ -52,37 +52,37 @@ abstract class Controller
     /**
      * @return Response
      */
-    public function back()
+    protected function back()
     {
         return $this->response()->back();
     }
 
-    public function json($data = [])
+    protected function json($data = [])
     {
         return $this->response()->json($data);
     }
 
-    public function success($message = null, $data = [])
+    protected function success($message = null, $data = [])
     {
         return $this->response()->success($message, $data);
     }
 
-    public function error($message = null, $data = [])
+    protected function error($message = null, $data = [])
     {
         return $this->response()->error($message, $data);
     }
 
-    public function translate($key, ...$args)
+    protected function translate($key, ...$args)
     {
         return $this->app()->translator()->translate($key, ...$args);
     }
 
-    public function translateKey($key, $text, ...$args)
+    protected function translateKey($key, $text, ...$args)
     {
         return $this->app()->translator()->translateKey($key, $text, ...$args);
     }
 
-    public function respondSuccess($message = null)
+    protected function respondSuccess($message = null)
     {
         if (Request::ajax()) {
             return $this->success($message);
@@ -95,7 +95,7 @@ abstract class Controller
         });
     }
 
-    public function respondError($message = null)
+    protected function respondError($message = null)
     {
         if (Request::ajax()) {
             return $this->error($message);
@@ -106,5 +106,10 @@ abstract class Controller
                 'disableTranslation' => true,
             ])->flash();
         });
+    }
+
+    protected function render($name, array $params = [], $layout = null, $_ = null)
+    {
+        return $this->app()->viewer()->render(...func_get_args());
     }
 }

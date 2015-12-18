@@ -64,13 +64,10 @@ class Runner implements \ArrayAccess
 
         $this->initServer();
 
-        // Load Helper
-        $this->helper($helper = Helper::newInstance($this->appName()));
-
         $this->initBinder();
 
         // Add staffs to Binder
-        $this->binder()->setObjects([$this, $helper]);
+        $this->binder()->setObjects([$this]);
 
         $this->initLoader();
 
@@ -124,15 +121,6 @@ class Runner implements \ArrayAccess
         }
 
         return $this;
-    }
-
-    public function getHelper()
-    {
-        if (!$model = $this->helper()) {
-            throw new \Exception('Application helper was not initiated.');
-        }
-
-        return $model;
     }
 
     public function initBinder()
@@ -488,15 +476,6 @@ class Runner implements \ArrayAccess
     public function publicPath()
     {
         return $this['public_path'] ?: Server::documentRoot();
-    }
-
-    /**
-     * @param Helper $binder
-     * @return Helper|bool
-     */
-    public function helper(Helper $binder = null)
-    {
-        return $this->memory('helper', ...func_get_args());
     }
 
     /**
