@@ -1565,7 +1565,7 @@ class Table
                 case Column::TYPE_DATETIME:
                 case Column::TYPE_TIMESTAMP:
                     if ($value) {
-                        $value = DateTime::formatTimeLocale('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? null : $value);
+                        $value = DateTime::formatTimeLocale('%Y-%m-%d %H:%M:%S', strtoupper($value) === 'CURRENT_TIMESTAMP' ? 'now' : $value);
                     }
 
                     break;
