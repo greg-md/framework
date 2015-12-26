@@ -582,8 +582,8 @@ class Request implements \ArrayAccess
     {
         $values = [];
 
-        foreach($keys as $key) {
-            $values[$key] = static::getPost($key);
+        foreach($keys as $k => $key) {
+            $values[is_int($k) ? $key : $k] = static::getPost($key);
         }
 
         return $values;
