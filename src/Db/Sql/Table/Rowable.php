@@ -378,6 +378,21 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return $this->getFirstUniqueFromRow($this->firstAssocDefaultRow());
     }
 
+    public function get($column)
+    {
+        if (is_array($column)) {
+            $values = [];
+
+            foreach($column as $key => $name) {
+                $values[is_int($key) ? $name : $key] = $this->firstAssocRow($name);
+            }
+
+            return $values;
+        }
+
+        return $this->firstAssocRow($column);
+    }
+
     public function offsetExists($offset)
     {
         return Arr::hasRef($this->firstAssocRow(), $offset);

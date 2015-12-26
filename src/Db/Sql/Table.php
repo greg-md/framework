@@ -225,6 +225,15 @@ class Table
         return $this->select()->whereCols($keys)->rowableAll();
     }
 
+    public function getRowable($keys)
+    {
+        if (!is_array($keys)) {
+            $keys = $this->combineFirstUnique($keys);
+        }
+
+        return $this->select()->whereCols($keys)->rowable();
+    }
+
     public function count(array $whereCols = [])
     {
         return $this->select('count(*)')->whereCols($whereCols)->one();

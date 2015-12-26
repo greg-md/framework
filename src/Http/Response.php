@@ -121,19 +121,19 @@ class Response
         return $this;
     }
 
-    public function success($message = null, $data = [])
+    public function success($content = null, $data = [])
     {
         return $this->json([
                 'type' => 'success',
-                'message' => $message,
+                'content' => $content,
             ] + $data);
     }
 
-    public function error($message = null, $data = [])
+    public function error($content = null, $data = [])
     {
         return $this->json([
                 'type' => 'error',
-                'message' => $message,
+                'content' => $content,
             ] + $data);
     }
 

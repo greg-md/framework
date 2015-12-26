@@ -62,14 +62,14 @@ abstract class Controller
         return $this->response()->json($data);
     }
 
-    protected function success($message = null, $data = [])
+    protected function success($content = null, $data = [])
     {
-        return $this->response()->success($message, $data);
+        return $this->response()->success($content, $data);
     }
 
-    protected function error($message = null, $data = [])
+    protected function error($content = null, $data = [])
     {
-        return $this->response()->error($message, $data);
+        return $this->response()->error($content, $data);
     }
 
     protected function translate($key, ...$args)
@@ -82,27 +82,27 @@ abstract class Controller
         return $this->app()->translator()->translateKey($key, $text, ...$args);
     }
 
-    protected function respondSuccess($message = null)
+    protected function respondSuccess($content = null)
     {
         if (Request::ajax()) {
-            return $this->success($message);
+            return $this->success($content);
         }
 
-        return $this->back()->with(function(Notifier $notifier) use ($message) {
-            $notifier->success($message, [
+        return $this->back()->with(function(Notifier $notifier) use ($content) {
+            $notifier->success($content, [
                 'disableTranslation' => true,
             ])->flash();
         });
     }
 
-    protected function respondError($message = null)
+    protected function respondError($content = null)
     {
         if (Request::ajax()) {
-            return $this->error($message);
+            return $this->error($content);
         }
 
-        return $this->back()->with(function(Notifier $notifier) use ($message) {
-            $notifier->error($message, [
+        return $this->back()->with(function(Notifier $notifier) use ($content) {
+            $notifier->error($content, [
                 'disableTranslation' => true,
             ])->flash();
         });
