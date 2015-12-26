@@ -229,7 +229,11 @@ class Arr
 
     static public function &getArrayRef(array &$array, $key, $else = null)
     {
-        return static::bringRef(static::getRef($array, $key, $else));
+        $ref = &static::getRef($array, $key, $else);
+
+        static::bringRef($ref);
+
+        return $ref;
     }
 
     static public function getArrayForce(array &$array, $key, $else = null)
@@ -239,7 +243,11 @@ class Arr
 
     static public function &getArrayForceRef(array &$array, $key, $else = null)
     {
-        return static::bringRef(static::getForceRef($array, $key, $else));
+        $ref = &static::getForceRef($array, $key, $else);
+
+        static::bringRef($ref);
+
+        return $ref;
     }
 
     static public function getIndex(array &$array, $index, $else = null, $delimiter = self::INDEX_DELIMITER)
@@ -385,7 +393,11 @@ class Arr
 
     static public function &getIndexArrayRef(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bringRef(static::getIndexRef($array, $index, $else, $delimiter));
+        $ref = &static::getIndexRef($array, $index, $else, $delimiter);
+
+        static::bringRef($ref);
+
+        return $ref;
     }
 
     static public function getIndexArrayForce(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
@@ -395,7 +407,11 @@ class Arr
 
     static public function &getIndexArrayForceRef(array &$array, $index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return static::bringRef(static::getIndexForceRef($array, $index, $else, $delimiter));
+        $ref = &static::getIndexForceRef($array, $index, $else, $delimiter);
+
+        static::bringRef($ref);
+
+        return $ref;
     }
 
     static public function required(array &$array, $key)
@@ -674,9 +690,9 @@ class Arr
         return static::bringRef($var, ...$vars);
     }
 
-    static public function &bringRef(&$var, &...$vars)
+    static public function bringRef(&$var, &...$vars)
     {
-        $var = static::bringVar($var);
+        static::bringVar($var);
 
         if (!$vars) {
             return $var;
@@ -692,7 +708,7 @@ class Arr
         return $vars;
     }
 
-    static public function &bringVar(&$var)
+    static public function bringVar(&$var)
     {
         if (is_array($var)) {
             return $var;

@@ -20,12 +20,12 @@ class Rows extends RowAbstract
 
     public function toArray($recursive = true)
     {
-        $items = parent::toArray();
+        $items = $this->storage;
 
         if ($recursive) {
-            foreach($items as &$item) {
+            foreach($items as $key => $item) {
                 if ($item instanceof Row) {
-                    $item = $item->toArray();
+                    $items[$key] = $item->toArray();
                 }
             }
             unset($item);

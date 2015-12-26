@@ -112,11 +112,6 @@ trait InternalTrait
         return $this->app()->binder()->call($callable);
     }
 
-    public function _()
-    {
-        return $this->app()->helper();
-    }
-
     public function __debugInfo()
     {
         return Debug::fixInfo($this, get_object_vars($this));
