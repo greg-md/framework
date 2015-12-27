@@ -492,8 +492,6 @@ class Obj
     {
         if (($num = func_num_args()) > 2) {
             if (is_array($key)) {
-                $value = null;
-
                 if ($num > 3) {
                     $type = func_get_arg(3);
                 }
@@ -533,8 +531,6 @@ class Obj
     {
         if (($num = func_num_args()) > 2) {
             if (is_array($key)) {
-                $value = null;
-
                 if ($num > 3) {
                     $type = func_get_arg(3);
                 }
@@ -569,8 +565,6 @@ class Obj
     {
         if (($num = func_num_args()) > 2) {
             if (is_array($index)) {
-                $value = null;
-
                 if ($num > 3) {
                     $type = func_get_arg(3);
                 }
