@@ -233,8 +233,8 @@ class Route implements \ArrayAccess
 
     protected function execAfterMiddleware($middleware)
     {
-        if (method_exists($middleware, 'routerBeforeMiddleware')) {
-            return $this->callCallableWith([$middleware, 'routerBeforeMiddleware'], $this);
+        if (method_exists($middleware, 'routerAfterMiddleware')) {
+            return $this->callCallableWith([$middleware, 'routerAfterMiddleware'], $this);
         }
 
         return true;
