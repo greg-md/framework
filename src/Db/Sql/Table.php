@@ -216,6 +216,11 @@ class Table
         return $this->select()->whereCols($keys)->rows();
     }
 
+    /**
+     * @param null $keys
+     * @return Table\Rowable|Table\Rowable[]
+     * @throws \Exception
+     */
     public function findRowable($keys = null)
     {
         $query = $this->select();
