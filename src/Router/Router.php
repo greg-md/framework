@@ -18,14 +18,13 @@ class Router
     }
 
     /**
-     * @param string $name
-     * @param string $format
-     * @param null $type
-     * @param callable|array $settings
+     * @param $format
+     * @param $action
+     * @param array $settings
      * @return Route
      */
-    public function createRoute($name, $format, $type = null, $settings = null)
+    public function createRoute($format, $action, array $settings = [])
     {
-        return $this->_createRoute($name, $format, $type, $settings)->router($this);
+        return $this->_createRoute($format, $action, $settings)->router($this);
     }
 }

@@ -11,49 +11,43 @@ class Route extends \Greg\Router\Route implements RouterInterface
 {
     use RouterTrait, InternalTrait;
 
-    protected $action = null;
-
-    static public function create($appName, $name, $format, $type = null, callable $callback = null)
+    static public function create($appName, $format, $action, array $settings = [])
     {
-        return static::newInstanceRef($appName, $name, $format, $type, $callback);
+        return static::newInstanceRef($appName, $format, $action, $settings);
     }
 
-    public function dispatch(array $params = [])
+    protected function fetchMiddleware($middleware)
     {
-        try {
-            $routeParams = $this->lastMatchedParams();
-
-            $allParams = $routeParams + $params;
-
-            if ($callback = $this->callback()) {
-                $request = Request::create($this->appName(), $allParams);
-
-                return $this->callCallableWith($callback, $request, ...array_values($allParams), ...[$this]);
-            }
-
-            if ($action = $this->action()) {
-                list($controller, $action) = explode('@', $action);
-
-                $controller = Str::spinalCase($controller);
-
-                $action = Str::spinalCase($action);
-
-                $allParams += [
-                    'controller' => $controller,
-                    'action' => $action,
-                ];
-
-                return $this->app()->action($action, $controller, $allParams, $this);
-            }
-        } catch (\Exception $e) {
-            return $this->dispatchException($e);
+        if (!is_object($middleware)) {
+            $middleware = $this->app()->binder()->getExpected($middleware);
         }
 
-        return null;
+        return $middleware;
     }
 
-    public function action($value = null, $type = Obj::PROP_REPLACE)
+    public function dispatchAction($action, array $params = [])
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $routeParams = $this->lastMatchedParams();
+
+        $allParams = $routeParams + $params;
+
+        if (is_callable($action)) {
+            $request = Request::create($this->appName(), $allParams);
+
+            return $this->callCallableWith($action, $request, ...array_values($allParams), ...[$this]);
+        } else {
+            list($controller, $action) = explode('@', $action);
+
+            $controller = Str::spinalCase($controller);
+
+            $action = Str::spinalCase($action);
+
+            $allParams += [
+                'controller' => $controller,
+                'action' => $action,
+            ];
+
+            return $this->app()->action($action, $controller, $allParams, $this);
+        }
     }
 }

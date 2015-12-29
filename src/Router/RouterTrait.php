@@ -28,24 +28,32 @@ trait RouterTrait
         return $this;
     }
 
-    public function any($name, $format, $settings = null)
+    public function any($format, $action, array $settings = [])
     {
-        return $this->setRoute($name, $format, null, $settings);
+        $settings['type'] = null;
+
+        return $this->setRoute($format, $action, $settings);
     }
 
-    public function post($name, $format, $settings = null)
+    public function post($format, $action, array $settings = [])
     {
-        return $this->setRoute($name, $format, Route::TYPE_POST, $settings);
+        $settings['type'] = Route::TYPE_POST;
+
+        return $this->setRoute($format, $action, $settings);
     }
 
-    public function get($name, $format, $settings = null)
+    public function get($format, $action, array $settings = [])
     {
-        return $this->setRoute($name, $format, Route::TYPE_GET, $settings);
+        $settings['type'] = Route::TYPE_GET;
+
+        return $this->setRoute($format, $action, $settings);
     }
 
-    public function group($name, $format, callable $callable, $settings = null)
+    public function group($format, callable $callable, array $settings = [])
     {
-        $route = $this->setRoute($name, $format, Route::TYPE_GROUP, $settings);
+        $settings['type'] = Route::TYPE_GROUP;
+
+        $route = $this->setRoute($format, null, $settings);
 
         $route->strict(false);
 
@@ -54,20 +62,20 @@ trait RouterTrait
         return $route;
     }
 
-    public function setRoute($name, $format, $type = null, $settings = null)
+    public function setRoute($format, $action, $settings = null)
     {
-        $this->routes[$name] = $route = $this->createRoute($name, $format, $type, $settings);
+        $this->routes[] = $route = $this->createRoute($format, $action, $settings);
 
         return $route;
     }
 
     public function hasRoute($name)
     {
-        if (array_key_exists($name, $this->routes)) {
-            return true;
-        }
-
         foreach($this->routes as $route) {
+            if ($routeName = $route->name() and $routeName == $name) {
+                return true;
+            }
+
             if ($route->hasRoute($name)) {
                 return true;
             }
@@ -78,11 +86,11 @@ trait RouterTrait
 
     public function getRoute($name)
     {
-        if (array_key_exists($name, $this->routes)) {
-            return $this->routes[$name];
-        }
-
         foreach($this->routes as $route) {
+            if ($routeName = $route->name() and $routeName == $name) {
+                return $route;
+            }
+
             if ($subRoute = $route->getRoute($name)) {
                 return $subRoute;
             }
@@ -96,54 +104,23 @@ trait RouterTrait
         return $this->routes;
     }
 
-    public function createRoute($name, $format, $type = null, $settings = null)
+    public function createRoute($format, $action, array $settings = [])
     {
-        return $this->_createRoute($name, $format, $type, $settings);
+        return $this->_createRoute($format, $action, $settings);
     }
 
-    /**
-     * @param string $name
-     * @param string $format
-     * @param null $type
-     * @param callable|array $settings
-     * @return Route
-     */
-    protected function _createRoute($name, $format, $type = null, $settings = null)
+    protected function _createRoute($format, $action, array $settings = [])
     {
-        $route = $this->newRoute($name, $format, $type);
+        $route = $this->newRoute($format, $action, $settings);
 
         $route->onError($this->onError());
-
-        if (is_callable($settings)) {
-            $route->callback($settings);
-        }
-
-        if (Str::isScalar($settings)) {
-            $settings = ['action' => $settings];
-        }
-
-        if (is_array($settings)) {
-            foreach($settings as $key => $value) {
-                switch($key) {
-                    case 'strict':
-                    case 'callback':
-                    case 'encodeValues':
-                    case 'action':
-                    case 'defaults':
-                    case 'onError':
-                        $route->$key($value);
-
-                        break;
-                }
-            }
-        }
 
         return $route;
     }
 
-    protected function newRoute($name, $format, $type = null)
+    protected function newRoute($format, $action, array $settings = [])
     {
-        return new Route($name, $format, $type);
+        return new Route($format, $action, $settings);
     }
 
     public function dispatchPath($path, &$foundRoute = null)

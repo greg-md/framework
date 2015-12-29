@@ -8,7 +8,7 @@ use Greg\Application\Engine\InternalTrait;
  * Class Router
  * @package Greg\Router
  *
- * @method Route createRoute($name, $format, $type = null, $settings = null)
+ * @method Route createRoute($format, $action, array $settings = null)
  */
 class Router extends \Greg\Router\Router implements RouterInterface
 {

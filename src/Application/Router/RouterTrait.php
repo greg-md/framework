@@ -8,9 +8,9 @@ use Greg\Tool\Obj;
 
 trait RouterTrait
 {
-    protected function newRoute($name, $format, $type = null)
+    protected function newRoute($format, $action, array $settings = [])
     {
-        return Route::create($this->appName(), $name, $format, $type);
+        return Route::newInstance($this->appName(), $format, $action, $settings);
     }
 
     public function dispatchPath($path, &$foundRoute = null, array $events = [])

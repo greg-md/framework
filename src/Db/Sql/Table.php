@@ -216,13 +216,19 @@ class Table
         return $this->select()->whereCols($keys)->rows();
     }
 
-    public function findRowable($keys)
+    public function findRowable($keys = null)
     {
-        if (!is_array($keys)) {
-            $keys = $this->combineFirstUnique($keys);
+        $query = $this->select();
+
+        if ($keys) {
+            if (!is_array($keys)) {
+                $keys = $this->combineFirstUnique($keys);
+            }
+
+            $query->whereCols($keys);
         }
 
-        return $this->select()->whereCols($keys)->rowableAll();
+        return $query->rowableAll();
     }
 
     public function getRowable($keys)
@@ -390,7 +396,7 @@ class Table
     /**
      * @param array $rows
      * @param bool $reset
-     * @return Table\Rowable
+     * @return Table\Rowable[]|Table\Rowable
      * @throws \Exception
      */
     public function createRowable(array $rows, $reset = true)

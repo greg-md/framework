@@ -114,7 +114,7 @@ class Binder
             $arg = $this->get($className);
 
             if (!$arg and !$expectedArg->isOptional()) {
-                throw new \Exception('`' . $className . '` is not registered in binder.');
+                throw new \Exception('Object `' . $className . '` is not registered in binder.');
             }
         } else {
             $arg = Obj::expectedArg($expectedArg);
@@ -144,12 +144,21 @@ class Binder
         }
 
         if ($this->storage($name)) {
-            throw new \Exception('Object name `' . $name . '` is already in use in binder.');
+            throw new \Exception('Object `' . $name . '` is already in use in binder.');
         }
 
         $this->storage($name, $object);
 
         return $this;
+    }
+
+    public function getExpected($name)
+    {
+        if (!$object = $this->get($name)) {
+            throw new \Exception('Object `' . $name . '` is not registered in binder.');
+        }
+
+        return $object;
     }
 
     public function get($name)
