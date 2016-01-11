@@ -366,7 +366,17 @@ class Select extends Query
 
     public function assocAll()
     {
-        return $this->stmt()->fetchAssocAll();
+        $items = $this->stmt()->fetchAssocAll();
+
+        if ($table = $this->table()) {
+            foreach($items as &$item) {
+                $item = $table->parseData($item);
+            }
+
+            unset($item);
+        }
+
+        return $items;
     }
 
     public function assocAllFull($references = null, $relationships = null, $dependencies = '*')
@@ -596,11 +606,15 @@ class Select extends Query
     {
         $pagination = $this->paginationAssocRowable($page, $limit);
 
-        return $this->getTable()
-            ->createRowable($pagination['rows'], false)
-            ->total($pagination['total'])
-            ->page($pagination['page'])
-            ->limit($pagination['limit']);
+        $rowable = $this->getTable()->createRowable($pagination['rows'], false);
+
+        $rowable->total($pagination['total']);
+
+        $rowable->page($pagination['page']);
+
+        $rowable->limit($pagination['limit']);
+
+        return $rowable;
     }
 
     public function paginationRowableFull($page = 1, $limit = 10, $references = null, $relationships = null, $dependencies = '*')

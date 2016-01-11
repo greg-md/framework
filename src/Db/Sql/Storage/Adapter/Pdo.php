@@ -29,6 +29,8 @@ class Pdo extends \PDO implements AdapterInterface
 
         $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
+        $this->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+
         return $this;
     }
 
