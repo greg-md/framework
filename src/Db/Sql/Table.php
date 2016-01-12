@@ -1618,6 +1618,11 @@ class Table
         return $data;
     }
 
+    public function getColumnType($name)
+    {
+        return $this->columnsTypes($name) ?: $this->columns($name)->type();
+    }
+
     public function getName()
     {
         if (!($name = $this->name())) {

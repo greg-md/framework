@@ -97,11 +97,23 @@ class Mysql implements StorageInterface
                 }
             }
 
-            $column->def($columnInfo['Default']);
-
             if ($columnInfo['Null'] == 'NO') {
                 $column->notNull();
             }
+
+            if ($columnInfo['Default'] === '') {
+                $columnInfo['Default'] = null;
+            }
+
+            if (!$column->allowNull()) {
+                $columnInfo['Default'] = (string)$columnInfo['Default'];
+            }
+
+            if ($column->isNumeric() and (!$column->allowNull() or $columnInfo['Default'] !== null)) {
+                $columnInfo['Default'] = (int)$columnInfo['Default'];
+            }
+
+            $column->def($columnInfo['Default']);
 
             $columns[$columnInfo['Field']] = $column;
         }
