@@ -194,17 +194,19 @@ class Table
         return array_keys($this->columns());
     }
 
-    public function combineFirstUnique($key)
+    public function combineFirstUnique($values)
     {
-        if (!$unique = $this->getFirstUnique()) {
+        $values = (array)$values;
+
+        if (!$keys = $this->getFirstUnique()) {
             throw new \Exception('Table does not have primary keys.');
         }
 
-        if (sizeof($unique) > 1) {
-            throw new \Exception('Table have more than one column as primary key.');
+        if (sizeof($keys) !== sizeof($values)) {
+            throw new \Exception('Unique columns count should be the same as keys count.');
         }
 
-        return [current($unique) => $key];
+        return array_combine($keys, $values);
     }
 
     public function find($keys)
@@ -391,11 +393,34 @@ class Table
         return $this->loadClassInstance($class, $this, $data);
     }
 
-    public function newRowable(array $row = [])
+    public function newRowableRow(array $row, $reset = true)
     {
-        $row['isNew'] = true;
+        return $this->newRowableFullRow(['row' => $row], $reset);
+    }
 
-        return $this->createRowable([$row]);
+    public function newRowableFullRow(array $row, $reset = true)
+    {
+        return $this->newRowable([$row], $reset);
+    }
+
+    public function newRowable(array $rows, $reset = true)
+    {
+        foreach($rows as &$row) {
+            $row['isNew'] = true;
+        }
+        unset($row);
+
+        return $this->createRowable($rows, $reset);
+    }
+
+    public function createRowableRow(array $row, $reset = true)
+    {
+        return $this->createRowableFullRow(['row' => $row], $reset);
+    }
+
+    public function createRowableFullRow(array $row, $reset = true)
+    {
+        return $this->createRowable([$row], $reset);
     }
 
     /**
