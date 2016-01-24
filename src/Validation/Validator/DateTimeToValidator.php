@@ -28,6 +28,10 @@ class DateTimeToValidator implements ValidatorInterface
 
     public function validate($value)
     {
+        if (!$value) {
+            return true;
+        }
+
         $errors = [];
 
         $value = DateTime::toTimestamp($value);
@@ -49,7 +53,7 @@ class DateTimeToValidator implements ValidatorInterface
 
     public function to($value = null)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function includeTo($value = null)

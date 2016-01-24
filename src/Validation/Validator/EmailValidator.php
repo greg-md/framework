@@ -11,6 +11,10 @@ class EmailValidator implements ValidatorInterface
 
     public function validate($value)
     {
+        if (!$value) {
+            return true;
+        }
+
         $errors = [];
 
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
