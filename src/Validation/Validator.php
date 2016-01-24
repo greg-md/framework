@@ -42,7 +42,7 @@ class Validator
                 $className = $this->getClassByName($vName);
 
                 /** @var $class ValidatorInterface */
-                $class = $this->loadClassInstance($className, $vArgs);
+                $class = $this->loadClassInstance($className, ...$vArgs);
 
                 if (!$class->validate($value)) {
                     $paramErrors = array_merge($paramErrors, $class->getErrors());
@@ -58,6 +58,8 @@ class Validator
 
         if ($errors) {
             $this->errors($errors, true);
+
+            return false;
         }
 
         return true;
