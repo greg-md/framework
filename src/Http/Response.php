@@ -22,6 +22,8 @@ class Response
 
     protected $content = null;
 
+    protected $attachment = null;
+
     protected $callbacks = [];
 
     const CODES = [
@@ -112,6 +114,19 @@ class Response
         return $this;
     }
 
+    public function download($content, $name = null, $type = 'application/octet-stream')
+    {
+        $this->content($content);
+
+        if ($name) {
+            $this->attachment($name);
+        }
+
+        $this->contentType($type);
+
+        return $this;
+    }
+
     public function json($data)
     {
         $this->contentType('application/json');
@@ -150,6 +165,10 @@ class Response
             }
         }
 
+        if ($attachment = $this->attachment()) {
+            $this->sendAttachment($attachment);
+        }
+
         $contentType = [];
 
         if ($type = $this->contentType()) {
@@ -183,6 +202,11 @@ class Response
     }
 
     public function contentType($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function attachment($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
@@ -343,6 +367,15 @@ class Response
     static public function sendContentType($type, $die = false)
     {
         header('Content-Type: ' . $type);
+
+        $die && die;
+
+        return true;
+    }
+
+    static public function sendAttachment($name, $die = false)
+    {
+        header('Content-disposition: attachment; filename="' . addslashes($name) . '"');
 
         $die && die;
 

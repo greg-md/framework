@@ -72,6 +72,11 @@ abstract class Controller
         return $this->response()->error($content, $data);
     }
 
+    protected function download($content, $name = null, $type = null)
+    {
+        return $this->response()->download($content, $name, $type);
+    }
+
     protected function translate($key, ...$args)
     {
         return $this->app()->translator()->translate($key, ...$args);
