@@ -4,12 +4,15 @@ namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
 use Greg\Db\Sql\TableRelationship;
+use Greg\Engine\InternalTrait;
 use Greg\Tool\Arr;
 use Greg\Tool\Debug;
 use Greg\Tool\Obj;
 
 class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serializable, \Countable
 {
+    use InternalTrait;
+
     protected $rows = [];
 
     protected $defaults = [];
@@ -356,7 +359,19 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
 
     protected function &firstAssocRow($key = null, $value = null)
     {
-        return Obj::fetchArrayReplaceVar($this, $this->firstAssoc('row'), ...func_get_args());
+        $row = &$this->firstAssoc('row');
+
+        if (func_num_args() === 1 and !is_array($key) and !array_key_exists($key, $row)) {
+            $methodName = 'let' . ucfirst($key);
+
+            if (method_exists($this, $methodName)) {
+                $value = $this->callCallableWith([$this, $methodName]);
+
+                return $value;
+            }
+        }
+
+        return Obj::fetchArrayReplaceVar($this, $row, ...func_get_args());
     }
 
     protected function &firstAssocDefaultRow($key = null, $value = null)
@@ -421,7 +436,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
 
     public function offsetGet($offset)
     {
-        return Arr::getRef($this->firstAssocRow(), $offset);
+        return $this->firstAssocRow($offset);
     }
 
 
