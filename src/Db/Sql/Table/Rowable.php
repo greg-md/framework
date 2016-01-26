@@ -220,6 +220,26 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return $items;
     }
 
+    public function getAll($column)
+    {
+        $items = [];
+
+        foreach($this->getIterator() as $row) {
+            $items[] = $row->get($column);
+        }
+
+        return $items;
+    }
+
+    public function find(callable $callable = null)
+    {
+        foreach($this->getIterator() as $key => $value) {
+            if (call_user_func_array($callable, [$value, $key])) return $value;
+        }
+
+        return null;
+    }
+
     /* START rows methods */
 
     public function set($key, $value = null)
