@@ -55,6 +55,11 @@ class DateTime extends \DateTime
         return static::formatTime('Y-m-d H:i' . ($second ? ':s' : ''), $time);
     }
 
+    static public function toISO8601($time)
+    {
+        return static::formatTime('c', $time);
+    }
+
     static public function toStringDate($time)
     {
         return static::formatTime('Y-m-d', $time);
