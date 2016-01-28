@@ -17,7 +17,7 @@ class Session
 
     public function __construct()
     {
-        $this->reloadFlash();
+        //$this->reloadFlash();
 
         return $this;
     }
@@ -28,7 +28,7 @@ class Session
 
         $this->del(static::FLASH_KEY);
 
-        $this->flash($flash);
+        $this->flash = $flash;
 
         return $this;
     }

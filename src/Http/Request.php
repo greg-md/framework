@@ -302,6 +302,15 @@ class Request implements \ArrayAccess
         return $_GET;
     }
 
+    static public function header($header)
+    {
+        $header = strtoupper($header);
+
+        $header = str_replace('-', '_', $header);
+
+        return Server::get('HTTP_' . $header);
+    }
+
     // Start standard $_GET array methods
 
     static public function hasGet($key, ...$keys)

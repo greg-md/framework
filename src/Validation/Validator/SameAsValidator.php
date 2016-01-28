@@ -2,21 +2,20 @@
 
 namespace Greg\Validation\Validator;
 
+use Greg\Tool\Arr;
 use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
-class IntValidator implements ValidatorInterface
+class SameAsValidator implements ValidatorInterface
 {
     use ValidatorTrait;
 
-    protected $type = null;
+    protected $sameAs = null;
 
-    public function __construct($type = null)
+    public function __construct($sameAs)
     {
-        if ($type !== null) {
-            $this->type($type);
-        }
+        $this->sameAs($sameAs);
 
         return $this;
     }
@@ -25,12 +24,10 @@ class IntValidator implements ValidatorInterface
     {
         $errors = [];
 
-        if ($value != (int)$value) {
-            $errors[] = 'Value is not integer.';
+        $sameAs = $this->sameAs();
 
-            if ($this->type() === 'unsigned' and $value < 0) {
-                $errors[] = 'Value is not unsigned.';
-            }
+        if ($value !== Arr::get($values, $sameAs)) {
+            $errors[] = 'Value is not the same as `' . $sameAs . '`.';
         }
 
         if ($errors) {
@@ -42,7 +39,7 @@ class IntValidator implements ValidatorInterface
         return true;
     }
 
-    public function type($value = null)
+    public function sameAs($value = null)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

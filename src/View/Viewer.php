@@ -122,21 +122,21 @@ class Viewer implements \ArrayAccess
         return $viewer->fetchFile($file, $responseObject);
     }
 
-    public function partial($name, array $params = [])
+    public function partial($name, array $params = [], $responseObject = true)
     {
-        return $this->partialName($name, $params);
+        return $this->partialName($name, $params, $responseObject);
     }
 
-    public function partialName($name, array $params = [])
+    public function partialName($name, array $params = [], $responseObject = true)
     {
         if ($file = $this->getFile($name)) {
-            return $this->partialFile($file, $params);
+            return $this->partialFile($file, $params, $responseObject);
         }
 
         throw new \Exception('View file `' . $name . '` does not exist in view paths.');
     }
 
-    public function partialFile($file, array $params = [])
+    public function partialFile($file, array $params = [], $responseObject = true)
     {
         $viewer = clone $this;
 
@@ -144,7 +144,7 @@ class Viewer implements \ArrayAccess
 
         $viewer->parent($this);
 
-        return $viewer->fetchFile($file);
+        return $viewer->fetchFile($file, $responseObject);
     }
 
     public function partialLoop($name, array $items, array $params = [])

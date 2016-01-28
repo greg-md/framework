@@ -19,7 +19,7 @@ class MinLengthValidator implements ValidatorInterface
         return $this;
     }
 
-    public function validate($value)
+    public function validate($value, array $values = [])
     {
         $errors = [];
 

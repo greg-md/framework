@@ -154,7 +154,7 @@ class Arr
             static::bringRef($else);
 
             foreach(($keys = $key) as $k => $key) {
-                $return[$k] = static::get($array, $key, array_key_exists($key, $else) ? $else[$key] : null);
+                $return[is_int($k) ? $key : $k] = static::get($array, $key, array_key_exists($key, $else) ? $else[$key] : null);
             }
 
             return $return;

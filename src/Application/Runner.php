@@ -110,6 +110,11 @@ class Runner implements \ArrayAccess
             ServerConfig::param($serverConfig);
         }
 
+        // Session id
+        if ($sessionId = $this->getIndex('session.id')) {
+            Session::id($sessionId);
+        }
+
         // Session ini
         if ($sessionIni = $this->getIndexArray('session.ini')) {
             Session::ini($sessionIni);

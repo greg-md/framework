@@ -44,7 +44,7 @@ class Validator
                 /** @var $class ValidatorInterface */
                 $class = $this->loadClassInstance($className, ...$vArgs);
 
-                if (!$class->validate($value)) {
+                if (!$class->validate($value, $params)) {
                     $paramErrors = array_merge($paramErrors, $class->getErrors());
                 }
             }
