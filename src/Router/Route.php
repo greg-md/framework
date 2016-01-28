@@ -514,11 +514,11 @@ class Route implements \ArrayAccess
             $compiled = $format;
         }
 
+        $defaultParams and Arr::del($params, ...$defaultParams);
+
         if (!$required and !$usedParams) {
             return null;
         }
-
-        $defaultParams and Arr::del($params, ...$defaultParams);
 
         $usedParams and Arr::del($params, ...$usedParams);
 

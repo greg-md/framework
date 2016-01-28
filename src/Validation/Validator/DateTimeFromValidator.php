@@ -38,7 +38,7 @@ class DateTimeFromValidator implements ValidatorInterface
 
         $from = DateTime::toTimestamp($this->from());
 
-        if ($this->includeFrom() ? $value >= $from : $value > $from) {
+        if ($this->includeFrom() ? $value <= $from : $value < $from) {
             $errors[] = 'Value should be greater than ' . DateTime::toStringDateTime($from) . '.';
         }
 
