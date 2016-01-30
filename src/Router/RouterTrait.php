@@ -91,7 +91,7 @@ trait RouterTrait
                 return $route;
             }
 
-            if ($subRoute = $route->getRoute($name)) {
+            if ($route->hasRoutes() and $subRoute = $route->getRoute($name)) {
                 return $subRoute;
             }
         }
@@ -102,6 +102,11 @@ trait RouterTrait
     public function getRoutes()
     {
         return $this->routes;
+    }
+
+    public function hasRoutes()
+    {
+        return $this->routes ? true : false;
     }
 
     public function createRoute($format, $action, array $settings = [])
