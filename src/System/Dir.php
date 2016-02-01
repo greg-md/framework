@@ -23,4 +23,15 @@ class Dir
     {
         return static::fix($dir, true);
     }
+
+    static public function unlink($dir)
+    {
+        foreach (glob($dir . '/*') as $file) {
+            is_dir($file) ? static::unlink($file) : unlink($file);
+        }
+
+        rmdir($dir);
+
+        return true;
+    }
 }

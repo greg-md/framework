@@ -25,14 +25,24 @@ class Validator
         $this->validators($validators);
     }
 
-    public function validate(array $params = [])
+    public function validate(array $params = [], $validateAll = true)
     {
         $errors = [];
 
-        foreach($params as $key => $value) {
+        foreach($this->validators() as $key => $validators) {
+            if (!Arr::has($params, $key)) {
+                if ($validateAll) {
+                    $params[$key] = null;
+                } else {
+                    continue;
+                }
+            }
+
+            $value = Arr::get($params, $key);
+
             $paramErrors = [];
 
-            foreach((array)$this->validators($key) as $validator) {
+            foreach ($validators as $validator) {
                 $parts = explode(':', $validator, 2);
 
                 $vName = array_shift($parts);
@@ -53,6 +63,32 @@ class Validator
                 $errors[$key] = $paramErrors;
             }
         }
+
+        /*
+        foreach($params as $key => $value) {
+            $paramErrors = [];
+
+            foreach((array)$this->validators($key) as $validator) {
+                $parts = explode(':', $validator, 2);
+
+                $vName = array_shift($parts);
+
+                $vArgs = $parts ? explode(',', array_shift($parts)) : [];
+
+                $className = $this->getClassByName($vName);
+
+                $class = $this->loadClassInstance($className, ...$vArgs);
+
+                if (!$class->validate($value, $params)) {
+                    $paramErrors = array_merge($paramErrors, $class->getErrors());
+                }
+            }
+
+            if ($paramErrors) {
+                $errors[$key] = $paramErrors;
+            }
+        }
+        */
 
         $this->params($params);
 

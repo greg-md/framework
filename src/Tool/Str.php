@@ -128,22 +128,28 @@ class Str
      * @param  string|array  $needles
      * @return bool
      */
-    public static function startsWith($haystack, $needles)
+    static public function startsWith($haystack, $needles)
     {
         foreach (Arr::bring($needles) as $needle) {
-            if (mb_substr($haystack, 0, mb_strlen($needle)) === $needle) return true;
+            if (strpos($haystack, $needle) === 0) return true;
+            //if (mb_substr($haystack, 0, mb_strlen($needle)) === $needle) return true;
         }
 
         return false;
     }
 
-    public static function endsWith($haystack, $needles)
+    static public function endsWith($haystack, $needles)
     {
         foreach (Arr::bring($needles) as $needle) {
             if (mb_substr($haystack, -mb_strlen($needle)) === $needle) return true;
         }
 
         return false;
+    }
+
+    static public function shift($str, $shift)
+    {
+        return mb_substr($str, mb_strlen($shift));
     }
 
     static public function quote($str, $with = '"')
