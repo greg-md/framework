@@ -6,15 +6,15 @@ use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
-class MinLengthValidator implements ValidatorInterface
+class MaxValidator implements ValidatorInterface
 {
     use ValidatorTrait;
 
-    protected $length = null;
+    protected $max = null;
 
-    public function __construct($length)
+    public function __construct($max)
     {
-        $this->length($length);
+        $this->max($max);
 
         return $this;
     }
@@ -23,10 +23,10 @@ class MinLengthValidator implements ValidatorInterface
     {
         $errors = [];
 
-        $length = $this->length();
+        $max = $this->max();
 
-        if (mb_strlen($value) < $length) {
-            $errors[] = 'Value length should be grater or equal with ' . $length . '.';
+        if ($value > $max) {
+            $errors[] = 'Value should be less or equal with ' . $max . '.';
         }
 
         if ($errors) {
@@ -38,7 +38,7 @@ class MinLengthValidator implements ValidatorInterface
         return true;
     }
 
-    public function length($value = null)
+    public function max($value = null)
     {
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }

@@ -393,17 +393,17 @@ class Table
         return $this->loadClassInstance($class, $this, $data);
     }
 
-    public function newRowableRow(array $row, $reset = true)
+    public function newRowableRow(array $row = [], $reset = true)
     {
         return $this->newRowableFullRow(['row' => $row], $reset);
     }
 
-    public function newRowableFullRow(array $row, $reset = true)
+    public function newRowableFullRow(array $row = [], $reset = true)
     {
         return $this->newRowable([$row], $reset);
     }
 
-    public function newRowable(array $rows, $reset = true)
+    public function newRowable(array $rows = [], $reset = true)
     {
         foreach($rows as &$row) {
             $row['isNew'] = true;
@@ -413,12 +413,12 @@ class Table
         return $this->createRowable($rows, $reset);
     }
 
-    public function createRowableRow(array $row, $reset = true)
+    public function createRowableRow(array $row = [], $reset = true)
     {
         return $this->createRowableFullRow(['row' => $row], $reset);
     }
 
-    public function createRowableFullRow(array $row, $reset = true)
+    public function createRowableFullRow(array $row = [], $reset = true)
     {
         return $this->createRowable([$row], $reset);
     }
@@ -429,7 +429,7 @@ class Table
      * @return Table\Rowable[]|Table\Rowable
      * @throws \Exception
      */
-    public function createRowable(array $rows, $reset = true)
+    public function createRowable(array $rows = [], $reset = true)
     {
         if (!($class = $this->rowableClass())) {
             throw new \Exception('Undefined table rowable class.');

@@ -58,9 +58,9 @@ class Str
         return $var;
     }
 
-    static public function spinalCase($var)
+    static public function spinalCase($var, $uppercase = true)
     {
-        return mb_strtolower(static::splitUpperCase($var, '-'));
+        return mb_strtolower($uppercase ? static::splitUpperCase($var, '-') : static::splitCase($var, '-'));
     }
 
     static public function phpName($var, $type = self::CAMEL_CASE)

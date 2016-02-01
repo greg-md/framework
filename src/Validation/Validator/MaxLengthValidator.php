@@ -26,7 +26,7 @@ class MaxLengthValidator implements ValidatorInterface
         $length = $this->length();
 
         if (mb_strlen($value) > $length) {
-            $errors[] = 'Value length should be less than ' . $length . '.';
+            $errors[] = 'Value length should be less or equal with ' . $length . '.';
         }
 
         if ($errors) {
