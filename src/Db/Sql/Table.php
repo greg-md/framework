@@ -1123,6 +1123,18 @@ class Table
             $params = [];
         }
 
+        if (is_bool($params)) {
+            $params = [
+                'full' => $params,
+            ];
+        }
+
+        if ($params instanceof \Closure) {
+            $params = [
+                'callback' => $params,
+            ];
+        }
+
         $params = array_merge([
             'references' => null,
             'relationships' => null,

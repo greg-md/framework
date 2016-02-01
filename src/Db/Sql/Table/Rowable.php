@@ -419,7 +419,23 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
             $values = [];
 
             foreach($column as $key => $name) {
-                $values[is_int($key) ? $name : $key] = $this->firstAssocRow($name);
+                $filter = null;
+
+                if (is_array($name)) {
+                    $args = $name;
+
+                    $name = array_shift($args);
+
+                    $filter = array_shift($args);
+                }
+
+                $value = $this->firstAssocRow((string)$name);
+
+                if (is_callable($filter)) {
+                    $value = $this->callCallable($filter, $value);
+                }
+
+                $values[is_int($key) ? $name : $key] = $value;
             }
 
             return $values;
