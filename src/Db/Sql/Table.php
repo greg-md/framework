@@ -552,8 +552,12 @@ class Table
                     $columns[] = $constraint['ColumnName'];
                 }
 
+                $key = implode('.', $columns);
+
+                $key = $this->referencesAliases($key) ?: $key;
+
                 foreach($items as &$item) {
-                    $item['references'][implode('.', $columns)] = null;
+                    $item['references'][$key] = null;
                 }
             }
             unset($item);
@@ -1331,6 +1335,8 @@ class Table
             }
 
             $key = implode('.', $key);
+
+            $key = $this->referencesAliases($key) ?: $key;
 
             foreach($rows as &$rowFull) {
                 $rowFull['references'][$key] = null;
