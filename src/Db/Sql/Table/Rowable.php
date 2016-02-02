@@ -173,13 +173,22 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return Arr::getArrayRef($references, $name);
     }
 
+    /**
+     * @param $name
+     * @return Rowable|null
+     * @throws \Exception
+     */
     public function getReference($name)
     {
+        $row = &$this->getReferenceAssoc($name);
+
+        if (!$row) {
+            return null;
+        }
+
         $reference = Arr::get(array_flip($this->getTable()->referencesAliases()), $name, $name);
 
         $table = $this->getTable()->getReferenceTableByColumn($reference);
-
-        $row = &$this->getReferenceAssoc($name);
 
         $rowDefault = &$this->getReferenceAssocDefault($name);
 

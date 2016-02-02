@@ -324,7 +324,13 @@ class Select extends Query
 
     public function assoc()
     {
-        return $this->stmt()->fetchAssoc();
+        $item = $this->stmt()->fetchAssoc();
+
+        if ($table = $this->table()) {
+            $item = $this->getTable()->parseData($item);
+        }
+
+        return $item;
     }
 
     public function assocFull($references = null, $relationships = null, $dependencies = '*')
