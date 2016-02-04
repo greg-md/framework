@@ -42,8 +42,12 @@ trait RouterTrait
         return $this->setRoute($format, $action, $settings);
     }
 
-    public function get($format, $action, array $settings = [])
+    public function get($format, $action, $settings = [])
     {
+        if (is_scalar($settings)) {
+            $settings = ['name' => $settings];
+        }
+
         $settings['type'] = Route::TYPE_GET;
 
         return $this->setRoute($format, $action, $settings);
