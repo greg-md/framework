@@ -238,6 +238,29 @@ class Table
         return $query->rowableAll();
     }
 
+    /**
+     * @param null $keys
+     * @param null $references
+     * @param null $relationships
+     * @param string $dependencies
+     * @return Table\Rowable|Table\Rowable[]
+     * @throws \Exception
+     */
+    public function findRowableFull($keys = null, $references = null, $relationships = null, $dependencies = '*')
+    {
+        $query = $this->select();
+
+        if ($keys) {
+            if (!is_array($keys)) {
+                $keys = $this->combineFirstUnique($keys);
+            }
+
+            $query->whereCols($keys);
+        }
+
+        return $query->rowableAllFull($references, $relationships, $dependencies);
+    }
+
     public function getRowable($keys)
     {
         if (!is_array($keys)) {

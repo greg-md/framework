@@ -92,7 +92,7 @@ class Update extends Query
         foreach($this->set as $key => $value) {
             $isExpr = ($value instanceof Expr);
 
-            $expr = $this->quoteName($key) . ' = ' . $isExpr ? $this->quoteExpr($value->toString()) : '?';
+            $expr = $this->quoteName($key) . ' = ' . ($isExpr ? $this->quoteExpr($value->toString()) : '?');
 
             if ($isExpr) {
                 $this->bindParams($value->params());
