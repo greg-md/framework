@@ -326,7 +326,7 @@ class Select extends Query
     {
         $item = $this->stmt()->fetchAssoc();
 
-        if ($table = $this->table()) {
+        if ($item and $table = $this->table()) {
             $item = $this->getTable()->parseData($item);
         }
 
