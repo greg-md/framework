@@ -135,6 +135,11 @@ abstract class Query
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
+    public function bindParam($param)
+    {
+        return $this->bindParams([$param]);
+    }
+
     public function bindParams(array $params = [])
     {
         if (func_num_args()) {

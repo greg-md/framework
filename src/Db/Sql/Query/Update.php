@@ -86,11 +86,24 @@ class Update extends Query
 
         $query[] = 'SET';
 
-        $query[] = implode(', ', array_map(function($expr) {
-            return $this->quoteName($expr) . ' = ?';
-        }, array_keys($this->set)));
+        $set = [];
 
-        $this->bindParams(array_values($this->set));
+        /* @var $value Expr|string */
+        foreach($this->set as $key => $value) {
+            $isExpr = ($value instanceof Expr);
+
+            $expr = $this->quoteName($key) . ' = ' . $isExpr ? $this->quoteExpr($value->toString()) : '?';
+
+            if ($isExpr) {
+                $this->bindParams($value->params());
+            } else {
+                $this->bindParam($value);
+            }
+
+            $set[] = $expr;
+        }
+
+        $query[] = implode(', ', $set);
 
         $where = $this->whereToString();
 
