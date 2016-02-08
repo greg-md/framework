@@ -3,6 +3,7 @@
 namespace Greg\Router;
 
 use Greg\Engine\InternalTrait;
+use Greg\Http\Request;
 use Greg\Regex\InNamespace;
 use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
@@ -355,6 +356,28 @@ class Route implements \ArrayAccess
         return $params;
     }
 
+    public function hasRouteBoundOutParam($key)
+    {
+        if ($this->hasBoundOutParam($key)) {
+            return true;
+        }
+
+        if ($router = $this->router()) {
+            return $router->hasBoundOutParam($key);
+        }
+
+        return false;
+    }
+
+    public function getRouteBoundOutParam($key, array $params = [])
+    {
+        if (!$router = $this->router() or $this->hasBoundOutParam($key)) {
+            return $this->getBoundOutParam($key, $params);
+        }
+
+        return $router->getBoundOutParam($key, $params);
+    }
+
     public function isGet()
     {
         return $this->type() == static::TYPE_GET;
@@ -421,8 +444,16 @@ class Route implements \ArrayAccess
             }
         }
 
-        if ($full) {
-            $compiled = Url::full($compiled);
+        if ($host = $this->settings('host')) {
+            list($hostCompiled) = $this->fetchFormat($host);
+
+            $compiled = $hostCompiled . $compiled;
+
+            $compiled = Url::fix($compiled, Request::isSecured());
+        } else {
+            if ($full) {
+                $compiled = Url::full($compiled);
+            }
         }
 
         return $compiled;
@@ -467,7 +498,11 @@ class Route implements \ArrayAccess
 
                         $paramRequired = !$matches[$paramRK][$key];
 
-                        $value = Arr::get($params, $paramName, $paramDefault);
+                        if (!Arr::has($params, $paramName) and $this->hasRouteBoundOutParam($paramName)) {
+                            $value = $this->getRouteBoundOutParam($paramName, $params);
+                        } else {
+                            $value = Arr::get($params, $paramName, $paramDefault);
+                        }
 
                         if ($paramRequired) {
                             if (Str::isEmpty($value)) {

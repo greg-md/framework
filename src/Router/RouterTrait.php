@@ -15,6 +15,10 @@ trait RouterTrait
 
     protected $onError = [];
 
+    protected $bindersOut = [];
+
+    protected $boundOutParams = [];
+
     protected $binders = [];
 
     protected $boundParams = [];
@@ -150,6 +154,33 @@ trait RouterTrait
         return $this->getRoute($routeName)->fetch($params, $full);
     }
 
+    public function bindOut($name, $result)
+    {
+        return $this->bindersOut($name, $result);
+    }
+
+    public function hasBoundOutParam($key)
+    {
+        return Arr::has($this->bindersOut(), $key);
+    }
+
+    public function getBoundOutParam($key, array $params = [])
+    {
+        if (Arr::has($this->boundOutParams(), $key)) {
+            return $this->boundOutParams($key);
+        }
+
+        if ($binder = $this->bindersOut($key)) {
+            $value = is_callable($binder) ? $this->callCallable($binder, $params) : $binder;
+
+            $this->boundOutParams($key, $value);
+        } else {
+            $value = Arr::get($params, $key);
+        }
+
+        return $value;
+    }
+
     public function bind($name, callable $result)
     {
         return $this->binders($name, $result);
@@ -167,7 +198,7 @@ trait RouterTrait
 
     public function getBoundParam($key, array $params)
     {
-        if (Arr::has($this->boundParams, $key)) {
+        if (Arr::has($this->boundParams(), $key)) {
             return $this->boundParams($key);
         }
 
@@ -183,6 +214,16 @@ trait RouterTrait
     }
 
     public function onError($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    protected function bindersOut($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    {
+        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    protected function boundOutParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
