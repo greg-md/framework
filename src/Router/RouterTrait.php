@@ -57,6 +57,15 @@ trait RouterTrait
         return $this->setRoute($format, $action, $settings);
     }
 
+    public function hidden($format, $name, array $settings = [])
+    {
+        $settings['name'] = $name;
+
+        $settings['type'] = Route::TYPE_HIDDEN;
+
+        return $this->setRoute($format, null, $settings);
+    }
+
     public function group($format, callable $callable, array $settings = [])
     {
         $settings['type'] = Route::TYPE_GROUP;
@@ -94,17 +103,26 @@ trait RouterTrait
 
     public function getRoute($name)
     {
+        if (!$route = $this->findRoute($name)) {
+            throw new \Exception('Route `' . $name . '` not found.');
+        }
+
+        return $route;
+    }
+
+    public function findRoute($name)
+    {
         foreach($this->routes as $route) {
             if ($routeName = $route->name() and $routeName == $name) {
                 return $route;
             }
 
-            if ($route->hasRoutes() and $subRoute = $route->getRoute($name)) {
+            if ($route->hasRoutes() and $subRoute = $route->findRoute($name)) {
                 return $subRoute;
             }
         }
 
-        throw new \Exception('Route `' . $name . '` not found.');
+        return null;
     }
 
     public function getRoutes()

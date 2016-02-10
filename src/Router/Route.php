@@ -7,6 +7,7 @@ use Greg\Http\Request;
 use Greg\Regex\InNamespace;
 use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
+use Greg\Tool\Debug;
 use Greg\Tool\Obj;
 use Greg\Tool\Regex;
 use Greg\Tool\Str;
@@ -19,6 +20,8 @@ class Route implements \ArrayAccess
     const TYPE_GET = 'get';
 
     const TYPE_POST = 'post';
+
+    const TYPE_HIDDEN = 'hidden';
 
     const TYPE_GROUP = 'group';
 
@@ -265,14 +268,18 @@ class Route implements \ArrayAccess
 
     public function match($path, array &$matchedParams = [])
     {
+        if ($this->isHidden()) {
+            return false;
+        }
+
         list($compiled, $compiledParams, $compiledDefaults) = $this->compile($this->format());
 
         $pattern = '^' . $compiled . (($this->isGroup() or !$this->strict()) ? '(.*)' : '') . '$';
 
-        $matchedRoute = false;
-
         if (preg_match(Regex::pattern($pattern), $path, $matches)) {
             array_shift($matches);
+
+            $matchedRoute = false;
 
             if ($this->isGroup()) {
                 $subPath = array_pop($matches);
@@ -333,9 +340,11 @@ class Route implements \ArrayAccess
                     $this->callCallableWith($callable, $matchedRoute);
                 }
             }
+
+            return $matchedRoute;
         }
 
-        return $matchedRoute;
+        return false;
     }
 
     public function onMatch(callable $callable)
@@ -362,6 +371,10 @@ class Route implements \ArrayAccess
             return true;
         }
 
+        if ($parent = $this->parent()) {
+            return $parent->hasRouteBoundOutParam($key);
+        }
+
         if ($router = $this->router()) {
             return $router->hasBoundOutParam($key);
         }
@@ -371,11 +384,19 @@ class Route implements \ArrayAccess
 
     public function getRouteBoundOutParam($key, array $params = [])
     {
-        if (!$router = $this->router() or $this->hasBoundOutParam($key)) {
+        if ($this->hasBoundOutParam($key)) {
             return $this->getBoundOutParam($key, $params);
         }
 
-        return $router->getBoundOutParam($key, $params);
+        if ($parent = $this->parent()) {
+            return $parent->getRouteBoundOutParam($key, $params);
+        }
+
+        if ($router = $this->router()) {
+            return $router->getBoundOutParam($key, $params);
+        }
+
+        return null;
     }
 
     public function isGet()
@@ -386,6 +407,11 @@ class Route implements \ArrayAccess
     public function isPost()
     {
         return $this->type() == static::TYPE_POST;
+    }
+
+    public function isHidden()
+    {
+        return $this->type() == static::TYPE_HIDDEN;
     }
 
     public function isGroup()
