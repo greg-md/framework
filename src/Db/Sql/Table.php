@@ -270,6 +270,15 @@ class Table
         return $this->select()->whereCols($keys)->rowable();
     }
 
+    public function getRowableFull($keys, $references = null, $relationships = null, $dependencies = '*')
+    {
+        if (!is_array($keys)) {
+            $keys = $this->combineFirstUnique($keys);
+        }
+
+        return $this->select()->whereCols($keys)->rowableFull($references, $relationships, $dependencies);
+    }
+
     public function count(array $whereCols = [])
     {
         return $this->select('count(*)')->whereCols($whereCols)->one();

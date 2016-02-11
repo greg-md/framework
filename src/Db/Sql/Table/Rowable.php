@@ -311,7 +311,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         foreach($this->rows as $key => &$row) {
             $default = &$this->defaults[$key];
 
-            $keys[] = $this->getFirstUniqueFromRow($default['row']);
+            $keys[] = array_values($this->getFirstUniqueFromRow($default['row']));
 
             $default['isNew'] = $row['isNew'] = true;
         }
