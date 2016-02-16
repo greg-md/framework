@@ -17,6 +17,8 @@ class Column
 
     const TYPE_BIGINT = 'bigint';
 
+    const TYPE_DOUBLE = 'double';
+
     const TYPE_VARCHAR = 'varchar';
 
     const TYPE_TEXT = 'text';
@@ -41,12 +43,18 @@ class Column
 
     const BIGINT_LENGTH = 8;
 
-    const NUMERIC_TYPES = [
+    const DOUBLE_LENGTH = 8;
+
+    const INT_TYPES = [
         self::TYPE_TINYINT => self::TINYINT_LENGTH,
         self::TYPE_SMALLINT => self::SMALLINT_LENGTH,
         self::TYPE_MEDIUMINT => self::MEDIUMINT_LENGTH,
         self::TYPE_INT => self::INT_LENGTH,
         self::TYPE_BIGINT => self::BIGINT_LENGTH,
+    ];
+
+    const FLOAT_TYPES = [
+        self::TYPE_DOUBLE => self::DOUBLE_LENGTH,
     ];
 
     protected $name = null;
@@ -102,22 +110,39 @@ class Column
         return $this;
     }
 
-    static public function getNumericLength($type)
+    static public function getIntLength($type)
     {
-        // phpStorm bug fix
-        $types = static::NUMERIC_TYPES;
-
-        return Arr::get($types, $type);
+        return Arr::get(static::INT_TYPES, $type);
     }
 
-    static public function isNumericType($type)
+    static public function getFloatLength($type)
     {
-        return static::getNumericLength($type) !== null;
+        return Arr::get(static::FLOAT_TYPES, $type);
+    }
+
+    static public function isIntType($type)
+    {
+        return static::getIntLength($type) !== null;
+    }
+
+    static public function isFloatType($type)
+    {
+        return static::getFloatLength($type) !== null;
+    }
+
+    public function isInt()
+    {
+        return $this->isIntType($this->type());
+    }
+
+    public function isFloat()
+    {
+        return $this->isFloatType($this->type());
     }
 
     public function isNumeric()
     {
-        return $this->isNumericType($this->type());
+        return $this->isInt() || $this->isFloat();
     }
 
     public function getMinValue()
@@ -135,7 +160,7 @@ class Column
 
     public function getMaxValue()
     {
-        if ($len = $this->getNumericLength($this->type())) {
+        if ($len = $this->getIntLength($this->type())) {
             $maxValue = 16 ** ($len * 2);
 
             if (!$this->unsigned()) {

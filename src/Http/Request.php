@@ -959,10 +959,8 @@ class Request implements \ArrayAccess
 
     static public function checkFile($file, $mimes = [])
     {
-        $errors = static::UPLOAD_ERR;
-
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            throw new \Exception('Upload file error: ' . $errors[UPLOAD_ERR_OK]);
+            throw new \Exception('Upload file error: ' . static::UPLOAD_ERR[$file['error']]);
         }
 
         if (!is_uploaded_file($file['tmp_name'])) {

@@ -277,7 +277,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
                 $default['isNew'] = $row['isNew'] = false;
 
                 if ($column = $this->getTable()->autoIncrement()) {
-                    $data[$column] = $this->getTable()->lastInsertId();
+                    $data[$column] = (int)$this->getTable()->lastInsertId();
                 }
             } else {
                 if ($data = array_diff_assoc($data, $default['row'])) {

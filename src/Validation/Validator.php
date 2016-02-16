@@ -17,7 +17,7 @@ class Validator
     protected $errors = [];
 
     protected $namespaces = [
-        'Greg\Validation\Validator',
+        'Greg\\Validation\\Validator',
     ];
 
     public function __construct(array $validators = [])
@@ -63,32 +63,6 @@ class Validator
                 $errors[$key] = $paramErrors;
             }
         }
-
-        /*
-        foreach($params as $key => $value) {
-            $paramErrors = [];
-
-            foreach((array)$this->validators($key) as $validator) {
-                $parts = explode(':', $validator, 2);
-
-                $vName = array_shift($parts);
-
-                $vArgs = $parts ? explode(',', array_shift($parts)) : [];
-
-                $className = $this->getClassByName($vName);
-
-                $class = $this->loadClassInstance($className, ...$vArgs);
-
-                if (!$class->validate($value, $params)) {
-                    $paramErrors = array_merge($paramErrors, $class->getErrors());
-                }
-            }
-
-            if ($paramErrors) {
-                $errors[$key] = $paramErrors;
-            }
-        }
-        */
 
         $this->params($params);
 

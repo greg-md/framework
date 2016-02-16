@@ -1652,8 +1652,12 @@ class Table
                 $value = (string)$value;
             }
 
-            if ($column->isNumeric() and (!$column->allowNull() or $value !== null)) {
+            if ($column->isInt() and (!$column->allowNull() or $value !== null)) {
                 $value = (int)$value;
+            }
+
+            if ($column->isFloat() and (!$column->allowNull() or $value !== null)) {
+                $value = (double)$value;
             }
 
             switch($this->columnsTypes($columnName) ?: $column->type()) {

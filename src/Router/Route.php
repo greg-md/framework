@@ -191,9 +191,22 @@ class Route implements \ArrayAccess
         }
     }
 
+    public function getAllMiddleware()
+    {
+        $middleware = $this->middleware();
+
+        if ($parent = $this->parent()) {
+            $parentMiddleware = $parent->middleware();
+
+            $middleware = array_merge($parentMiddleware, $middleware);
+        }
+
+        return $middleware;
+    }
+
     protected function runBeforeMiddleware()
     {
-        foreach($this->middleware() as $middleware) {
+        foreach($this->getAllMiddleware() as $middleware) {
             $middleware = $this->fetchMiddleware($middleware);
 
             if ($this->execBeforeMiddleware($middleware) === false) {
@@ -206,7 +219,7 @@ class Route implements \ArrayAccess
 
     protected function runAfterMiddleware()
     {
-        foreach($this->middleware() as $middleware) {
+        foreach($this->getAllMiddleware() as $middleware) {
             $middleware = $this->fetchMiddleware($middleware);
 
             if ($this->execAfterMiddleware($middleware) === false) {
