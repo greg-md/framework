@@ -109,7 +109,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return $this;
     }
 
-    public function tableRelationship($name)
+    public function getTableRelationship($name)
     {
         if (!$relationship = $this->tableRelationships($name)) {
             $relationshipTable = $this->getTable()->getRelationshipTable($name);
@@ -122,8 +122,38 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return $relationship;
     }
 
+    protected function getRelationshipTable($name)
+    {
+        $relationship = Arr::get(array_flip($this->getTable()->relationshipsAliases()), $name, $name);
+
+        $tableName = current($parts = explode('.', $relationship));
+
+        return $this->getTable()->getRelationshipTable($tableName);
+    }
+
+    protected function fetchRelationship($name)
+    {
+        $row = &$this->firstAssoc();
+
+        $relationships = &$row['relationships'];
+
+        if (!Arr::has($relationships, $name)) {
+            $rows = [&$row];
+
+            $relationshipTable = $this->getRelationshipTable($name);
+
+            $this->getTable()->addRowableRelationship($rows, $relationshipTable->getName());
+
+            $this->firstAssocDefault()['relationships'][$name] = $relationships[$name];
+        }
+
+        return $this;
+    }
+
     protected function &getRelationshipAssoc($name)
     {
+        $this->fetchRelationship($name);
+
         $relationships = &$this->firstAssoc('relationships');
 
         Arr::bringRef($relationships);
@@ -133,6 +163,8 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
 
     protected function &getRelationshipAssocDefault($name)
     {
+        $this->fetchRelationship($name);
+
         $relationships = &$this->firstAssocDefault('relationships');
 
         Arr::bringRef($relationships);
@@ -142,21 +174,43 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
 
     public function getRelationship($name)
     {
-        $relationship = Arr::get(array_flip($this->getTable()->relationshipsAliases()), $name, $name);
-
-        $tableName = current($parts = explode('.', $relationship));
-
-        $table = $this->getTable()->getRelationshipTable($tableName);
-
         $rows = &$this->getRelationshipAssoc($name);
 
         $rowsDefault = &$this->getRelationshipAssocDefault($name);
 
-        return $table->createRowable([], false)->exchangeRef($rows, $rowsDefault);
+        return $this->getRelationshipTable($name)->createRowable([], false)->exchangeRef($rows, $rowsDefault);
+    }
+
+    protected function getReferenceTable($name)
+    {
+        $reference = Arr::get(array_flip($this->getTable()->referencesAliases()), $name, $name);
+
+        return $this->getTable()->getReferenceTableByColumn($reference);
+    }
+
+    protected function fetchReference($name)
+    {
+        $row = &$this->firstAssoc();
+
+        $references = &$row['references'];
+
+        if (!Arr::has($references, $name)) {
+            $rows = [&$row];
+
+            $referenceTable = $this->getReferenceTable($name);
+
+            $this->getTable()->addRowableReference($rows, $referenceTable->getName());
+
+            $this->firstAssocDefault()['references'][$name] = $references[$name];
+        }
+
+        return $this;
     }
 
     protected function &getReferenceAssoc($name)
     {
+        $this->fetchReference($name);
+
         $references = &$this->firstAssoc('references');
 
         Arr::bringRef($references);
@@ -166,6 +220,8 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
 
     protected function &getReferenceAssocDefault($name)
     {
+        $this->fetchReference($name);
+
         $references = &$this->firstAssocDefault('references');
 
         Arr::bringRef($references);
@@ -186,13 +242,9 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
             return null;
         }
 
-        $reference = Arr::get(array_flip($this->getTable()->referencesAliases()), $name, $name);
-
-        $table = $this->getTable()->getReferenceTableByColumn($reference);
-
         $rowDefault = &$this->getReferenceAssocDefault($name);
 
-        return $table->createRowable([], false)->appendRef($row, $rowDefault);
+        return $this->getReferenceTable($name)->createRowable([], false)->appendRef($row, $rowDefault);
     }
 
     /**

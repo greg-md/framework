@@ -1151,14 +1151,8 @@ class Table
         return $rows;
     }
 
-    protected function fixRowableFullParams($name, $params)
+    protected function fixRowableFullParams(&$params)
     {
-        if (is_int($name)) {
-            $name = $params;
-
-            $params = [];
-        }
-
         if (is_bool($params)) {
             $params = [
                 'full' => $params,
@@ -1179,7 +1173,7 @@ class Table
             'callback' => null,
         ], $params);
 
-        return [$name, $params];
+        return $this;
     }
 
     protected function getRowableRelationshipsParts(&$rows, $relationships, $tableName, $constraintName = 'RelationshipColumnName')
@@ -1262,7 +1256,11 @@ class Table
     public function addRowableDependencies(&$rows, $dependencies = '*')
     {
         foreach($this->findDependencies($dependencies) as $name => $params) {
-            list($name, $params) = $this->fixRowableFullParams($name, $params);
+            if (is_int($name)) {
+                $name = $params;
+
+                $params = [];
+            }
 
             $this->addRowableDependence($rows, $name, $params);
         }
@@ -1272,6 +1270,8 @@ class Table
 
     public function addRowableDependence(&$rows, $name, $params = [])
     {
+        $this->fixRowableFullParams($params);
+
         $dependenceInfo = $this->dependencies($name);
 
         /* @var $table string|Table */
@@ -1381,10 +1381,14 @@ class Table
 
     public function addRowableReferences(&$rows, $references)
     {
-        foreach($this->findReferences($references) as $tableName => $params) {
-            list($tableName, $params) = $this->fixRowableFullParams($tableName, $params);
+        foreach($this->findReferences($references) as $name => $params) {
+            if (is_int($name)) {
+                $name = $params;
 
-            $this->addRowableReference($rows, $tableName, $params);
+                $params = [];
+            }
+
+            $this->addRowableReference($rows, $name, $params);
         }
 
         return $this;
@@ -1392,6 +1396,8 @@ class Table
 
     public function addRowableReference(&$rows, $tableName, $params = [])
     {
+        $this->fixRowableFullParams($params);
+
         $this->prepareRowableTableReferencesFormat($rows, $tableName);
 
         $table = $this->getRelationshipTable($tableName);
@@ -1503,10 +1509,14 @@ class Table
 
     public function addRowableRelationships(&$rows, $relationships)
     {
-        foreach($this->findRelationships($relationships) as $tableName => $params) {
-            list($tableName, $params) = $this->fixRowableFullParams($tableName, $params);
+        foreach($this->findRelationships($relationships) as $name => $params) {
+            if (is_int($name)) {
+                $name = $params;
 
-            $this->addRowableRelationship($rows, $tableName, $params);
+                $params = [];
+            }
+
+            $this->addRowableRelationship($rows, $name, $params);
         }
 
         return $this;
@@ -1514,6 +1524,8 @@ class Table
 
     public function addRowableRelationship(&$rows, $tableName, $params = [])
     {
+        $this->fixRowableFullParams($params);
+
         $this->prepareRowableTableRelationshipsFormat($rows, $tableName);
 
         $table = $this->getRelationshipTable($tableName);

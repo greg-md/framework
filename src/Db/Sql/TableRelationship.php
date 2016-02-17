@@ -49,7 +49,7 @@ class TableRelationship
         return $this;
     }
 
-    public function find($keys)
+    public function find($keys = [])
     {
         $table = $this->getTable();
 
