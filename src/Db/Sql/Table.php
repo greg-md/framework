@@ -1643,11 +1643,13 @@ class Table
 
 
 
-    public function parseData(array $data)
+    public function parseData(array $data, $clean = false)
     {
         foreach($data as $columnName => &$value) {
             if (!($column = $this->columns($columnName))) {
-                unset($data[$columnName]);
+                if ($clean) {
+                    unset($data[$columnName]);
+                }
 
                 continue;
             }

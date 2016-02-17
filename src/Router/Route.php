@@ -38,6 +38,7 @@ class Route implements \ArrayAccess
         'delimiter' => '/',
         'regexMatchDelimiter' => false,
         'middleware' => null,
+        'defaults' => [],
     ];
 
     protected $onMatch = [];
@@ -260,7 +261,7 @@ class Route implements \ArrayAccess
     protected function dispatchAction($action, array $params = [])
     {
         if (is_callable($action)) {
-            return $this->callCallable($action, $params + $this->lastMatchedParams(), $this);
+            return $this->callCallable($action, $params + $this->lastMatchedParams() + $this->settings('defaults'), $this);
         }
 
         return null;
