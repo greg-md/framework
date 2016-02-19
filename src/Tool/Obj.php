@@ -110,7 +110,11 @@ class Obj
         $returnArgs = [];
 
         $countMixedExpected = $allowMixed ? Arr::count($expectedArgs, function(\ReflectionParameter $expectedArg) {
-            return !$expectedArg->getClass();
+            try {
+                return !$expectedArg->getClass();
+            } catch (\Exception $e) {
+                return false;
+            }
         }) : 0;
 
         foreach ($expectedArgs as $expectedArg) {

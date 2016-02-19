@@ -38,14 +38,7 @@ class Route extends \Greg\Router\Route implements RouterInterface
         } else {
             list($controller, $action) = explode('@', $action);
 
-            $controller = Str::spinalCase($controller);
-
-            $action = Str::spinalCase($action);
-
-            $allParams += [
-                'controller' => $controller,
-                'action' => $action,
-            ];
+            $controller = explode('/', $controller);
 
             return $this->app()->action($action, $controller, $allParams, $this);
         }
