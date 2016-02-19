@@ -36,7 +36,7 @@ class Row extends RowAbstract implements RowInterface
     {
         $table = $this->getTable();
 
-        $data = $table->parseData($this->storage());
+        $data = $table->parseData($this->storage(), true);
 
         if ($this->isNew()) {
             $table->insert($data)->exec();

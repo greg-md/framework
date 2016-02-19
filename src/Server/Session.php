@@ -15,6 +15,8 @@ class Session
 
     protected $flash = [];
 
+    protected $flashLoaded = false;
+
     public function __construct()
     {
         //$this->reloadFlash();
@@ -35,6 +37,12 @@ class Session
 
     public function flash($key = null, $value = null)
     {
+        if (!$this->flashLoaded) {
+            $this->reloadFlash();
+
+            $this->flashLoaded = true;
+        }
+
         if ($num = func_num_args()) {
             $flash = &$this->getForceRef(static::FLASH_KEY);
 
