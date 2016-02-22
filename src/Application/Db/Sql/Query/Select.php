@@ -30,4 +30,9 @@ class Select extends \Greg\Db\Sql\Query\Select
     {
         return Where::create($this->appName(), $this->storage());
     }
+
+    protected function newOn()
+    {
+        return On::create($this->appName(), $this->storage());
+    }
 }

@@ -229,6 +229,11 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         return Arr::getArrayRef($references, $name);
     }
 
+    public function hasReference($name)
+    {
+        return Arr::has($this->firstAssoc('references'), $name);
+    }
+
     /**
      * @param $name
      * @return Rowable|null

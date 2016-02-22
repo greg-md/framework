@@ -11,6 +11,7 @@ use Greg\Tool\Obj;
  * Class Select
  * @package Greg\Db\Sql\Query
  *
+ * @method Select inner($table, $on = null, $param = null, $_ = null)
  * @method Select whereRel($column, $operator, $value = null)
  * @method Select whereCol($column, $operator, $value = null)
  * @method Select whereCols(array $columns)

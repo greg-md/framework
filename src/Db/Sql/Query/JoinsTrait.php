@@ -11,17 +11,17 @@ trait JoinsTrait
 
     public function left($table, $on = null, $param = null, $_ = null)
     {
-        return $this->join('LEFT', ...func_get_args());
+        return $this->join('LEFT', null, ...func_get_args());
     }
 
     public function right($table, $on = null, $param = null, $_ = null)
     {
-        return $this->join('RIGHT', ...func_get_args());
+        return $this->join('RIGHT', null, ...func_get_args());
     }
 
     public function inner($table, $on = null, $param = null, $_ = null)
     {
-        return $this->join('INNER', ...func_get_args());
+        return $this->join('INNER', null, ...func_get_args());
     }
 
     public function leftTo($source, $table, $on = null, $param = null, $_ = null)
@@ -79,9 +79,8 @@ trait JoinsTrait
 
         $sourceParts = array_filter($this->fetchAlias($source));
 
-
         foreach($this->joins as $join) {
-            $joinSourceParts = ($this->fetchAlias($join['source']));
+            $joinSourceParts = array_filter($this->fetchAlias($join['source']));
 
             if ((!$sourceParts and !$joinSourceParts) or array_intersect($sourceParts, $joinSourceParts)) {
                 list($alias, $table) = $this->fetchAlias($join['table']);
