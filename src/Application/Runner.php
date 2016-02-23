@@ -409,13 +409,15 @@ class Runner implements \ArrayAccess
 
         $controller = $this->loadController($controllerName);
 
-        if (!method_exists($controller, $name)) {
+        $actionMethod = Str::phpName($name);
+
+        if (!method_exists($controller, $actionMethod)) {
             throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
         }
 
         $request = Request::create($this->appName(), $params);
 
-        return $this->binder()->callWith([$controller, $name], $request, ...array_values($params), ...$others);
+        return $this->binder()->callWith([$controller, $actionMethod], $request, ...array_values($params), ...$others);
     }
 
     public function loadController($name)
