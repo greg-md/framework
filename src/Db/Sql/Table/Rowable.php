@@ -9,7 +9,7 @@ use Greg\Tool\Arr;
 use Greg\Tool\Debug;
 use Greg\Tool\Obj;
 
-class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serializable, \Countable
+class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Serializable*/, \Countable
 {
     use InternalTrait;
 
@@ -590,24 +590,46 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate, \Serial
         }
     }
 
-    public function serialize()
+    /*
+    protected function serializeParams()
     {
-        return serialize([
+        return [
             'rows' => $this->rows,
             'defaults' => $this->defaults,
-        ]);
+            'tableRelationships' => $this->tableRelationships,
+            'total' => $this->total,
+            'page' => $this->page,
+            'limit' => $this->limit,
+        ];
     }
 
-    public function unserialize($storage)
+    public function serialize()
     {
-        $data = unserialize($storage);
+        return serialize($this->serializeParams());
+    }
 
+    protected function unserializeParams($data)
+    {
         $this->rows = $data['rows'];
 
         $this->defaults = $data['defaults'];
 
+        $this->tableRelationships = $data['tableRelationships'];
+
+        $this->total = $data['total'];
+
+        $this->page = $data['page'];
+
+        $this->limit = $data['limit'];
+    }
+
+    public function unserialize($storage)
+    {
+        $this->unserializeParams(unserialize($storage));
+
         return $this;
     }
+    */
 
     public function count()
     {
