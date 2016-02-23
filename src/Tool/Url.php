@@ -86,6 +86,15 @@ class Url
         return $url;
     }
 
+    static public function serverRelative($url)
+    {
+        if (static::isFull($url) and parse_url($url, PHP_URL_HOST) == Request::serverHost()) {
+            return parse_url($url, PHP_URL_PATH);
+        }
+
+        return $url;
+    }
+
     static public function base($url = '/')
     {
         return Request::baseUri() . $url;

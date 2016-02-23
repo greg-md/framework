@@ -948,7 +948,7 @@ class Request implements \ArrayAccess
     {
         $file = static::getIndexFiles($name);
 
-        if (!$file) {
+        if (!$file or !$file['tmp_name']) {
             return null;
         }
 
