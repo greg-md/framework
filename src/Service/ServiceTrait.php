@@ -6,15 +6,15 @@ trait ServiceTrait
 {
     public function error($content = null)
     {
-        return $this->newService($content, ServiceResponse::TYPE_ERROR);
+        return $this->newResponse($content, ServiceResponse::TYPE_ERROR);
     }
 
     public function success($content = null)
     {
-        return $this->newService($content, ServiceResponse::TYPE_SUCCESS);
+        return $this->newResponse($content, ServiceResponse::TYPE_SUCCESS);
     }
 
-    protected function newService($content = null, $type = null)
+    protected function newResponse($content = null, $type = null)
     {
         return new ServiceResponse($content, $type);
     }
