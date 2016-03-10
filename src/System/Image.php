@@ -90,10 +90,14 @@ class Image extends File
 
     static public function widthFile($file)
     {
-        list($width) = @getimagesize($file);
+        if (file_exists($file)) {
+            list($width) = @getimagesize($file);
 
-        if (!$width) {
-            $width = imagesx(static::getFile($file));
+            if (!$width) {
+                $width = imagesx(static::getFile($file));
+            }
+        } else {
+            $width = 0;
         }
 
         return $width;
@@ -101,12 +105,16 @@ class Image extends File
 
     static public function heightFile($file)
     {
-        list($width, $height) = @getimagesize($file);
+        if (file_exists($file)) {
+            list($width, $height) = @getimagesize($file);
 
-        unset($width);
+            unset($width);
 
-        if (!$height) {
-            $height = imagesy(static::getFile($file));
+            if (!$height) {
+                $height = imagesy(static::getFile($file));
+            }
+        } else {
+            $height = 0;
         }
 
         return $height;

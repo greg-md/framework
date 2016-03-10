@@ -130,6 +130,14 @@ abstract class Query
         return Str::quote($name, $this->quoteNameWith());
     }
 
+    public function quoteLike($string, $escape = '\\')
+    {
+        return strtr($string, [
+            '_' => $escape . '_',
+            '%' => $escape . '%',
+        ]);
+    }
+
     public function quoteNameWith($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
