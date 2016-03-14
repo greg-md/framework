@@ -330,7 +330,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
         foreach($this->rows as $key => &$row) {
             $default = &$this->defaults[$key];
 
-            $data = $this->getTable()->parseData($row['row'], true);
+            $data = $this->getTable()->parseData($row['row'], true, true);
 
             if (Arr::get($row, 'isNew')) {
                 $this->getTable()->insert($data)->exec();

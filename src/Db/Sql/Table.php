@@ -1643,7 +1643,7 @@ class Table
 
 
 
-    public function parseData(array $data, $clean = false)
+    public function parseData(array $data, $clean = false, $reverse = false)
     {
         foreach($data as $columnName => &$value) {
             if (!($column = $this->columns($columnName))) {
@@ -1702,6 +1702,10 @@ class Table
                     break;
                 case 'boolean':
                     $value = (bool)$value;
+
+                    break;
+                case 'json':
+                    $value = $reverse ? json_encode($value) : json_decode($value, true);
 
                     break;
             }
