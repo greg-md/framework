@@ -1787,7 +1787,7 @@ class Table
             }
         }
 
-        throw new \Exception('Reference table not found by column`' . $name . '` in table `' . $this->getName() . '`.');
+        throw new \Exception('Reference table not found by column `' . $name . '` in table `' . $this->getName() . '`.');
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)
