@@ -37,6 +37,10 @@ class ServiceResponse
         return $this->type() === static::TYPE_ERROR;
     }
 
+    /**
+     * @param null $value
+     * @return mixed
+     */
     public function content($value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
