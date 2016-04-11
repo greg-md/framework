@@ -219,7 +219,7 @@ class Obj
      * @param $var
      * @param $value
      * @param string $type
-     * @return string|$this
+     * @return string
      */
     static public function &fetchStrVar($return, &$var, $value = null, $type = self::PROP_REPLACE)
     {
