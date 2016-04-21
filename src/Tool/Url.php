@@ -109,7 +109,7 @@ class Url
         return $urlPath . ($allQuery ? '?' . implode('&', $allQuery) : '');
     }
 
-    static public function init($url)
+    static public function init($url, $verbose = false)
     {
         $ch = curl_init(static::fix($url));
 
@@ -117,7 +117,9 @@ class Url
 
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-        curl_setopt($ch, CURLOPT_VERBOSE, true);
+        if ($verbose) {
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+        }
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
