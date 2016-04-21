@@ -1643,7 +1643,7 @@ class Table
 
 
 
-    public function parseData(array $data, $clean = false)
+    public function parseData(array $data, $clean = false, $reverse = false)
     {
         foreach($data as $columnName => &$value) {
             if (!($column = $this->columns($columnName))) {
@@ -1702,6 +1702,10 @@ class Table
                     break;
                 case 'boolean':
                     $value = (bool)$value;
+
+                    break;
+                case 'json':
+                    $value = $reverse ? json_encode($value) : json_decode($value, true);
 
                     break;
             }
@@ -1783,7 +1787,7 @@ class Table
             }
         }
 
-        throw new \Exception('Reference table not found by column`' . $name . '` in table `' . $this->getName() . '`.');
+        throw new \Exception('Reference table not found by column `' . $name . '` in table `' . $this->getName() . '`.');
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)

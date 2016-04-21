@@ -103,7 +103,7 @@ trait JoinsTrait
             }
         }
 
-        return implode('', $joins);
+        return implode(' ', $joins);
     }
 
     /**

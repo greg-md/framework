@@ -31,6 +31,15 @@ class Url
         return ($secured ? 'https' : 'http') . '://' . $url;
     }
 
+    static public function fixShort($url)
+    {
+        if (static::isFull($url)) {
+            return $url;
+        }
+
+        return '//' . $url;
+    }
+
     static public function host($url, $stripWWW = true)
     {
         $url = Url::fix($url);

@@ -41,7 +41,7 @@ class DateTime extends \DateTime
         return Type::isNaturalNumber($time) ? $time : strtotime($time);
     }
 
-    static public function diffTime($time1, $time2)
+    static public function diffTime($time1, $time2 = 'now')
     {
         $time1 = static::toTimestamp($time1);
 
@@ -50,7 +50,7 @@ class DateTime extends \DateTime
         return ($time1 === $time2) ? 0 : ($time1 > $time2 ? 1 : -1);
     }
 
-    static public function toStringDateTime($time, $second = true)
+    static public function toStringDateTime($time = 'now', $second = true)
     {
         return static::formatTime('Y-m-d H:i' . ($second ? ':s' : ''), $time);
     }
@@ -60,12 +60,12 @@ class DateTime extends \DateTime
         return static::formatTime('c', $time);
     }
 
-    static public function toStringDate($time)
+    static public function toStringDate($time = 'now')
     {
         return static::formatTime('Y-m-d', $time);
     }
 
-    static public function toStringTime($time, $second = true)
+    static public function toStringTime($time = 'now', $second = true)
     {
         return static::formatTime('H:i' . ($second ? ':s' : ''), $time);
     }

@@ -82,6 +82,8 @@ class Select extends Query
     {
         if (!is_array($column)) {
             $column = func_get_args();
+
+            array_shift($column);
         }
 
         list($alias, $name) = $this->fetchAlias($table);

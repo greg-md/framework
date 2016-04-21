@@ -43,11 +43,17 @@ class Validator
             $paramErrors = [];
 
             foreach ($validators as $validator) {
-                $parts = explode(':', $validator, 2);
+                if (is_array($validator)) {
+                    $vName = array_shift($validator);
 
-                $vName = array_shift($parts);
+                    $vArgs = $validator;
+                } else {
+                    $parts = explode(':', $validator, 2);
 
-                $vArgs = $parts ? explode(',', array_shift($parts)) : [];
+                    $vName = array_shift($parts);
+
+                    $vArgs = $parts ? explode(',', array_shift($parts)) : [];
+                }
 
                 $className = $this->getClassByName($vName);
 

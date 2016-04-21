@@ -219,7 +219,7 @@ class Obj
      * @param $var
      * @param $value
      * @param string $type
-     * @return string|$this
+     * @return string
      */
     static public function &fetchStrVar($return, &$var, $value = null, $type = self::PROP_REPLACE)
     {
@@ -490,7 +490,7 @@ class Obj
      * @param null $value
      * @param string $type
      * @param bool $recursive
-     * @return mixed|$this
+     * @return mixed
      */
     static public function &fetchArrayReplaceVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $recursive = false)
     {
@@ -529,7 +529,7 @@ class Obj
      * @param string $type
      * @param bool $replace
      * @param bool $recursive
-     * @return mixed|$this
+     * @return mixed
      */
     static public function &fetchArrayVar($return, &$var, $key = null, $value = null, $type = self::PROP_APPEND, $replace = false, $recursive = false)
     {
