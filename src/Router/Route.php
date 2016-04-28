@@ -343,9 +343,9 @@ class Route implements \ArrayAccess
                 if ($matchedRoute !== $this) {
                     $matchedRoute->lastMatchedPath($path);
 
-                    $matchedRoute->lastMatchedCleanParams($cleanParams, Obj::PROP_PREPEND);
+                    $matchedRoute->lastMatchedCleanParams($cleanParams);
 
-                    $matchedRoute->lastMatchedParams($params, Obj::PROP_PREPEND);
+                    $matchedRoute->lastMatchedParams($params);
                 }
 
                 $matchedParams = $params;
