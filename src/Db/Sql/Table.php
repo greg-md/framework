@@ -36,6 +36,8 @@ class Table
 
     protected $columnsTypes = [];
 
+    protected $columnName = null;
+
     protected $autoIncrement = null;
 
     protected $primary = [];
@@ -88,7 +90,7 @@ class Table
 
     protected $cacheSchemaLifetime = 0;
 
-    protected $relationshipsTables = [];
+    protected $knownTables = [];
 
     public function init()
     {
@@ -325,7 +327,7 @@ class Table
 
             sort($constraintColumns);
 
-            $table = $this->getRelationshipTable($tableName);
+            $table = $this->getKnownTable($tableName);
 
             foreach($this->getTableRelationships($tableName) as $relationshipInfo) {
                 $relationshipColumns = [];
@@ -375,6 +377,23 @@ class Table
         }
 
         return $query;
+    }
+
+    public function getPairs(array $whereIs = [])
+    {
+        if (!$columnName = $this->columnName()) {
+            throw new \Exception('Undefined column name for table `' . $this->getName() . '`');
+        }
+
+        $query = $this->select();
+
+        $query->columns($query->concat($this->getFirstUnique(), ':'), $columnName);
+
+        if ($whereIs) {
+            $query->whereCols($whereIs);
+        }
+
+        return $query->pairs();
     }
 
     public function exists($column, $value)
@@ -569,7 +588,7 @@ class Table
                 'callback' => null,
             ], $referenceParams);
 
-            $referenceTable = $this->getRelationshipTable($referenceTableName);
+            $referenceTable = $this->getKnownTable($referenceTableName);
 
             $tableReferences = $tablesReferences[$referenceTable->getName()];
 
@@ -751,7 +770,7 @@ class Table
                 'callback' => null,
             ], $relationshipParams);
 
-            $relationshipTable = $this->getRelationshipTable($relationshipTableName);
+            $relationshipTable = $this->getKnownTable($relationshipTableName);
 
             $tableRelationships = $this->getTableRelationships($relationshipTable->getName());
 
@@ -960,7 +979,7 @@ class Table
             $dependenceInfo = $this->dependencies($dependenceName);
 
             /* @var $dependenceTable string|Table */
-            $dependenceTable = $this->getRelationshipTable($dependenceInfo['table']);
+            $dependenceTable = $this->getKnownTable($dependenceInfo['table']);
 
             $tableRelationships = $this->getTableRelationships($dependenceTable->name());
 
@@ -1178,7 +1197,7 @@ class Table
 
     protected function getRowableRelationshipsParts(&$rows, $relationships, $tableName, $constraintName = 'RelationshipColumnName')
     {
-        $table = $this->getRelationshipTable($tableName);
+        $table = $this->getKnownTable($tableName);
 
         $parts = [];
 
@@ -1275,7 +1294,7 @@ class Table
         $dependenceInfo = $this->dependencies($name);
 
         /* @var $table string|Table */
-        $table = $this->getRelationshipTable($dependenceInfo['table']);
+        $table = $this->getKnownTable($dependenceInfo['table']);
 
         $relationships = $this->getTableRelationships($table->name());
 
@@ -1400,7 +1419,7 @@ class Table
 
         $this->prepareRowableTableReferencesFormat($rows, $tableName);
 
-        $table = $this->getRelationshipTable($tableName);
+        $table = $this->getKnownTable($tableName);
 
         $references = $this->getTableReferences($tableName);
 
@@ -1469,9 +1488,6 @@ class Table
         return $this;
     }
 
-
-
-
     protected function findRelationships($relationships = '*')
     {
         if ($relationships == '*') {
@@ -1483,20 +1499,12 @@ class Table
 
     protected function prepareRowableTableRelationshipsFormat(&$rows, $tableName)
     {
-        $table = $this->getRelationshipTable($tableName);
+        $table = $this->getKnownTable($tableName);
 
         $relationships = $this->getTableRelationships($table->getName());
 
         foreach($relationships as $info) {
-            $key = [$tableName];
-
-            foreach($info['Constraint'] as $constraint) {
-                $key[] = $constraint['RelationshipColumnName'];
-            }
-
-            $key = implode('.', $key);
-
-            $key = $this->relationshipsAliases($key) ?: $key;
+            $key = $this->relationshipsAliases($info['ConstraintName']) ?: $info['ConstraintName'];
 
             foreach($rows as &$row) {
                 $row['relationships'][$key] = [];
@@ -1528,7 +1536,7 @@ class Table
 
         $this->prepareRowableTableRelationshipsFormat($rows, $tableName);
 
-        $table = $this->getRelationshipTable($tableName);
+        $table = $this->getKnownTable($tableName);
 
         $relationships = $this->getTableRelationships($tableName);
 
@@ -1602,13 +1610,7 @@ class Table
                 $relationshipColumns[] = $constraint['RelationshipColumnName'];
             }
 
-            $key = $relationshipColumns;
-
-            Arr::prepend($key, $tableName);
-
-            $key = implode('.', $key);
-
-            $key = $this->relationshipsAliases($key) ?: $key;
+            $key = $this->relationshipsAliases($info['ConstraintName']) ?: $info['ConstraintName'];
 
             foreach($rows as &$rowFull) {
                 $values = [];
@@ -1715,9 +1717,18 @@ class Table
         return $data;
     }
 
+    public function getColumn($name)
+    {
+        if (!$column = $this->columns($name)) {
+            throw new \Exception('Column `' . $name . '`not found in table `' . $this->name() . '`.');
+        }
+
+        return $column;
+    }
+
     public function getColumnType($name)
     {
-        return $this->columnsTypes($name) ?: $this->columns($name)->type();
+        return $this->columnsTypes($name) ?: (($column = $this->columns($name)) ? $column->type() : null);
     }
 
     public function getName()
@@ -1759,17 +1770,68 @@ class Table
         return $tablesReferences;
     }
 
+    public function getRelationshipTable($name)
+    {
+        $name = Arr::get(array_flip($this->relationshipsAliases()), $name, $name);
+
+        return $this->getKnownTable($this->relationships($name)['RelationshipTableName']);
+    }
+
     /**
      * @param $name
      * @return Table
      * @throws \Exception
      */
-    public function getRelationshipTable($name)
+    public function getReferenceTable($name)
     {
-        $table = $this->relationshipsTables($name);
+        $reference = Arr::get(array_flip($this->referencesAliases()), $name, $name);
+
+        return $this->getReferenceTableByColumn($reference);
+    }
+
+    /**
+     * @param $name
+     * @return Table
+     * @throws \Exception
+     */
+    public function getDependenceTable($name)
+    {
+        $dependenceInfo = $this->dependencies($name);
+
+        return $this->getKnownTable($dependenceInfo['table']);
+    }
+
+    public function findReferenceTableByColumn($name)
+    {
+        foreach($this->references() as $reference) {
+            if ($name == implode('.', array_column($reference['Constraint'], 'ColumnName'))) {
+                return $this->getKnownTable($reference['ReferencedTableName']);
+            }
+        }
+
+        return null;
+    }
+
+    public function getReferenceTableByColumn($name)
+    {
+        if (!$reference = $this->findReferenceTableByColumn($name)) {
+            throw new \Exception('Reference table not found by column `' . $name . '` in table `' . $this->getName() . '`.');
+        }
+
+        return $reference;
+    }
+
+    /**
+     * @param $name
+     * @return Table
+     * @throws \Exception
+     */
+    public function getKnownTable($name)
+    {
+        $table = $this->knownTables($name);
 
         if (!$table) {
-            throw new \Exception('Relationship table `' . $name . '` not found in table `' . $this->getName() . '`.');
+            throw new \Exception('Known table `' . $name . '` not found in table `' . $this->getName() . '`.');
         }
 
         if (is_callable($table)) {
@@ -1777,17 +1839,6 @@ class Table
         }
 
         return $table;
-    }
-
-    public function getReferenceTableByColumn($name)
-    {
-        foreach($this->references() as $reference) {
-            if ($name == implode('.', array_column($reference['Constraint'], 'ColumnName'))) {
-                return $this->getRelationshipTable($reference['ReferencedTableName']);
-            }
-        }
-
-        throw new \Exception('Reference table not found by column `' . $name . '` in table `' . $this->getName() . '`.');
     }
 
     public function prefix($value = null, $type = Obj::PROP_REPLACE)
@@ -1820,6 +1871,11 @@ class Table
     public function columnsTypes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+    }
+
+    public function columnName($value = null, $type = Obj::PROP_REPLACE)
+    {
+        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
     public function autoIncrement($value = null, $type = Obj::PROP_REPLACE)
@@ -1950,7 +2006,7 @@ class Table
         return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
     }
 
-    public function relationshipsTables($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function knownTables($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
     {
         return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

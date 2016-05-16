@@ -2,9 +2,11 @@
 
 namespace Greg\Db\Sql\Storage\Mysql\Query;
 
+use Greg\Db\Sql\Storage\Mysql\QueryTrait;
+
 class Select extends \Greg\Db\Sql\Query\Select
 {
-    use SelectTrait;
+    use QueryTrait, SelectTrait;
 
     const FOR_UPDATE = 'FOR UPDATE';
 

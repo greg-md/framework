@@ -138,6 +138,11 @@ abstract class Query
         ]);
     }
 
+    public function concat($array, $delimiter = '')
+    {
+        return implode(' + ' . $delimiter . ' + ', $array);
+    }
+
     public function quoteNameWith($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());

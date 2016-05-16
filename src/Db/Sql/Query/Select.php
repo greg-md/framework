@@ -118,7 +118,6 @@ class Select extends Query
     public function columns($column = null, $_ = null)
     {
         if (func_num_args()) {
-
             if (!is_array($column)) {
                 $column = func_get_args();
             }

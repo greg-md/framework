@@ -124,11 +124,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
     protected function getRelationshipTable($name)
     {
-        $relationship = Arr::get(array_flip($this->getTable()->relationshipsAliases()), $name, $name);
-
-        $tableName = current($parts = explode('.', $relationship));
-
-        return $this->getTable()->getRelationshipTable($tableName);
+        return $this->getTable()->getRelationshipTable($name);
     }
 
     protected function fetchRelationship($name)
@@ -187,9 +183,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
     protected function getReferenceTable($name)
     {
-        $reference = Arr::get(array_flip($this->getTable()->referencesAliases()), $name, $name);
-
-        return $this->getTable()->getReferenceTableByColumn($reference);
+        return $this->getTable()->getReferenceTable($name);
     }
 
     protected function fetchReference($name)
@@ -256,6 +250,73 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
         return $this->getReferenceTable($name)->createRowable([], false)->appendRef($row, $rowDefault);
     }
 
+    protected function getDependenceTable($name)
+    {
+        return $this->getTable()->getDependenceTable($name);
+    }
+
+    protected function fetchDependence($name)
+    {
+        $row = &$this->firstAssoc();
+
+        $dependencies = &$row['dependencies'];
+
+        if (!Arr::has($dependencies, $name)) {
+            $rows = [&$row];
+
+            $this->getTable()->addRowableDependence($rows, $name);
+
+            $this->firstAssocDefault()['dependencies'][$name] = $dependencies[$name];
+        }
+
+        return $this;
+    }
+
+    protected function &getDependenceAssoc($name)
+    {
+        $this->fetchDependence($name);
+
+        $dependencies = &$this->firstAssoc('dependencies');
+
+        Arr::bringRef($dependencies);
+
+        return Arr::getArrayRef($dependencies, $name);
+    }
+
+    protected function &getDependenceAssocDefault($name)
+    {
+        $this->fetchDependence($name);
+
+        $dependencies = &$this->firstAssocDefault('dependencies');
+
+        Arr::bringRef($dependencies);
+
+        return Arr::getArrayRef($dependencies, $name);
+    }
+
+    public function hasDependence($name)
+    {
+        return Arr::has($this->firstAssoc('dependencies'), $name);
+    }
+
+    /**
+     * @param $name
+     * @return Rowable|null
+     * @throws \Exception
+     */
+    public function getDependence($name)
+    {
+        $row = &$this->getDependenceAssoc($name);
+
+        if (!$row) {
+            return null;
+        }
+
+        $rowDefault = &$this->getDependenceAssocDefault($name);
+
+        return $this->getDependenceTable($name)->createRowable([], false)->appendRef($row, $rowDefault);
+    }
+
     /**
      * @return Table
      * @throws \Exception
@@ -283,8 +344,8 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
     {
         $items = [];
 
-        foreach($this->rows as $row) {
-            $items[] = $row['row'][$column];
+        foreach($this as $row) {
+            $items[] = $row[$column];
         }
 
         return $items;
