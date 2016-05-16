@@ -36,7 +36,12 @@ class Smtp
     {
         ErrorHandler::throwException();
 
-        $socket = stream_socket_client($this->remoteAddress(), $errorNum, $errorStr, $this->timeout());
+        $options['ssl']['verify_peer'] = false;
+
+        $options['ssl']['verify_peer_name'] = false;
+
+        $socket = stream_socket_client($this->remoteAddress(), $errorNum, $errorStr, $this->timeout(),
+            STREAM_CLIENT_CONNECT, stream_context_create($options));
 
         if ($errorNum) {
             throw new \Exception($errorStr);

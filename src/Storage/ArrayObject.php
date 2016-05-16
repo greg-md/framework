@@ -10,7 +10,6 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function __construct($input = [], $iteratorClass = null)
     {
-        $_GET['lol'] = true;
         $this->mergeMe(Arr::bring($input));
 
         if ($iteratorClass !== null) {
