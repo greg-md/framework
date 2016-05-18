@@ -1272,6 +1272,16 @@ class Table
         return Arr::bring($dependencies);
     }
 
+    protected function prepareRowableTableDependenceFormat(&$rows, $name)
+    {
+        foreach($rows as &$row) {
+            $row['dependencies'][$name] = null;
+        }
+        unset($row);
+
+        return $this;
+    }
+
     public function addRowableDependencies(&$rows, $dependencies = '*')
     {
         foreach($this->findDependencies($dependencies) as $name => $params) {
@@ -1290,6 +1300,8 @@ class Table
     public function addRowableDependence(&$rows, $name, $params = [])
     {
         $this->fixRowableFullParams($params);
+
+        $this->prepareRowableTableDependenceFormat($rows, $name);
 
         $dependenceInfo = $this->dependencies($name);
 
