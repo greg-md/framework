@@ -85,15 +85,23 @@ class Mysql implements StorageInterface
 
             $column = new Column($columnInfo['Field']);
 
-            if (preg_match('#^([a-z]+)(?:\(([0-9]+)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
+            if (preg_match('#^([a-z]+)(?:\((.+?)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
                 $column->type($matches[1]);
 
                 if (Arr::hasRef($matches, 2)) {
-                    $column->length($matches[2]);
+                    if ($matches[1] === 'enum') {
+                        $column->values(str_getcsv($matches[2], ',', "'"));
+                    } else {
+                        $column->length($matches[2]);
+                    }
                 }
 
                 if (Arr::hasRef($matches, 3)) {
                     $column->unsigned();
+                }
+
+                if ($matches[1] === 'text') {
+                    $column->length(65535);
                 }
             }
 

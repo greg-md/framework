@@ -379,7 +379,7 @@ class Table
         return $query;
     }
 
-    public function getPairs(array $whereIs = [])
+    public function getPairs(array $whereIs = [], callable $callable = null)
     {
         if (!$columnName = $this->columnName()) {
             throw new \Exception('Undefined column name for table `' . $this->getName() . '`');
@@ -391,6 +391,10 @@ class Table
 
         if ($whereIs) {
             $query->whereCols($whereIs);
+        }
+
+        if ($callable) {
+            $callable($query);
         }
 
         return $query->pairs();
@@ -1509,12 +1513,8 @@ class Table
         return Arr::bring($relationships);
     }
 
-    protected function prepareRowableTableRelationshipsFormat(&$rows, $tableName)
+    protected function prepareRowableTableRelationshipsFormat(&$rows, $relationships)
     {
-        $table = $this->getKnownTable($tableName);
-
-        $relationships = $this->getTableRelationships($table->getName());
-
         foreach($relationships as $info) {
             $key = $this->relationshipsAliases($info['ConstraintName']) ?: $info['ConstraintName'];
 
@@ -1542,15 +1542,15 @@ class Table
         return $this;
     }
 
-    public function addRowableRelationship(&$rows, $tableName, $params = [])
+    public function addRowableRelationship(&$rows, $name, $params = [])
     {
+        $table = $this->getRelationshipTable($name);
+
         $this->fixRowableFullParams($params);
 
-        $this->prepareRowableTableRelationshipsFormat($rows, $tableName);
+        $relationships = $this->getTableRelationships($table->getName());
 
-        $table = $this->getKnownTable($tableName);
-
-        $relationships = $this->getTableRelationships($tableName);
+        $this->prepareRowableTableRelationshipsFormat($rows, $relationships);
 
         $query = $table->select();
 
@@ -1594,7 +1594,7 @@ class Table
             $query = $this->select()->union($queries);
             */
         } else {
-            $parts = $this->getRowableRelationshipsParts($rows, $relationships, $tableName);
+            $parts = $this->getRowableRelationshipsParts($rows, $relationships, $table->getName());
 
             if (!$parts) {
                 return $this;
@@ -1709,7 +1709,7 @@ class Table
 
                     break;
                 case 'sys_name':
-                    if ($value) {
+                    if ($reverse && $value) {
                         $value = Url::transform($value);
                     }
 
@@ -1786,7 +1786,11 @@ class Table
     {
         $name = Arr::get(array_flip($this->relationshipsAliases()), $name, $name);
 
-        return $this->getKnownTable($this->relationships($name)['RelationshipTableName']);
+        if (!$relationship = $this->relationships($name)) {
+            throw new \Exception('Relationship `' . $name . '` not found in table `' . $this->getName() . '`.');
+        }
+
+        return $this->getKnownTable($relationship['RelationshipTableName']);
     }
 
     /**

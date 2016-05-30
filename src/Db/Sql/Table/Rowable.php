@@ -136,9 +136,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
         if (!Arr::has($relationships, $name)) {
             $rows = [&$row];
 
-            $relationshipTable = $this->getRelationshipTable($name);
-
-            $this->getTable()->addRowableRelationship($rows, $relationshipTable->getName());
+            $this->getTable()->addRowableRelationship($rows, $name);
 
             if (!Arr::has($relationships, $name)) {
                 throw new \Exception('Relationship `' . $name . '` not found for table `' . $this->getTableName() . '`.');

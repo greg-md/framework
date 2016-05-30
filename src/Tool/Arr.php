@@ -846,6 +846,11 @@ class Arr
         $arrays = $grouped; return $arrays;
     }
 
+    static public function pairs($array, $key, $value)
+    {
+        return array_combine(array_column($array, $key), array_column($array, $value));
+    }
+
     static public function filled(array &$array, ...$args)
     {
         return sizeof(array_filter($array, ...$args)) == sizeof($array);
