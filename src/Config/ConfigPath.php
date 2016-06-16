@@ -4,20 +4,7 @@ namespace Greg\Config;
 
 class ConfigPath
 {
-    static public function fetch($path, $env = null, $ext = '.php')
-    {
-        $config = static::fetchCurrent($path, $ext);
-
-        if ($env) {
-            foreach(static::fetchCurrent($path . DIRECTORY_SEPARATOR . $env, $ext) as $key => $conf) {
-                $config[$key] = array_key_exists($key, $config) ? array_merge($config[$key], $conf) : $conf;
-            }
-        }
-
-        return $config;
-    }
-
-    static protected function fetchCurrent($path, $ext = '.php')
+    static public function fetch($path, array $params = [], $ext = '.php')
     {
         $config = [];
 
@@ -29,7 +16,7 @@ class ConfigPath
 
                 $basename = mb_substr($basename, 0, mb_strlen($basename) - $extLen);
 
-                $config[$basename] = ___requireFile($file);
+                $config[$basename] = ___gregRequireFile($file, $params);
             }
         }
 
@@ -42,9 +29,11 @@ class ConfigPath
  *
  * Prevents access to $this/self from included files.
  */
-if (!function_exists('___requireFile')) {
-    function ___requireFile($___file)
+if (!function_exists('___gregRequireFile')) {
+    function ___gregRequireFile($___file, array $___params = [])
     {
+        extract($___params);
+
         return require $___file;
     }
 }
