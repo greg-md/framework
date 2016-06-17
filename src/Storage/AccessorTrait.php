@@ -13,6 +13,10 @@ trait AccessorTrait
         return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
     }
 
+    /**
+     * @param array $storage
+     * @return array
+     */
     protected function &accessor(array $storage = [])
     {
         return Obj::fetchVar($this, $this->storage, ...func_get_args());

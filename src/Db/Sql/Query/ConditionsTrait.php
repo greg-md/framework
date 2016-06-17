@@ -272,7 +272,7 @@ trait ConditionsTrait
 
     /**
      * @param StorageInterface $value
-     * @return $this|null|StorageInterface
+     * @return StorageInterface|null
      */
     abstract public function storage(StorageInterface $value = null);
 

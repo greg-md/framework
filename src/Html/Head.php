@@ -19,7 +19,7 @@ class Head
 
     /**
      * @param Meta $value
-     * @return Meta|$this|null
+     * @return Meta|null
      */
     public function meta(Meta $value = null)
     {
@@ -28,7 +28,7 @@ class Head
 
     /**
      * @param Link $value
-     * @return Link|$this|null
+     * @return Link|null
      */
     public function link(Link $value = null)
     {
@@ -37,7 +37,7 @@ class Head
 
     /**
      * @param Style $value
-     * @return Style|$this|null
+     * @return Style|null
      */
     public function style(Style $value = null)
     {

@@ -4,19 +4,25 @@ namespace Greg\Config;
 
 class ConfigPath
 {
-    static public function fetch($path, array $params = [], $ext = '.php')
+    static public function fetch($path, array $params = [], $ext = 'php')
     {
         $config = [];
 
-        $extLen = mb_strlen($ext);
+        foreach(glob($path . DIRECTORY_SEPARATOR . '*') as $file) {
+            $settings = null;
 
-        foreach(glob($path . DIRECTORY_SEPARATOR . '*' . $ext) as $file) {
-            if (is_file($file)) {
-                $basename = basename($file);
+            if (is_dir($file)) {
+                $settings = static::fetch($file, $params, $ext);
+            }
 
-                $basename = mb_substr($basename, 0, mb_strlen($basename) - $extLen);
+            if (is_file($file) and pathinfo($file, PATHINFO_EXTENSION) == $ext) {
+                $settings = ___gregRequireFile($file, $params);
+            }
 
-                $config[$basename] = ___gregRequireFile($file, $params);
+            if ($settings !== null) {
+                $fileName = pathinfo($file, PATHINFO_FILENAME);
+
+                $config[$fileName] = isset($config[$fileName]) ? array_merge($config[$fileName], $settings) : $settings;
             }
         }
 

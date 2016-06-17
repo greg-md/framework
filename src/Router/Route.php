@@ -7,7 +7,6 @@ use Greg\Http\Request;
 use Greg\Regex\InNamespace;
 use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
-use Greg\Tool\Debug;
 use Greg\Tool\Obj;
 use Greg\Tool\Regex;
 use Greg\Tool\Str;
