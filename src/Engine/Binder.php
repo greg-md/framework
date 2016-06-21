@@ -4,6 +4,7 @@ namespace Greg\Engine;
 
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
+use Greg\Tool\Str;
 
 class Binder
 {
@@ -25,6 +26,13 @@ class Binder
         $self = $class->newInstanceWithoutConstructor();
 
         method_exists($self, '__bind') && $this->call([$self, '__bind']);
+
+        // Call all methods which starts with __bind
+        foreach(get_class_methods($self) as $methodName) {
+            if ($methodName[0] === '_' and $methodName !== '__bind' and Str::startsWith($methodName, '__bind')) {
+                $this->call([$self, $methodName]);
+            }
+        }
 
         if ($constructor = $class->getConstructor()) {
             if ($expectedArgs = $constructor->getParameters()) {

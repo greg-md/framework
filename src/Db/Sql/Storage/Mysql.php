@@ -83,54 +83,98 @@ class Mysql implements StorageInterface
                 $autoIncrement = $columnInfo['Field'];
             }
 
-            $column = new Column($columnInfo['Field']);
-
-            if (preg_match('#^([a-z]+)(?:\((.+?)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
-                $column->type($matches[1]);
-
-                if (Arr::hasRef($matches, 2)) {
-                    if ($matches[1] === 'enum') {
-                        $column->values(str_getcsv($matches[2], ',', "'"));
-                    } else {
-                        $column->length($matches[2]);
-                    }
-                }
-
-                if (Arr::hasRef($matches, 3)) {
-                    $column->unsigned();
-                }
-
-                if ($matches[1] === 'text') {
-                    $column->length(65535);
-                }
-            }
-
-            if ($columnInfo['Null'] == 'NO') {
-                $column->notNull();
-            }
-
-            if ($columnInfo['Default'] === '') {
-                $columnInfo['Default'] = null;
-            }
-
-            if (!$column->allowNull()) {
-                $columnInfo['Default'] = (string)$columnInfo['Default'];
-            }
-
-            if ($column->isNumeric() and (!$column->allowNull() or $columnInfo['Default'] !== null)) {
-                $columnInfo['Default'] = (int)$columnInfo['Default'];
-            }
-
-            $column->def($columnInfo['Default']);
-
-            $columns[$columnInfo['Field']] = $column;
+            $columns[] = $this->parseColumnInfo($columnInfo);
         }
 
         return [
             'columns' => $columns,
-            'primary' => $primaryKeys,
+            'primaryKeys' => $primaryKeys,
             'autoIncrement' => $autoIncrement,
         ];
+    }
+
+    public function parseColumnInfo($columnInfo)
+    {
+        $info = $this->parseColumnInfoAsArray($columnInfo);
+
+        $column = new Column();
+
+        $column->name($info['name']);
+
+        $column->type($info['type']);
+
+        $column->length($info['length']);
+
+        $column->unsigned($info['unsigned']);
+
+        $column->null($info['null']);
+
+        $column->defaultValue($info['defaultValue']);
+
+        $column->comment($info['comment']);
+
+        $column->values($info['values']);
+
+        return $column;
+    }
+
+    protected function parseColumnInfoAsArray($columnInfo)
+    {
+        $name = $columnInfo['Field'];
+
+        $type = null;
+
+        $length = null;
+
+        $unsigned = false;
+
+        $null = true;
+
+        $defaultValue = null;
+
+        $comment = null;
+
+        $values = [];
+
+        if (preg_match('#^([a-z]+)(?:\((.+?)\))?(?: (unsigned))?#i', $columnInfo['Type'], $matches)) {
+            $type = $matches[1];
+
+            if (Arr::hasRef($matches, 2)) {
+                if ($matches[1] === 'enum') {
+                    $values = str_getcsv($matches[2], ',', "'");
+                } else {
+                    $length = $matches[2];
+                }
+            }
+
+            if (Arr::hasRef($matches, 3)) {
+                $unsigned = true;
+            }
+
+            if ($matches[1] === 'text') {
+                $length = 65535;
+            }
+        }
+
+        if ($columnInfo['Null'] == 'NO') {
+            $null = false;
+        }
+
+        if ($columnInfo['Default'] === '') {
+            $columnInfo['Default'] = null;
+        }
+
+        if (!$null) {
+            $columnInfo['Default'] = (string)$columnInfo['Default'];
+        }
+
+        if (Column::isNumericType($type) and (!$null or $columnInfo['Default'] !== null)) {
+            $columnInfo['Default'] = (int)$columnInfo['Default'];
+        }
+
+        $defaultValue = $columnInfo['Default'];
+
+        return compact('name', 'type', 'length', 'unsigned', 'null', 'defaultValue', 'comment', 'values');
     }
 
     public function getTableReferences($tableName)

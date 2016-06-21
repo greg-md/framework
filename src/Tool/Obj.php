@@ -29,8 +29,13 @@ class Obj
 
         $self = $class->newInstanceWithoutConstructor();
 
-        if (method_exists($self, '__bind')) {
-            $self->__bind();
+        method_exists($self, '__bind') && $self->__bind();
+
+        // Call all methods which starts with __bind
+        foreach(get_class_methods($self) as $methodName) {
+            if ($methodName[0] === '_' and $methodName !== '__bind' and Str::startsWith($methodName, '__bind')) {
+                $self->{$methodName}();
+            }
         }
 
         if ($constructor = $class->getConstructor()) {
@@ -214,13 +219,6 @@ class Obj
         return $var;
     }
 
-    /**
-     * @param $return
-     * @param $var
-     * @param $value
-     * @param string $type
-     * @return string
-     */
     static public function &fetchStrVar($return, &$var, $value = null, $type = self::PROP_REPLACE)
     {
         if (func_num_args() > 2) {

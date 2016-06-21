@@ -59,7 +59,7 @@ class Column
 
     protected $name = null;
 
-    protected $type = self::TYPE_INT;
+    protected $type = null;
 
     protected $length = null;
 
@@ -67,48 +67,11 @@ class Column
 
     protected $allowNull = true;
 
-    protected $def = null;
+    protected $defaultValue = null;
 
     protected $comment = null;
 
     protected $values = [];
-
-    //protected $autoIncrement = false;
-
-    public function __construct($name, $type = null, $length = null, $isUnsigned = null, $allowNull = null, $def = null, $comment = null)
-    {
-        $this->name($name);
-
-        if ($type !== null) {
-            $this->type($type);
-        }
-
-        if ($length !== null) {
-            if (is_array($length)) {
-                $this->values($length);
-            } else {
-                $this->length($length);
-            }
-        }
-
-        if ($isUnsigned !== null) {
-            $this->isUnsigned($isUnsigned);
-        }
-
-        if ($allowNull !== null) {
-            $this->allowNull($allowNull);
-        }
-
-        if ($def !== null) {
-            $this->def($def);
-        }
-
-        if ($comment !== null) {
-            $this->comment($comment);
-        }
-
-        return $this;
-    }
 
     static public function getIntLength($type)
     {
@@ -128,6 +91,11 @@ class Column
     static public function isFloatType($type)
     {
         return static::getFloatLength($type) !== null;
+    }
+
+    static public function isNumericType($type)
+    {
+        return static::isIntType($type) || static::isFloatType($type);
     }
 
     public function isInt()
@@ -219,7 +187,7 @@ class Column
         return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 
-    public function def($value = null, $type = Obj::PROP_REPLACE)
+    public function defaultValue($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchScalarVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

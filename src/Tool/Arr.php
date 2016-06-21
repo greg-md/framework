@@ -682,7 +682,7 @@ class Arr
      * Bring the variable to an array.
      *
      * @param $var
-     * @param ...$vars
+     * @param array ...$vars
      * @return array
      */
     static public function bring($var, ...$vars)
@@ -763,12 +763,6 @@ class Arr
         return static::first($array, $callable, $else);
     }
 
-    /**
-     * @param array $array
-     * @param callable ...$callable
-     * @param int ...$flag
-     * @return bool
-     */
     static public function filterRecursive(array $array, ...$args)
     {
         return static::filterRecursiveMe($array, ...$args);

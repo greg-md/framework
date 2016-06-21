@@ -100,7 +100,7 @@ class Table
 
                 $info['columns'] && $this->columns($info['columns']);
 
-                $info['primary'] && $this->primary($info['primary']);
+                $info['primaryKeys'] && $this->primary($info['primaryKeys']);
 
                 $info['autoIncrement'] && $this->autoIncrement($info['autoIncrement']);
             }
@@ -430,7 +430,7 @@ class Table
             $rowData = [];
 
             foreach($this->columns() as $name => $column) {
-                $rowData[$column->name()] = $column->def();
+                $rowData[$column->name()] = $column->defaultValue();
             }
 
             $data = array_merge($rowData, $data);
@@ -494,7 +494,7 @@ class Table
             $defaults = [];
 
             foreach($this->columns() as $name => $column) {
-                $defaults[$column->name()] = $column->def();
+                $defaults[$column->name()] = $column->defaultValue();
             }
 
             foreach($rows as &$row) {
@@ -1732,7 +1732,7 @@ class Table
     public function getColumn($name)
     {
         if (!$column = $this->columns($name)) {
-            throw new \Exception('Column `' . $name . '`not found in table `' . $this->name() . '`.');
+            throw new \Exception('Column `' . $name . '` not found in table `' . $this->name() . '`.');
         }
 
         return $column;
