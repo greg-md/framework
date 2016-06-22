@@ -9,6 +9,7 @@ use Greg\Db\Sql\Storage\Mysql\Query\Select;
 use Greg\Db\Sql\Storage\Mysql\Query\Update;
 use Greg\Db\Sql\StorageInterface;
 use Greg\Db\Sql\Table\Column;
+use Greg\Db\Sql\Table\TableConstraint;
 use Greg\Engine\InternalTrait;
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
@@ -183,13 +184,40 @@ class Mysql implements StorageInterface
 
         $sql = $stmt->fetchOne('Create Table');
 
+        return $this->parseTableReferences($sql);
+    }
+
+    public function parseTableReferences($sql)
+    {
+        $references = [];
+
+        foreach($this->parseTableReferencesAsArray($sql) as $info) {
+            $reference = new TableConstraint();
+
+            $reference->setName($info['ConstraintName'])
+                ->setReferencedTableName($info['ReferencedTableName'])
+                ->setOnUpdate($info['OnUpdate'])
+                ->setOnDelete($info['OnDelete']);
+
+            foreach($info['Constraint'] as $constraintInfo) {
+                $reference->setRelation($constraintInfo['Position'], $constraintInfo['ColumnName'], $constraintInfo['ReferencedColumnName']);
+            }
+
+            $references[] = $reference;
+        }
+
+        return $references;
+    }
+
+    public function parseTableReferencesAsArray($sql)
+    {
+        $tableName = $this->parseTableName($sql);
+
         $regex = 'CONSTRAINT `(.+)` FOREIGN KEY \((.+)\) REFERENCES `(.+)` \((.+)\) ON DELETE (.+) ON UPDATE (.+)';
 
         $references = [];
 
         if (preg_match_all('#' . $regex . '#i', $sql, $matches)) {
-            $dbName = $this->dbName();
-
             foreach($matches[0] as $k => $match) {
                 $constraint = [];
 
@@ -207,9 +235,7 @@ class Mysql implements StorageInterface
 
                 $references[] = [
                     'ConstraintName' => $matches[1][$k],
-                    'DbName' => $dbName,
                     'TableName' => $tableName,
-                    'ReferencedTableSchema' => $dbName,
                     'ReferencedTableName' => $matches[3][$k],
                     'OnUpdate' => $matches[5][$k],
                     'OnDelete' => $matches[6][$k],
@@ -219,6 +245,15 @@ class Mysql implements StorageInterface
         }
 
         return $references;
+    }
+
+    public function parseTableName($sql)
+    {
+        if (!preg_match('#^CREATE TABLE `(.+)`#', $sql, $tableMatches)) {
+            throw new \Exception('Wrong create table sql.');
+        }
+
+        return $tableMatches[1];
     }
 
     public function getTableRelationships($tableName, $rules = false)
@@ -263,6 +298,38 @@ class Mysql implements StorageInterface
 
         $items = $query->assocAll();
 
+        return $this->parseTableRelationshipsAsArray($items, $rules);
+    }
+
+    protected function parseTableRelationships(array $items, $rules = false)
+    {
+        $relationships = [];
+
+        foreach($this->parseTableRelationshipsAsArray($items, $rules) as $relationship) {
+            $constraint = new TableConstraint();
+
+            $constraint->setName($relationship['ConstraintName']);
+
+            $constraint->setReferencedTableName($relationship['RelationshipTableName']);
+
+            if ($rules) {
+                $constraint->setOnUpdate($relationship['OnUpdate']);
+
+                $constraint->setOnDelete($relationship['OnDelete']);
+            }
+
+            foreach($relationship['Constraint'] as $relation) {
+                $constraint->setRelation($relation['Position'], $relation['ColumnName'], $relation['RelationshipColumnName']);
+            }
+
+            $relationships[] = $constraint;
+        }
+
+        return $relationships;
+    }
+
+    protected function parseTableRelationshipsAsArray(array $items, $rules = false)
+    {
         $relationships = [];
 
         foreach($items as $item) {
@@ -273,8 +340,6 @@ class Mysql implements StorageInterface
                     'TableName' => $item['REFERENCED_TABLE_NAME'],
                     'RelationshipTableSchema' => $item['TABLE_SCHEMA'],
                     'RelationshipTableName' => $item['TABLE_NAME'],
-                    //'OnUpdate' => $item['UPDATE_RULE'],
-                    //'OnDelete' => $item['DELETE_RULE'],
                 ];
 
                 if ($rules) {

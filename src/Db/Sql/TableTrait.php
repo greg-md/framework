@@ -2,7 +2,9 @@
 
 namespace Greg\Db\Sql;
 
+use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Table\Column;
+use Greg\Db\Sql\Table\TableConstraint;
 use Greg\Tool\Arr;
 
 trait TableTrait
@@ -35,15 +37,12 @@ trait TableTrait
 
     protected $nameColumn = null;
 
+    protected $query = null;
+
     /**
      * @var StorageInterface|null
      */
     protected $storage = null;
-
-    public function getInfo()
-    {
-        return $this->getStorage()->getTableInfo($this->getFullName());
-    }
 
     public function getFirstUniqueKeys()
     {
@@ -75,6 +74,77 @@ trait TableTrait
         }
 
         return array_combine($keys, $values);
+    }
+
+    public function select($columns = null, $_ = null)
+    {
+        if (!is_array($columns)) {
+            $columns = func_get_args();
+        }
+
+        $this->query = $this->getStorage()->select($columns)->table($this)->from($this);
+
+        return $this;
+    }
+
+    public function update(array $values = [])
+    {
+        $query = $this->getStorage()->update($this);
+
+        if ($values) {
+            $query->set($values);
+        }
+
+        return $query;
+    }
+
+    public function delete(array $whereIs = [])
+    {
+        $query = $this->getStorage()->delete($this, true);
+
+        if ($whereIs) {
+            $query->whereCols($whereIs);
+        }
+
+        return $query;
+    }
+
+    public function insert(array $data = [])
+    {
+        return $this->getStorage()->insert($this)->data($data);
+    }
+
+    public function insertData(array $data = [])
+    {
+        $this->insert($data)->exec();
+
+        return $this;
+    }
+
+    public function getPairs(array $whereIs = [], callable $callable = null)
+    {
+        if (!$columnName = $this->getNameColumn()) {
+            throw new \Exception('Undefined column name for table `' . $this->getName() . '`.');
+        }
+
+        $query = $this->select();
+
+        $query->columns($query->concat($this->getFirstUniqueKeys(), ':'), $columnName);
+
+        if ($whereIs) {
+            $query->whereCols($whereIs);
+        }
+
+        if ($callable) {
+            $callable($query);
+        }
+
+        return $query->pairs();
+    }
+
+    public function exists($column, $value)
+    {
+        return $this->select(new Expr(1))->whereCol($column, $value)->exists();
     }
 
     public function getPrefix()
@@ -150,12 +220,31 @@ trait TableTrait
         return $this;
     }
 
-    /*
-    public function customColumnsTypes($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getCustomColumnTypes()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->customColumnsTypes;
     }
-    */
+
+    public function setCustomColumnTypes(array $columnsTypes)
+    {
+        foreach($columnsTypes as $key => $value) {
+            $this->setCustomColumnType($key, $value);
+        }
+
+        return $this;
+    }
+
+    public function setCustomColumnType($key, $value)
+    {
+        $this->customColumnsTypes[(string)$key] = (string)$value;
+
+        return $this;
+    }
+
+    public function getCustomColumnType($key)
+    {
+        return array_key_exists($key, $this->customColumnsTypes) ? $this->customColumnsTypes[$key] : null;
+    }
 
     public function getAutoIncrement()
     {
@@ -197,17 +286,47 @@ trait TableTrait
         return $this;
     }
 
-    /*
-    public function references($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getReferences()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->references;
     }
 
-    public function relationships($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setReferences(array $references)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->references = [];
+
+        foreach($references as $reference) {
+            $this->addReference($reference);
+        }
+
+        return $this;
     }
-    */
+
+    public function addReference(TableConstraint $constraint)
+    {
+        $this->references[] = $constraint;
+    }
+
+    public function getRelationships()
+    {
+        return $this->relationships;
+    }
+
+    public function setRelationships(array $references)
+    {
+        $this->relationships = [];
+
+        foreach($references as $reference) {
+            $this->addRelationship($reference);
+        }
+
+        return $this;
+    }
+
+    public function addRelationship(TableConstraint $constraint)
+    {
+        $this->relationships[] = $constraint;
+    }
 
     public function getDependencies()
     {
@@ -224,17 +343,57 @@ trait TableTrait
         return $this;
     }
 
-    /*
-    public function relationshipsAliases($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getRelationshipsAliases()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->relationshipsAliases;
     }
 
-    public function referencesAliases($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setRelationshipsAliases(array $columnsTypes)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        foreach($columnsTypes as $key => $value) {
+            $this->setCustomColumnType($key, $value);
+        }
+
+        return $this;
     }
-    */
+
+    public function setRelationshipAlias($key, $value)
+    {
+        $this->relationshipsAliases[(string)$key] = (string)$value;
+
+        return $this;
+    }
+
+    public function getRelationshipAlias($key)
+    {
+        return array_key_exists($key, $this->relationshipsAliases) ? $this->relationshipsAliases[$key] : null;
+    }
+
+    public function getReferencesAliases()
+    {
+        return $this->referencesAliases;
+    }
+
+    public function setReferencesAliases(array $columnsTypes)
+    {
+        foreach($columnsTypes as $key => $value) {
+            $this->setCustomColumnType($key, $value);
+        }
+
+        return $this;
+    }
+
+    public function setReferenceAlias($key, $value)
+    {
+        $this->referencesAliases[(string)$key] = (string)$value;
+
+        return $this;
+    }
+
+    public function getReferenceAlias($key)
+    {
+        return array_key_exists($key, $this->referencesAliases) ? $this->referencesAliases[$key] : null;
+    }
 
     public function getNameColumn()
     {
