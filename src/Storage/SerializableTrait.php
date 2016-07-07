@@ -4,15 +4,13 @@ namespace Greg\Storage;
 
 trait SerializableTrait
 {
-    abstract protected function &accessor(array $storage = []);
-
     public function serialize()
     {
-        return serialize($this->accessor());
+        return serialize($this->storage);
     }
 
     public function unserialize($storage)
     {
-        $this->accessor(unserialize($storage));
+        $this->storage = unserialize($storage);
     }
 }

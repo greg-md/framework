@@ -2,7 +2,7 @@
 
 namespace Greg\Cache;
 
-interface StorageInterface
+interface CacheStorageInterface
 {
     public function fetch($id, callable $callable, $expire = 0);
 
@@ -12,9 +12,9 @@ interface StorageInterface
 
     public function load($id);
 
-    public function modified($id);
+    public function getLastModified($id);
 
-    public function expired($id, $expire = 0);
+    public function isExpired($id, $expire = 0);
 
     public function delete($ids = []);
 }

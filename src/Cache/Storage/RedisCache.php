@@ -2,7 +2,7 @@
 
 namespace Greg\Cache\Storage;
 
-use Greg\Cache\Storage;
+use Greg\Cache\CacheStorage;
 use Greg\Http\Request;
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
@@ -12,7 +12,7 @@ use Greg\Tool\Obj;
  * @package Greg\Cache\Storage
  *
  */
-class Redis extends Storage
+class RedisCache extends CacheStorage
 {
     protected $host = '127.0.0.1';
 
@@ -84,7 +84,7 @@ class Redis extends Storage
         return unserialize($this->getAdapter()->hGet($id, 'Content'));
     }
 
-    public function modified($id)
+    public function getLastModified($id)
     {
         return $this->getAdapter()->hGet($id, 'LastModified');
     }

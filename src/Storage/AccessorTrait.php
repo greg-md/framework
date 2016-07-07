@@ -2,28 +2,45 @@
 
 namespace Greg\Storage;
 
-use Greg\Tool\Obj;
-
 trait AccessorTrait
 {
     protected $storage = [];
 
-    protected function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    protected function getStorage()
     {
-        return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
+        return $this->storage;
     }
 
-    /**
-     * @param array $storage
-     * @return array
-     */
-    protected function &accessor(array $storage = [])
+    protected function setStorage(array $storage)
     {
-        return Obj::fetchVar($this, $this->storage, ...func_get_args());
+        $this->storage = $storage;
+
+        return $this;
     }
 
-    protected function getIteratorAccessor()
+    protected function addToStorage($key, $value)
     {
-        return $this->accessor();
+        $this->storage[$key] = $value;
+
+        return $this;
+    }
+
+    protected function getStorageValue($key)
+    {
+        return array_key_exists($key, $this->storage) ? $this->storage[$key] : null;
+    }
+
+    protected function mergeStorage(array $storage, $prepend = false)
+    {
+        $this->storage = $prepend ? array_merge($storage, $this->storage) : array_merge($this->storage, $storage);
+
+        return $this;
+    }
+
+    protected function replaceStorage(array $storage, $prepend = false)
+    {
+        $this->storage = $prepend ? array_replace($storage, $this->storage) : array_replace($this->storage, $storage);
+
+        return $this;
     }
 }

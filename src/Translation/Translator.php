@@ -23,7 +23,7 @@ class Translator implements \ArrayAccess
     {
         $this->languages($languages);
 
-        $this->storage($translates);
+        $this->storage = $translates;
 
         return $this;
     }

@@ -2,12 +2,12 @@
 
 namespace Greg\Cache\Storage;
 
-use Greg\Cache\Storage;
+use Greg\Cache\CacheStorage;
 use Greg\Http\Request;
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
 
-class Sqlite extends Storage
+class SqliteCache extends CacheStorage
 {
     protected $structureChecked = false;
 

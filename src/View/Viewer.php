@@ -33,7 +33,7 @@ class Viewer implements \ArrayAccess
 
         $this->paths($paths);
 
-        $this->storage($param);
+        $this->storage = $param;
 
         return $this;
     }
@@ -343,7 +343,9 @@ class Viewer implements \ArrayAccess
 
     public function assign($key, $value = null)
     {
-        return $this->storage(...func_get_args());
+        $this->storage[$key] = $value;
+
+        return $this;
     }
 
     public function __set($key, $value)

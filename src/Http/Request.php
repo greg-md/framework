@@ -43,7 +43,7 @@ class Request implements \ArrayAccess
 
     public function __construct(array $params = [])
     {
-        $this->storage($params);
+        $this->storage = $params;
 
         return $this;
     }
@@ -55,92 +55,92 @@ class Request implements \ArrayAccess
 
     public function is()
     {
-        return (bool)$this->accessor();
+        return (bool)$this->storage;
     }
 
     public function &all()
     {
-        return $this->accessor();
+        return $this->storage;
     }
 
     public function get($key, $else = null)
     {
-        return Arr::get($this->accessor(), $key, $this->getRequest($key, $else));
+        return Arr::get($this->storage, $key, $this->getRequest($key, $else));
     }
 
     public function &getRef($key, $else = null)
     {
-        return Arr::getRef($this->accessor(), $key, $this->getRefRequest($key, $else));
+        return Arr::getRef($this->storage, $key, $this->getRefRequest($key, $else));
     }
 
     public function getForce($key, $else = null)
     {
-        return Arr::getForce($this->accessor(), $key, $this->getForceRequest($key, $else));
+        return Arr::getForce($this->storage, $key, $this->getForceRequest($key, $else));
     }
 
     public function &getForceRef($key, $else = null)
     {
-        return Arr::getForceRef($this->accessor(), $key, $this->getForceRefRequest($key, $else));
+        return Arr::getForceRef($this->storage, $key, $this->getForceRefRequest($key, $else));
     }
 
     public function getArray($key, $else = null)
     {
-        return Arr::getArray($this->accessor(), $key, $this->getArrayRequest($key, $else));
+        return Arr::getArray($this->storage, $key, $this->getArrayRequest($key, $else));
     }
 
     public function &getArrayRef($key, $else = null)
     {
-        return Arr::getArrayRef($this->accessor(), $key, $this->getArrayRefRequest($key, $else));
+        return Arr::getArrayRef($this->storage, $key, $this->getArrayRefRequest($key, $else));
     }
 
     public function getArrayForce($key, $else = null)
     {
-        return Arr::getArrayForce($this->accessor(), $key, $this->getArrayForceRequest($key, $else));
+        return Arr::getArrayForce($this->storage, $key, $this->getArrayForceRequest($key, $else));
     }
 
     public function &getArrayForceRef($key, $else = null)
     {
-        return Arr::getArrayForceRef($this->accessor(), $key, $this->getArrayForceRefRequest($key, $else));
+        return Arr::getArrayForceRef($this->storage, $key, $this->getArrayForceRefRequest($key, $else));
     }
 
     public function getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndex($this->accessor(), $index, $this->getIndexRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndex($this->storage, $index, $this->getIndexRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexRef($this->accessor(), $index, $this->getIndexRefRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexRef($this->storage, $index, $this->getIndexRefRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function getIndexForce($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexForce($this->accessor(), $index, $this->getIndexForceRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexForce($this->storage, $index, $this->getIndexForceRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function &getIndexForceRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexForceRef($this->accessor(), $index, $this->getIndexForceRefRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexForceRef($this->storage, $index, $this->getIndexForceRefRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function getIndexArray($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArray($this->accessor(), $index, $this->getIndexArrayRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexArray($this->storage, $index, $this->getIndexArrayRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function &getIndexArrayRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayRef($this->accessor(), $index, $this->getIndexArrayRefRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexArrayRef($this->storage, $index, $this->getIndexArrayRefRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function getIndexArrayForce($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForce($this->accessor(), $index, $this->getIndexArrayForceRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexArrayForce($this->storage, $index, $this->getIndexArrayForceRequest($index, $else, $delimiter), $delimiter);
     }
 
     public function &getIndexArrayForceRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        return Arr::getIndexArrayForceRef($this->accessor(), $index, $this->getIndexArrayForceRefRequest($index, $else, $delimiter), $delimiter);
+        return Arr::getIndexArrayForceRef($this->storage, $index, $this->getIndexArrayForceRefRequest($index, $else, $delimiter), $delimiter);
     }
 
     static public function protocol()

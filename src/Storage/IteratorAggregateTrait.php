@@ -16,13 +16,11 @@ trait IteratorAggregateTrait
             throw new \Exception('Undefined iterator.');
         }
 
-        return new $class($this->getIteratorAccessor());
+        return new $class($this->storage);
     }
 
     public function iteratorClass($value = null, $type = Obj::PROP_REPLACE)
     {
         return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
-
-    abstract protected function getIteratorAccessor();
 }

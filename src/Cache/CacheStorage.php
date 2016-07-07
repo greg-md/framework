@@ -5,13 +5,13 @@ namespace Greg\Cache;
 use Greg\Engine\InternalTrait;
 use Greg\Http\Request;
 
-abstract class Storage implements StorageInterface
+abstract class CacheStorage implements CacheStorageInterface
 {
     use InternalTrait;
 
     public function fetch($id, callable $callable, $expire = 0)
     {
-        if ($this->expired($id, $expire)) {
+        if ($this->isExpired($id, $expire)) {
             $this->save($id, $result = $this->callCallable($callable));
         } else {
             $result = $this->load($id);
@@ -20,9 +20,9 @@ abstract class Storage implements StorageInterface
         return $result;
     }
 
-    public function expired($id, $expire = 0)
+    public function isExpired($id, $expire = 0)
     {
-        $modified = $this->modified($id);
+        $modified = $this->getLastModified($id);
 
         if ($modified === null or $modified === false) {
             return true;

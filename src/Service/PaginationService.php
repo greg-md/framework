@@ -32,10 +32,12 @@ class PaginationService implements \ArrayAccess, \Countable
     public function items(array $items = null)
     {
         if ($items === null) {
-            return $this->storage();
+            return $this->storage;
         }
 
-        return $this->storage($items);
+        $this->storage = $items;
+
+        return $this;
     }
 
     public function offset()

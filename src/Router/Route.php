@@ -683,24 +683,24 @@ class Route implements \ArrayAccess
 
     public function offsetExists($key)
     {
-        return Arr::hasRef($this->accessor(), $key);
+        return Arr::hasRef($this->storage, $key);
     }
 
     public function offsetSet($key, $value)
     {
-        Arr::set($this->accessor(), $key, $value);
+        Arr::set($this->storage, $key, $value);
 
         return $this;
     }
 
     public function &offsetGet($key)
     {
-        return $this->accessor()[$key];
+        return $this->storage[$key];
     }
 
     public function offsetUnset($key)
     {
-        Arr::del($this->accessor(), $key);
+        Arr::del($this->storage, $key);
 
         return $this;
     }
