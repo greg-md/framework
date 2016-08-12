@@ -3,72 +3,46 @@
 namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
-use Greg\Http\Request;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 
-/**
- * Class Redis
- * @package Greg\Cache\Storage
- *
- */
 class RedisCache extends CacheStorage
 {
-    protected $host = '127.0.0.1';
+    private $host = '127.0.0.1';
 
-    protected $port = 6379;
+    private $port = 6379;
 
-    protected $prefix = null;
+    private $prefix = null;
 
-    protected $timeout = 0.0;
+    private $timeout = 0.0;
 
-    protected $adapter = null;
+    private $adapter = null;
 
     public function __construct($host = null, $port = null, $prefix = null, $timeout = null)
     {
         if ($host !== null) {
-            $this->host($host);
+            $this->setHost($host);
         }
 
         if ($port !== null) {
-            $this->port($port);
+            $this->setPort($port);
         }
 
         if ($prefix !== null) {
-            $this->prefix($prefix);
+            $this->setPrefix($prefix);
         }
 
         if ($timeout !== null) {
-            $this->host($timeout);
+            $this->setTimeout($timeout);
         }
 
         return $this;
     }
 
-    public function getAdapter()
-    {
-        $adapter = $this->adapter();
-
-        if (!$adapter) {
-            $adapter = new \Redis;
-
-            $adapter->connect($this->host(), $this->port(), $this->timeout());
-
-            if ($this->prefix()) {
-                $adapter->setOption(\Redis::OPT_PREFIX, $this->prefix());
-            }
-
-            $this->adapter($adapter);
-        }
-
-        return $adapter;
-    }
-
     public function save($id, $data = null)
     {
         $this->getAdapter()->hMset($id, [
-            'Content' => serialize($data),
-            'LastModified' => Request::time(),
+            'Content' => $this->serialize($data),
+            'LastModified' => time(),
         ]);
 
         return $this;
@@ -81,7 +55,7 @@ class RedisCache extends CacheStorage
 
     public function load($id)
     {
-        return unserialize($this->getAdapter()->hGet($id, 'Content'));
+        return $this->unserialize($this->getAdapter()->hGet($id, 'Content'));
     }
 
     public function getLastModified($id)
@@ -98,40 +72,85 @@ class RedisCache extends CacheStorage
 
             $adapter->delete($ids);
         } else {
-            $ids = $this->getAdapter()->getKeys('*');
+            $ids = $adapter->getKeys('*');
 
             $adapter->setOption(\Redis::OPT_PREFIX, '');
 
             $adapter->delete($ids);
 
-            $adapter->setOption(\Redis::OPT_PREFIX, $this->prefix());
+            $adapter->setOption(\Redis::OPT_PREFIX, $this->getPrefix());
         }
 
         return $this;
     }
 
-    public function host($value = null, $type = Obj::PROP_REPLACE)
+    public function getHost()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->host;
     }
 
-    public function port($value = null)
+    public function setHost($name)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->host = (string)$name;
+
+        return $this;
     }
 
-    public function prefix($value = null, $type = Obj::PROP_REPLACE)
+    public function getPort()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->port;
     }
 
-    public function timeout($value = null)
+    public function setPort($number)
     {
-        return Obj::fetchFloatVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->port = (int)$number;
+
+        return $this;
     }
 
-    public function adapter(\Redis $value = null)
+    public function getPrefix()
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->prefix;
+    }
+
+    public function setPrefix($name)
+    {
+        $this->prefix = (string)$name;
+
+        return $this;
+    }
+
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
+
+    public function setTimeout($number)
+    {
+        $this->timeout = (double)$number;
+
+        return $this;
+    }
+
+    public function getAdapter()
+    {
+        if (!$this->adapter) {
+            $this->adapter = new \Redis;
+
+            $this->adapter->connect($this->getHost(), $this->getPort(), $this->getTimeout());
+
+            if ($prefix = $this->getPrefix()) {
+                $this->adapter->setOption(\Redis::OPT_PREFIX, $prefix);
+            }
+        }
+
+        return $this->adapter;
+    }
+
+    public function setAdapter(\Redis $adapter)
+    {
+        $this->adapter = $adapter;
+
+        return $this;
     }
 }

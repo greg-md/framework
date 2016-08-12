@@ -4,7 +4,7 @@ namespace Greg\Storage;
 
 trait AccessorTrait
 {
-    protected $storage = [];
+    private $storage = [];
 
     protected function getStorage()
     {
@@ -18,6 +18,13 @@ trait AccessorTrait
         return $this;
     }
 
+    protected function setStorageRef(array &$storage)
+    {
+        $this->storage = &$storage;
+
+        return $this;
+    }
+
     protected function addToStorage($key, $value)
     {
         $this->storage[$key] = $value;
@@ -25,22 +32,8 @@ trait AccessorTrait
         return $this;
     }
 
-    protected function getStorageValue($key)
+    protected function getFromStorage($key)
     {
         return array_key_exists($key, $this->storage) ? $this->storage[$key] : null;
-    }
-
-    protected function mergeStorage(array $storage, $prepend = false)
-    {
-        $this->storage = $prepend ? array_merge($storage, $this->storage) : array_merge($this->storage, $storage);
-
-        return $this;
-    }
-
-    protected function replaceStorage(array $storage, $prepend = false)
-    {
-        $this->storage = $prepend ? array_replace($storage, $this->storage) : array_replace($this->storage, $storage);
-
-        return $this;
     }
 }

@@ -3,7 +3,6 @@
 namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
-use Greg\Http\Request;
 use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
 
@@ -11,15 +10,17 @@ class FileCache extends CacheStorage
 {
     use AccessorTrait;
 
-    protected $path = null;
+    private $path = null;
 
-    protected $schemaName = 'schema';
+    private $schemaName = 'schema';
 
-    protected $storage = null;
+    private $storage = null;
 
-    public function __construct($path, $schemaName = null)
+    public function __construct($path = null, $schemaName = null)
     {
-        $this->setPath($path);
+        if ($path !== null) {
+            $this->setPath($path);
+        }
 
         if ($schemaName !== null) {
             $this->setSchemaName($schemaName);
@@ -64,7 +65,7 @@ class FileCache extends CacheStorage
             throw new \Exception('Cache file `' . $name . '` from `' . $this->getSchemaName() . '` is not readable.');
         }
 
-        return unserialize(file_get_contents($file));
+        return $this->unserialize(file_get_contents($file));
     }
 
     protected function write($name, $data)
@@ -85,7 +86,7 @@ class FileCache extends CacheStorage
             throw new \Exception('Cache file `' . $file . '` from `' . $this->getSchemaName() . '` is not writable.');
         }
 
-        file_put_contents($file, serialize($data));
+        file_put_contents($file, $this->serialize($data));
 
         return $this;
     }
@@ -105,7 +106,7 @@ class FileCache extends CacheStorage
     {
         $this->loadStorage();
 
-        $this->addToStorage($id, Request::time());
+        $this->addToStorage($id, time());
 
         $this->update();
 
@@ -134,7 +135,7 @@ class FileCache extends CacheStorage
     {
         $this->loadStorage();
 
-        return array_key_exists($id, $this->storage);
+        return array_key_exists($id, $this->getStorage());
     }
 
     public function load($id)
@@ -146,14 +147,14 @@ class FileCache extends CacheStorage
     {
         $this->loadStorage();
 
-        return $this->getStorageValue($id);
+        return $this->getFromStorage($id);
     }
 
     public function delete($ids = [])
     {
         $this->loadStorage();
 
-        $ids = func_num_args() ? Arr::bring($ids) : array_keys($this->storage);
+        $ids = func_num_args() ? Arr::bring($ids) : array_keys($this->getStorage());
 
         foreach($ids as $id) {
             $this->remove($this->fetchFileName($id));
@@ -171,9 +172,9 @@ class FileCache extends CacheStorage
         return $this->path;
     }
 
-    public function setPath($path)
+    public function setPath($name)
     {
-        $this->path = (string)$path;
+        $this->path = (string)$name;
 
         return $this;
     }

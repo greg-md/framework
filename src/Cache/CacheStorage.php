@@ -40,4 +40,14 @@ abstract class CacheStorage implements CacheStorageInterface
 
         return false;
     }
+
+    protected function serialize($data)
+    {
+        return serialize($data);
+    }
+
+    protected function unserialize($data)
+    {
+        return unserialize($data);
+    }
 }

@@ -4,6 +4,7 @@ namespace Greg\Config;
 
 use Greg\Storage\AccessorTrait;
 use Greg\Storage\ArrayAccessTrait;
+use Greg\Tool\Arr;
 use Greg\Tool\Obj;
 
 class ConfigIni implements \ArrayAccess

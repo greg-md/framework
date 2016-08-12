@@ -4,11 +4,11 @@ namespace Greg\Storage;
 
 class Iterator implements \Iterator
 {
-    use AccessorTrait;
+    private $storage = [];
 
-    public function __construct(&$array = [])
+    public function __construct(array &$storage = [])
     {
-        $this->storage = &$array;
+        $this->storage = $storage;
     }
 
     public function current()

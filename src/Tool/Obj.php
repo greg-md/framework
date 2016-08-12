@@ -3,7 +3,6 @@
 namespace Greg\Tool;
 
 use Greg\Storage\ArrayObject;
-use Greg\Storage\ArrayReference;
 
 class Obj
 {
@@ -56,11 +55,6 @@ class Obj
         }
 
         return (new \ReflectionFunction($callable))->getParameters();
-    }
-
-    static public function fetchRef($value)
-    {
-        return ($value instanceof ArrayReference) ? $value->get() : $value;
     }
 
     static public function callWith(callable $callable, ...$args)
