@@ -5,7 +5,7 @@ namespace Greg\Html;
 use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
 
-class Script
+class HtmlScript
 {
     use AccessorTrait;
 
@@ -116,6 +116,7 @@ class Script
                 'condition' => $condition,
                 'attr' => $attr,
             ];
+
             if ($type == static::PREPEND) {
                 $this->storage[$where] = array_merge([$param], $this->storage[$where]);
             } else {
@@ -126,27 +127,30 @@ class Script
         return $this;
     }
 
-    public function fetchItem($item)
-    {
-        $element = new Element('script', Arr::bring($item['attr']), $item['condition']);
-
-        $element->inner($item['inner']);
-
-        return $element;
-    }
-
-    public function __toString()
+    public function toObjects()
     {
         $html = [];
 
         foreach(static::ORDER as $type) {
-            if (Arr::hasRef($this->storage, $type)) {
-                foreach($this->storage[$type] as $item) {
-                    $html[] = $this->fetchItem($item);
-                }
+            foreach((array)$this->getFromStorage($type) as $item) {
+                $element = new HtmlElement('script', $item['attr'], $item['condition']);
+
+                $element->inner($item['inner']);
+
+                $html[] = $element;
             }
         }
 
-        return implode("\n", $html);
+        return $html;
+    }
+
+    public function toString()
+    {
+        return implode("\n", $this->toObjects());
+    }
+
+    public function __toString()
+    {
+        return $this->toString();
     }
 }

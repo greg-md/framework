@@ -1,11 +1,10 @@
 <?php
 
-namespace Greg\Html\Head;
+namespace Greg\Html;
 
-use Greg\Html\Element;
 use Greg\Storage\AccessorTrait;
 
-class Link
+class HeadLink
 {
     use AccessorTrait;
 
@@ -15,11 +14,7 @@ class Link
 
         $attr['href'] = $href;
 
-        if ($id !== null) {
-            $this->storage[$id] = $attr;
-        } else {
-            $this->storage[] = $attr;
-        }
+        $this->setToStorage($id, $attr);
 
         return $this;
     }
@@ -36,29 +31,29 @@ class Link
         $this->set('stylesheet', $href, $attr, $id);
     }
 
-    public function __call($method, $args)
-    {
-        return $this->set($method, ...$args);
-    }
-
-    public function fetch()
+    public function toObjects()
     {
         $items = [];
 
-        foreach($this->storage as $id => $attr) {
-            $items[$id] = $this->fetchItem($attr);
+        foreach($this->getStorage() as $id => $attr) {
+            $items[$id] = new HtmlElement('link', $attr);
         }
 
         return $items;
     }
 
-    public function fetchItem($attr)
+    public function toString()
     {
-        return new Element('link', $attr);
+        return implode("\n", $this->toObjects());
+    }
+
+    public function __call($method, $args)
+    {
+        return $this->set($method, ...$args);
     }
 
     public function __toString()
     {
-        return implode("\n", $this->fetch());
+        return $this->toString();
     }
 }

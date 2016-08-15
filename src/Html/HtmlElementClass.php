@@ -4,7 +4,7 @@ namespace Greg\Html;
 
 use Greg\Storage\AccessorTrait;
 
-class ElementClass
+class HtmlElementClass
 {
     use AccessorTrait;
 

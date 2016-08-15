@@ -16,23 +16,18 @@ trait AccessorStaticTrait
         static::$storage = $storage;
     }
 
-    static protected function addToStorage($key, $value)
+    static protected function inStorage($key)
+    {
+        return array_key_exists($key, static::$storage);
+    }
+
+    static protected function setToStorage($key, $value)
     {
         static::$storage[$key] = $value;
     }
 
     static protected function getFromStorage($key)
     {
-        return array_key_exists($key, static::$storage) ? static::$storage[$key] : null;
-    }
-
-    static protected function mergeStorage(array $storage, $prepend = false)
-    {
-        static::$storage = $prepend ? array_merge($storage, static::$storage) : array_merge(static::$storage, $storage);
-    }
-
-    static protected function replaceStorage(array $storage, $prepend = false)
-    {
-        static::$storage = $prepend ? array_replace($storage, static::$storage) : array_replace(static::$storage, $storage);
+        return static::inStorage($key) ? static::$storage[$key] : null;
     }
 }

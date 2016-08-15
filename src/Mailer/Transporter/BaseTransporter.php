@@ -2,12 +2,13 @@
 
 namespace Greg\Mailer\Transporter;
 
-use Greg\Mailer\Transporter;
+use Greg\Mailer\Mail;
+use Greg\Mailer\MailTransporter;
 use Greg\Tool\ErrorHandler;
 
-class Mail extends Transporter
+class BaseTransporter extends MailTransporter
 {
-    public function send(\Greg\Mailer\Mail $mail)
+    public function send(Mail $mail)
     {
         $subject = $this->getEncodedSubject($mail);
 
@@ -25,14 +26,8 @@ class Mail extends Transporter
 
         ErrorHandler::throwException();
 
-        foreach($mail->to() as $email => $name) {
-            $to = $this->emailsToString(is_array($name) ? $name : [$email => $name]);
-
-            if (!$to) {
-                throw new \Exception('No recipients defined.');
-            }
-
-            mail($to, $subject, $message, $headers);
+        foreach($mail->getTo() as $emails) {
+            mail($this->emailsToString($emails), $subject, $message, $headers);
         }
 
         ErrorHandler::restore();

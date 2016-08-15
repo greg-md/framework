@@ -2,136 +2,249 @@
 
 namespace Greg\Mailer;
 
-use Greg\Tool\Obj;
+use Greg\Storage\AccessorTrait;
 
 class Mail
 {
+    use AccessorTrait;
+
     protected $subject = null;
 
     protected $body = [];
 
     protected $from = [];
 
-    protected $toStorage = [];
+    protected $to = [];
 
     protected $replyTo = [];
 
-    protected $ccStorage = [];
+    protected $cc = [];
 
-    protected $bccStorage = [];
+    protected $bcc = [];
 
     protected $mimeVersion = '1.0';
 
     protected $charset = 'utf-8'; // iso-8859-1
 
-    public function __construct($subject = null, array $body = [], $to = null)
-    {
-        if ($subject !== null) {
-            $this->subject($subject);
-        }
-
-        $this->body($body);
-
-        if ($to) {
-            $this->to($to);
-        }
-
-        return $this;
-    }
-
-    public function send(TransporterInterface $transporter = null)
+    public function send(MailTransporterInterface $transporter = null)
     {
         if (!$transporter) {
-            $transporter = new Transporter\Mail();
+            $transporter = new Transporter\BaseTransporter();
         }
 
         $transporter->send($this);
     }
 
-    public function from($email = null, $name = null)
+    public function setFrom($email, $name = null)
     {
-        if (func_num_args()) {
-            $this->from = [$email, $name];
+        $this->from = [$email, $name];
 
-            return $this;
-        }
+        return $this;
+    }
 
+    public function getFrom()
+    {
         return $this->from;
     }
 
-    public function replyTo($email = null, $name = null)
+    public function setReplyTo($email, $name = null)
     {
-        if (func_num_args()) {
-            $this->replyTo = [$email, $name];
+        $this->replyTo = [$email, $name];
 
-            return $this;
-        }
+        return $this;
+    }
 
+    public function getReplyTo()
+    {
         return $this->replyTo;
     }
 
-    public function plain($body)
+    public function setPlainBody($body)
     {
-        return $this->body('text/plain', is_array($body) ? implode("\n", $body) : $body);
+        return $this->setBody('text/plain', is_array($body) ? implode("\n", $body) : $body);
     }
 
-    public function html($body)
+    public function getPlainBody()
     {
-        return $this->body('text/html', is_array($body) ? implode('<br />', $body) : $body);
+        return $this->getBody('text/plain');
     }
 
-    public function subject($value = null, $type = Obj::PROP_REPLACE)
+    public function setHtmlBody($body)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->setBody('text/html', is_array($body) ? implode('<br />', $body) : $body);
     }
 
-    public function body($mime = null, $body = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getHtmlBody()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->getBody('text/html');
     }
 
-    public function to($email = null, $name = null)
+    public function setBody($mime, $body)
     {
-        return func_num_args() ? $this->toStorage(is_array($email) ? [$email] : $email, $name) : $this->toStorage();
+        return $this->setToStorage($mime, $body);
     }
 
-    public function toEach(array $emails)
+    public function getBody($mime)
     {
-        return $this->toStorage(array_values($emails));
+        return $this->getFromStorage($mime);
     }
 
-    public function cc($email = null, $name = null)
+    public function getAllBody()
     {
-        return func_num_args() ? $this->ccStorage($email, $name) : $this->ccStorage();
+        return $this->getStorage();
     }
 
-    public function bcc($email = null, $name = null)
+    public function setSubject($subject)
     {
-        return func_num_args() ? $this->bccStorage($email, $name) : $this->bccStorage();
+        $this->subject = (string)$subject;
+
+        return $this;
     }
 
-    protected function toStorage($email = null, $name = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getSubject()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->subject;
     }
 
-    protected function ccStorage($email = null, $name = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function clearTo()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->to = [];
+
+        return $this;
     }
 
-    protected function bccStorage($email = null, $name = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setTo($email, $name = null)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->clearTo()->addTo($email, $name);
     }
 
-    public function mimeVersion($value = null, $type = Obj::PROP_REPLACE)
+    public function setToMulti(array $emails)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->clearTo()->setToMulti($emails);
     }
 
-    public function charset($value = null, $type = Obj::PROP_REPLACE)
+    public function setToEach(array $emails)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->clearTo()->setToEach($emails);
+    }
+
+    public function addTo($email, $name = null)
+    {
+        $this->to[] = [
+            [$email, $name],
+        ];
+
+        return $this;
+    }
+
+    public function addToMulti(array $emails)
+    {
+        $users = [];
+
+        foreach($emails as $email => $name) {
+            if (is_int($email)) {
+                $email = $name;
+
+                $name = null;
+            }
+
+            $users = [$email, $name];
+        }
+
+        $this->to[] = $users;
+
+        return $this;
+    }
+
+    public function addToEach(array $emails)
+    {
+        foreach($emails as $email => $name) {
+            if (is_int($email)) {
+                $email = $name;
+
+                $name = null;
+            }
+
+            $this->addTo($email, $name);
+        }
+
+        return $this;
+    }
+
+    public function getTo()
+    {
+        return $this->to;
+    }
+
+    public function clearCC()
+    {
+        $this->cc = [];
+
+        return $this;
+    }
+
+    public function setCC($email, $name = null)
+    {
+        return $this->clearCC()->addCC($email, $name);
+    }
+
+    public function addCC($email, $name = null)
+    {
+        $this->cc[$email] = $name;
+
+        return $this;
+    }
+
+    public function getCC()
+    {
+        return $this->cc;
+    }
+
+    public function clearBCC()
+    {
+        $this->bcc = [];
+
+        return $this;
+    }
+
+    public function setBCC($email, $name = null)
+    {
+        return $this->clearBCC()->addBCC($email, $name);
+    }
+
+    public function addBCC($email, $name = null)
+    {
+        $this->bcc[$email] = $name;
+
+        return $this;
+    }
+
+    public function getBCC()
+    {
+        return $this->bcc;
+    }
+
+    public function setMimeVersion($version)
+    {
+        $this->mimeVersion = (string)$version;
+
+        return $this;
+    }
+
+    public function getMimeVersion()
+    {
+        return $this->mimeVersion;
+    }
+
+    public function setCharset($charset)
+    {
+        $this->charset = (string)$charset;
+
+        return $this;
+    }
+
+    public function getCharset()
+    {
+        return $this->charset;
     }
 }

@@ -1,12 +1,10 @@
 <?php
 
-namespace Greg\Html\Head;
+namespace Greg\Html;
 
-use Greg\Html\Element;
-use Greg\Html\Script;
 use Greg\Tool\Arr;
 
-class Style extends Script
+class HeadStyle extends HtmlScript
 {
     public function fetchItem($item)
     {
@@ -14,7 +12,7 @@ class Style extends Script
 
         $attr['rel'] = 'stylesheet';
 
-        $element = new Element($item['inner'] ? 'style' : 'link', $attr, $item['condition']);
+        $element = new HtmlElement($item['inner'] ? 'style' : 'link', $attr, $item['condition']);
 
         $element->inner($item['inner']);
 

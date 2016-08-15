@@ -3,66 +3,53 @@
 namespace Greg\Mailer\Protocol;
 
 use Greg\Tool\ErrorHandler;
-use Greg\Tool\Obj;
 
-class Smtp
+class SmtpProtocol
 {
     const NEW_LINE = "\r\n";
 
-    protected $remoteAddress = 'tcp://127.0.0.1:25';
+    protected $remoteAddress = null;
 
-    protected $timeout = 30;
+    protected $timeout = null;
 
-    protected $socket = null;
+    protected $resource = null;
 
     protected $debug = true;
 
-    protected $log = array();
+    protected $log = [];
 
-    public function __construct($remoteAddress = null, $timeout = null)
+    public function connect($remoteAddress = 'tcp://127.0.0.1:25', $timeout = 30)
     {
-        if ($remoteAddress !== null) {
-            $this->remoteAddress($remoteAddress);
-        }
+        $this->remoteAddress = $remoteAddress;
 
-        if ($timeout !== null) {
-            $this->timeout($timeout);
-        }
+        $this->timeout = $timeout;
 
-        return $this;
-    }
-
-    public function connect()
-    {
         ErrorHandler::throwException();
 
         $options['ssl']['verify_peer'] = false;
 
         $options['ssl']['verify_peer_name'] = false;
 
-        $socket = stream_socket_client($this->remoteAddress(), $errorNum, $errorStr, $this->timeout(),
-            STREAM_CLIENT_CONNECT, stream_context_create($options));
+        $socket = stream_socket_client($remoteAddress, $errorNum, $errorStr, $timeout, STREAM_CLIENT_CONNECT, stream_context_create($options));
 
         if ($errorNum) {
             throw new \Exception($errorStr);
         }
 
-        $this->socket($socket);
-
         ErrorHandler::restore();
+
+        $this->socket = $socket;
 
         return $this;
     }
 
-    public function getSocket()
+    public function getResource()
     {
-        $socket = $this->socket();
-
-        if (!is_resource($socket)) {
-            throw new \Exception('No connection has been established to `' . $this->remoteAddress() . '`.');
+        if (!is_resource($this->resource)) {
+            throw new \Exception('No connection has been established.');
         }
 
-        return $socket;
+        return $this->resource;
     }
 
     public function hello($host = 'localhost', $username = null, $password = null, $layer = 'ssl')
@@ -77,7 +64,7 @@ class Smtp
 
             $this->expect(220, 180);
 
-            if (!stream_socket_enable_crypto($this->getSocket(), true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+            if (!stream_socket_enable_crypto($this->getResource(), true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
                 throw new \Exception('Unable to connect via TLS.');
             }
 
@@ -150,47 +137,33 @@ class Smtp
     {
         $this->addLog($request . static::NEW_LINE);
 
-        $result = fwrite($this->getSocket(), $request . static::NEW_LINE);
+        $result = fwrite($this->getResource(), $request . static::NEW_LINE);
 
         if ($result === false) {
-            throw new \Exception('Could not send request to `' . $this->remoteAddress() . '`.');
+            throw new \Exception('Could not send request to `' . $this->remoteAddress . '`.');
         }
 
         return $result;
     }
 
-    public function addLog($message)
-    {
-        if ($this->debug()) {
-            $this->log([$message]);
-        }
-
-        return $this;
-    }
-
     protected function receive($timeout = null)
     {
-        $socket = $this->getSocket();
+        $resource = $this->getResource();
 
-        $timeout !== null and $this->setTimeout($timeout);
+        $timeout !== null and stream_set_timeout($resource, $timeout);;
 
-        $this->addLog($response = fgets($socket, 1024));
+        $this->addLog($response = fgets($resource, 1024));
 
         // Check meta data to ensure connection is still valid
-        if (!empty(stream_get_meta_data($socket)['timed_out'])) {
-            throw new \Exception('`' . $this->remoteAddress() . '` has timed out.');
+        if (!empty(stream_get_meta_data($resource)['timed_out'])) {
+            throw new \Exception('`' . $this->remoteAddress . '` has timed out.');
         }
 
         if ($response === false) {
-            throw new \Exception('Could not read from `' . $this->remoteAddress() . '`.');
+            throw new \Exception('Could not read from `' . $this->remoteAddress . '`.');
         }
 
         return $response;
-    }
-
-    public function setTimeout($timeout)
-    {
-        return stream_set_timeout($this->getSocket(), $timeout);
     }
 
     public function mail($from)
@@ -243,33 +216,37 @@ class Smtp
 
     public function disconnect()
     {
-        fclose($this->getSocket());
+        fclose($this->getResource());
 
         return $this;
     }
 
-    protected function remoteAddress($value = null, $type = Obj::PROP_REPLACE)
+    public function enableDebugging()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->debug = true;
+
+        return $this;
     }
 
-    protected function timeout($value = null)
+    public function disableDebugging()
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->debug = false;
+
+        return $this;
     }
 
-    public function socket($value = null)
+    public function addLog($message)
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        if ($this->debug) {
+            $this->log[] = $message;
+        }
+
+        return $this;
     }
 
-    public function debug($value = null)
+    public function getLog()
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->log;
     }
 
-    public function log($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
 }

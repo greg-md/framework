@@ -5,33 +5,14 @@ namespace Greg\Config;
 use Greg\Storage\AccessorTrait;
 use Greg\Storage\ArrayAccessTrait;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 
 class ConfigIni implements \ArrayAccess
 {
     use AccessorTrait, ArrayAccessTrait;
 
-    protected $contents = [];
-
-    protected $section = null;
-
-    protected $indexDelimiter = null;
-
-    public function __construct($contents, $section = null, $indexDelimiter = null)
+    public function setContents(array $contents = [], $section = null, $indexDelimiter = null)
     {
-        if ($contents !== null) {
-            $this->contents($contents);
-        }
-
-        if ($section !== null) {
-            $this->section($section);
-        }
-
-        if ($indexDelimiter !== null) {
-            $this->indexDelimiter($indexDelimiter);
-        }
-
-        $this->storage = static::fetchContents($contents, $section, $indexDelimiter);
+        $this->setStorage(static::fetchContents($contents, $section, $indexDelimiter));
 
         return $this;
     }
@@ -39,6 +20,7 @@ class ConfigIni implements \ArrayAccess
     static protected function fetchContents($contents, $section = null, $indexDelimiter = null)
     {
         $return = [];
+
         if ($contents) {
             if ($section) {
                 $partsParam = [];
@@ -100,20 +82,5 @@ class ConfigIni implements \ArrayAccess
         }
 
         return $fetchedSection;
-    }
-
-    public function contents($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false, $recursive = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function section($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function indexDelimiter($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

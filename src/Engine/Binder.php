@@ -2,17 +2,14 @@
 
 namespace Greg\Engine;
 
+use Greg\Storage\AccessorTrait;
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
 use Greg\Tool\Str;
 
 class Binder
 {
-    use InternalTrait;
-
-    protected $storage = [];
-
-    protected $singletons = [];
+    use AccessorTrait, InternalTrait;
 
     public function loadInstance($className, ...$args)
     {
@@ -131,31 +128,22 @@ class Binder
         return $arg;
     }
 
-    public function setObjects(array $objects)
-    {
-        foreach($objects as $object) {
-            $this->setObject($object);
-        }
-
-        return $this;
-    }
-
     public function setObject($object)
-    {
-        return $this->set(get_class($object), $object);
-    }
-
-    public function set($name, $object)
     {
         if (!is_object($object)) {
             throw new \Exception('Item is not an object.');
         }
 
-        if ($this->storage($name)) {
+        return $this->set(get_class($object), $object);
+    }
+
+    public function set($name, $object)
+    {
+        if ($this->inStorage($name)) {
             throw new \Exception('Object `' . $name . '` is already in use in binder.');
         }
 
-        $this->storage($name, $object);
+        $this->setToStorage($name, $object);
 
         return $this;
     }
@@ -171,30 +159,20 @@ class Binder
 
     public function get($name)
     {
-        $object = $this->storage($name);
+        $object = $this->getFromStorage($name);
 
-        if (!$object and $instance = $this->singletons($name)) {
-            if (is_callable($instance)) {
-                $object = $this->call($instance);
+        if ($object and !is_object($object)) {
+            if (is_callable($object)) {
+                $object = $this->call($object);
             } else {
-                $instance = Arr::bring($instance);
+                $object = Arr::bring($object);
 
-                $object = $this->loadClassInstance(...$instance);
+                $object = $this->loadClassInstance(...$object);
             }
 
-            $this->storage($name, $object);
+            $this->setToStorage($name, $object);
         }
 
         return $object;
-    }
-
-    public function storage($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function singletons($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }
 }

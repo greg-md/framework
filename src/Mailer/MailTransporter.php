@@ -2,15 +2,15 @@
 
 namespace Greg\Mailer;
 
-abstract class Transporter implements TransporterInterface
+abstract class MailTransporter implements MailTransporterInterface
 {
     const NEW_LINE = "\r\n";
 
     public function getEncodedSubject(Mail $mail)
     {
-        $subject = $mail->subject();
+        $subject = $mail->getSubject();
 
-        if ($charset = $mail->charset()) {
+        if ($charset = $mail->getCharset()) {
             $subject = '=?' . strtoupper($charset) . '?B?' . base64_encode($subject) . '?=';
         }
 
@@ -19,12 +19,12 @@ abstract class Transporter implements TransporterInterface
 
     public function fetchBody(Mail $mail)
     {
-        if (sizeof($body = $mail->body()) > 1) {
+        if (sizeof($body = $mail->getAllBody()) > 1) {
             $contentType = 'multipart/alternative; boundary="' . ($boundary = uniqid('boundary')) . '"';
 
-            $message = $this->fetchMultiPart($boundary, $body, $mail->charset());
+            $message = $this->fetchMultiPart($boundary, $body, $mail->getCharset());
         } else {
-            $contentType = $this->fetchContentType(key($body), $mail->charset());
+            $contentType = $this->fetchContentType(key($body), $mail->getCharset());
 
             $message = current($body);
         }
@@ -36,27 +36,27 @@ abstract class Transporter implements TransporterInterface
     {
         $headers = array();
 
-        list($fromEmail, $fromName) = ($mail->from() ?: [null, null]);
+        list($fromEmail, $fromName) = ($mail->getFrom() ?: [null, null]);
 
         if ($fromEmail) {
             $headers[] = 'From: ' . $this->emailsToString([$fromEmail => $fromName]);
         }
 
-        list($replyToEmail, $replyToName) = ($mail->replyTo() ?: [null, null]);
+        list($replyToEmail, $replyToName) = ($mail->getReplyTo() ?: [null, null]);
 
         if ($replyToEmail) {
             $headers[] = 'Reply-To: ' . $this->emailsToString([$replyToEmail => $replyToName]);
         }
 
-        if ($mimeVersion = $mail->mimeVersion()) {
+        if ($mimeVersion = $mail->getMimeVersion()) {
             $headers[] = 'MIME-Version: ' . $mimeVersion;
         }
 
-        if ($cc = $mail->cc()) {
+        if ($cc = $mail->getCC()) {
             $headers[] = 'Cc: ' . $this->emailsToString($cc);
         }
 
-        if ($bcc = $mail->bcc()) {
+        if ($bcc = $mail->getBCC()) {
             $headers[] = 'Bcc: ' . $this->emailsToString($bcc);
         }
 

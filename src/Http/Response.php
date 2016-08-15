@@ -5,7 +5,6 @@ namespace Greg\Http;
 use Greg\Engine\InternalTrait;
 use Greg\System\Image;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 use Greg\Tool\Type;
 
 class Response
@@ -22,9 +21,7 @@ class Response
 
     protected $content = null;
 
-    protected $attachment = null;
-
-    protected $callbacks = [];
+    protected $attachmentName = null;
 
     const CODES = [
         100 => 'Continue',
@@ -92,11 +89,11 @@ class Response
     public function __construct($content = null, $contentType = null)
     {
         if ($content !== null) {
-            $this->content($content);
+            $this->setContent($content);
         }
 
         if ($contentType !== null) {
-            $this->contentType($contentType);
+            $this->setContentType($contentType);
         }
 
         return $this;
@@ -104,78 +101,49 @@ class Response
 
     public function back()
     {
-        return $this->location(Request::referrer());
-    }
-
-    public function with(callable $callable)
-    {
-        $this->callbacks()[] = $callable;
-
-        return $this;
+        return $this->setLocation(Request::referrer());
     }
 
     public function download($content, $name = null, $type = 'application/octet-stream')
     {
-        $this->content($content);
+        $this->setContent($content);
 
         if ($name) {
-            $this->attachment($name);
+            $this->setAttachmentName($name);
         }
 
-        $this->contentType($type);
+        $this->setContentType($type);
 
         return $this;
     }
 
     public function json($data)
     {
-        $this->contentType('application/json');
+        $this->setContentType('application/json');
 
-        $this->content(json_encode($data));
+        $this->setContent(json_encode($data));
 
         return $this;
     }
 
-    public function success($content = null, $data = [])
-    {
-        return $this->json([
-                'type' => 'success',
-                'content' => $content,
-            ] + $data);
-    }
-
-    public function error($content = null, $data = [])
-    {
-        return $this->json([
-                'type' => 'error',
-                'content' => $content,
-            ] + $data);
-    }
-
     public function refresh()
     {
-        return $this->location(Request::uri());
+        return $this->setLocation(Request::uri());
     }
 
     public function send()
     {
-        if ($callbacks = $this->callbacks()) {
-            foreach($callbacks as $callback) {
-                $this->callCallable($callback);
-            }
-        }
-
-        if ($attachment = $this->attachment()) {
-            $this->sendAttachment($attachment);
+        if ($attachmentName = $this->getAttachmentName()) {
+            $this->sendAttachment($attachmentName);
         }
 
         $contentType = [];
 
-        if ($type = $this->contentType()) {
+        if ($type = $this->getContentType()) {
             $contentType[] = $type;
         }
 
-        if ($charset = $this->charset()) {
+        if ($charset = $this->getCharset()) {
             $contentType[] = 'charset=' . $charset;
         }
 
@@ -183,78 +151,118 @@ class Response
             $this->sendContentType(implode('; ', $contentType));
         }
 
-        if ($code = $this->code()) {
+        if ($code = $this->getCode()) {
             $this->sendCode($code);
         }
 
-        if ($location = $this->location()) {
+        if ($location = $this->getLocation()) {
             $this->sendRedirect($location);
         }
 
-        echo $this->content();
+        echo $this->getContent();
 
         return $this;
     }
 
     public function isHtml()
     {
-        return $this->contentType() == 'text/html';
+        return $this->getContentType() == 'text/html';
     }
 
-    public function contentType($value = null, $type = Obj::PROP_REPLACE)
+    public function setContentType($type)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->contentType = (string)$type;
+
+        return $this;
     }
 
-    public function attachment($value = null, $type = Obj::PROP_REPLACE)
+    public function getContentType()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->contentType;
     }
 
-    public function charset($value = null, $type = Obj::PROP_REPLACE)
+    public function setAttachmentName($name)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->attachmentName = (string)$name;
+
+        return $this;
     }
 
-    public function location($value = null, $type = Obj::PROP_REPLACE)
+    public function getAttachmentName()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->attachmentName;
     }
 
-    public function code($value = null)
+    public function setCharset($name)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->charset = (string)$name;
+
+        return $this;
     }
 
-    public function content($value = null, $type = Obj::PROP_REPLACE)
+    public function getCharset()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->charset;
     }
 
-    protected function &callbacks($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setLocation($path)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->location = (string)$path;
+
+        return $this;
+    }
+
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    public function setCode($number)
+    {
+        $this->code = $number ? (int)$number : null;
+
+        return $this;
+    }
+
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    public function setContent($content)
+    {
+        $this->content = (string)$content;
+
+        return $this;
+    }
+
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    public function toString()
+    {
+        return (string)$this->getContent();
     }
 
     public function __toString()
     {
-        return $this->content();
+        return $this->toString();
     }
 
-    static public function sendCode($code, $die = false)
+    static public function sendCode($code)
     {
-        if (Type::isNaturalNumber($code) and Arr::has($codes = static::CODES, $code)) {
-            $code .= ' ' . $codes[$code];
+        if (Type::isNaturalNumber($code) and Arr::has(static::CODES, $code)) {
+            $code .= ' ' . static::CODES[$code];
         }
 
         header('HTTP/1.1 ' . $code);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendRedirect($url = '/', $code = null, $die = false)
+    static public function sendRedirect($url = '/', $code = null)
     {
         if ($code !== null) {
             static::sendCode($code);
@@ -266,44 +274,38 @@ class Response
 
         header('Location: ' . $url, false, $code);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendRefresh($die = false)
+    static public function sendRefresh()
     {
-        return static::sendRedirect(Request::uri(), null, $die);
+        return static::sendRedirect(Request::uri(), null);
     }
 
-    static public function sendBack($die = false)
+    static public function sendBack()
     {
-        return static::sendRedirect(Request::referrer(), null, $die);
+        return static::sendRedirect(Request::referrer(), null);
     }
 
-    static public function sendJson($param = [], $die = false)
+    static public function sendJson($param = [])
     {
         static::sendContentType('application/json');
 
         echo json_encode($param);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendHtml($html, $die = false)
+    static public function sendHtml($html)
     {
         static::sendContentType('text/html');
 
         echo $html;
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendImageFile($file, $die = false)
+    static public function sendImageFile($file)
     {
         $mime = Image::mimeFile($file);
 
@@ -315,69 +317,55 @@ class Response
 
         readfile($file);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendText($text, $die = false)
+    static public function sendText($text)
     {
         static::sendContentType('text/plain');
 
         echo $text;
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendJpeg($image, $quality = 75, $die = false)
+    static public function sendJpeg($image, $quality = 75)
     {
         static::sendContentType('image/jpeg');
 
         imagejpeg($image, null, $quality);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendGif($image, $die = false)
+    static public function sendGif($image)
     {
         static::sendContentType('image/gif');
 
         imagegif($image);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendPng($image, $die = false)
+    static public function sendPng($image)
     {
         static::sendContentType('image/png');
 
         imagepng($image);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendContentType($type, $die = false)
+    static public function sendContentType($type)
     {
         header('Content-Type: ' . $type);
 
-        $die && die;
-
         return true;
     }
 
-    static public function sendAttachment($name, $die = false)
+    static public function sendAttachment($name)
     {
         header('Content-disposition: attachment; filename="' . addslashes($name) . '"');
-
-        $die && die;
 
         return true;
     }
@@ -385,13 +373,15 @@ class Response
     static public function flushContent()
     {
         echo str_pad('', 4096);
+
         ob_flush();
+
         flush();
 
         return true;
     }
 
-    static public function isModifiedSince($timestamp, $maxAge = 0, $die = false)
+    static public function isModifiedSince($timestamp, $maxAge = 0)
     {
         if (!Type::isNaturalNumber($timestamp)) {
             $timestamp = strtotime($timestamp);
@@ -444,8 +434,6 @@ class Response
 
         // Nothing has changed since their last request - serve a 304
         static::sendCode(304);
-
-        $die && die;
 
         return true;
     }

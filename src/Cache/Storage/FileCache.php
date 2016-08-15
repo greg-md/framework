@@ -106,7 +106,7 @@ class FileCache extends CacheStorage
     {
         $this->loadStorage();
 
-        $this->addToStorage($id, time());
+        $this->setToStorage($id, time());
 
         $this->update();
 

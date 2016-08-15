@@ -4,13 +4,18 @@ namespace Greg\Config;
 
 class ConfigIniString extends ConfigIni
 {
-    public function __construct($string = null, $section = null, $indexDelimiter = null)
+    public function __construct($string, $section = null, $indexDelimiter = null)
     {
-        return parent::__construct($string ? parse_ini_string($string, true) : null, $section, $indexDelimiter);
+        return $this->setContents($this->parse($string), $section, $indexDelimiter);
+    }
+
+    static public function parse($string)
+    {
+        return parse_ini_string($string, true);
     }
 
     static public function fetch($string, $section = null, $indexDelimiter = false)
     {
-        return parent::fetchContents(parse_ini_string($string, true), $section, $indexDelimiter);
+        return parent::fetchContents(static::parse($string), $section, $indexDelimiter);
     }
 }

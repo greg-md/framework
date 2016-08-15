@@ -2,7 +2,7 @@
 
 namespace Greg\Mailer;
 
-interface TransporterInterface
+interface MailTransporterInterface
 {
     public function send(Mail $mail);
 }

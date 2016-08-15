@@ -4,11 +4,9 @@ namespace Greg\Event;
 
 interface ListenerInterface
 {
-    public function addMore(array $events);
+    public function on($event, callable $callable);
 
-    public function on($event, callable $call, $id = null);
-
-    public function register($event, $class);
+    public function register($event, $object);
 
     public function fire($event, ...$args);
 
@@ -22,7 +20,5 @@ interface ListenerInterface
 
     public function fireWithArgs($event, array $args = []);
 
-    public function addSubscribers($subscribers, callable $callback = null);
-
-    public function subscribe($name, $subscriber, callable $callback = null);
+    public function subscribe(SubscriberInterface $subscriber);
 }

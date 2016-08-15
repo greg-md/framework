@@ -6,7 +6,7 @@ use Greg\Storage\AccessorTrait;
 use Greg\Storage\ArrayAccessTrait;
 use Greg\Tool\Obj;
 
-class Element implements \ArrayAccess
+class HtmlElement implements \ArrayAccess
 {
     use AccessorTrait, ArrayAccessTrait;
 
@@ -37,6 +37,11 @@ class Element implements \ArrayAccess
         }
 
         return $this;
+    }
+
+    static public function clearAttrValue($content)
+    {
+        return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
     }
 
     public function name($value = null, $type = Obj::PROP_REPLACE)

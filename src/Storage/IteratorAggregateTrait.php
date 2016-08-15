@@ -2,25 +2,28 @@
 
 namespace Greg\Storage;
 
-use Greg\Tool\Obj;
-
 trait IteratorAggregateTrait
 {
     protected $iteratorClass = \ArrayIterator::class;
 
     public function getIterator()
     {
-        $class = $this->iteratorClass();
-
-        if (!$class) {
+        if (!$this->iteratorClass) {
             throw new \Exception('Undefined iterator.');
         }
 
-        return new $class($this->storage);
+        return new $this->iteratorClass($this->storage);
     }
 
-    public function iteratorClass($value = null, $type = Obj::PROP_REPLACE)
+    public function getIteratorClass()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->iteratorClass;
+    }
+
+    public function setIteratorClass($name = null)
+    {
+        $this->iteratorClass = (string)$name;
+
+        return $this;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Greg\Storage;
 
+use Greg\Tool\Arr;
+
 trait AccessorTrait
 {
     private $storage = [];
@@ -18,22 +20,20 @@ trait AccessorTrait
         return $this;
     }
 
-    protected function setStorageRef(array &$storage)
+    protected function inStorage($key)
     {
-        $this->storage = &$storage;
-
-        return $this;
-    }
-
-    protected function addToStorage($key, $value)
-    {
-        $this->storage[$key] = $value;
-
-        return $this;
+        return array_key_exists($key, $this->storage);
     }
 
     protected function getFromStorage($key)
     {
-        return array_key_exists($key, $this->storage) ? $this->storage[$key] : null;
+        return $this->inStorage($key) ? $this->storage[$key] : null;
+    }
+
+    protected function setToStorage($key, $value)
+    {
+        Arr::setRefValueRef($this->storage, $key, $value);
+
+        return $this;
     }
 }
