@@ -4,7 +4,6 @@ namespace Greg\Router;
 
 use Greg\Tool\Arr;
 use Greg\Tool\Obj;
-use Greg\Tool\Str;
 
 trait RouterTrait
 {
