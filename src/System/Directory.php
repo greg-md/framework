@@ -4,7 +4,7 @@ namespace Greg\System;
 
 use Greg\Tool\ErrorHandler;
 
-class Dir
+class Directory
 {
     static public function fix($dir, $recursive = false)
     {

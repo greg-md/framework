@@ -508,7 +508,7 @@ class Obj
             return static::fetchArrayVarGetKey($var, $key);
         }
 
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         return $var;
     }
@@ -552,7 +552,7 @@ class Obj
             return static::fetchArrayVarGetKey($var, $key);
         }
 
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         return $var;
     }
@@ -579,14 +579,14 @@ class Obj
             return static::fetchArrayVarGetIndex($var, $index, $delimiter);
         }
 
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         return $var;
     }
 
     static public function &fetchArrayVarGetKey(&$var, $key)
     {
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         if (array_key_exists($key, $var)) {
             return $var[$key];
@@ -599,14 +599,14 @@ class Obj
 
     static public function &fetchArrayVarGetIndex(&$var, $index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        Arr::bringRef($var);
+        $var = (array)$var;
 
-        return Arr::getIndexRef($var, $index, null, $delimiter);
+        return Arr::getIndexRef($var, $index, $else = null, $delimiter);
     }
 
     static public function &fetchArrayVarKeyValue($return, &$var, $key, $value, $type = self::PROP_APPEND)
     {
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         switch($type) {
             case static::PROP_REPLACE:
@@ -628,7 +628,7 @@ class Obj
 
     static public function &fetchArrayVarIndexValue($return, &$var, $index, $value, $type = self::PROP_APPEND, $delimiter = Arr::INDEX_DELIMITER)
     {
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         switch($type) {
             case static::PROP_REPLACE:
@@ -650,7 +650,7 @@ class Obj
 
     static public function &fetchArrayVarArrayKey($return, &$var, array $key, $type = self::PROP_APPEND, $replace = false, $recursive = false)
     {
-        Arr::bringRef($var);
+        $var = (array)$var;
 
         if ($type === null) {
             $type = static::PROP_APPEND;
@@ -710,7 +710,7 @@ class Obj
     {
         $name = array_map(function($name) {
             return Str::phpName($name);
-        }, Arr::bring($name));
+        }, (array)$name);
 
         $name = implode('\\', $name);
 

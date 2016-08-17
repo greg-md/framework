@@ -3,6 +3,9 @@ namespace Greg\Testing;
 
 class Tester
 {
+    /**
+     * @var Test[]
+     */
     protected $tests = [];
 
     public function it($condition, $function = null)
@@ -47,7 +50,7 @@ class Tester
         $tests = [];
 
         foreach($this->tests as $test) {
-            if (($test instanceof Test) and $test->failed()) {
+            if ($test->failed()) {
                 $tests[] = $test;
             }
         }

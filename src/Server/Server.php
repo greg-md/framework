@@ -31,13 +31,13 @@ class Server
         return static::get('DOCUMENT_ROOT');
     }
 
-    static public function has($key, ...$keys)
+    static public function has($key)
     {
-        return Arr::hasRef($_SERVER, $key, ...$keys);
+        return Arr::hasRef($_SERVER, $key);
     }
 
     static public function get($key, $else = null)
     {
-        return Arr::get($_SERVER, $key, $else);
+        return Arr::getRef($_SERVER, $key, $else);
     }
 }

@@ -36,4 +36,11 @@ trait AccessorTrait
 
         return $this;
     }
+
+    protected function addToStorage(array $items)
+    {
+        $this->storage = array_merge($this->storage, $items);
+
+        return $this;
+    }
 }

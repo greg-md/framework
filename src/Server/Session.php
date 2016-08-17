@@ -11,72 +11,62 @@ class Session
 
     static protected $handler = null;
 
-    const FLASH_KEY = '__FLASH__';
+    static protected $flashKey = '__FLASH__';
 
-    protected $flash = [];
+    static protected $flash = [];
 
-    protected $flashLoaded = false;
+    static protected $flashLoaded = false;
 
-    public function __construct()
+    static public function reloadFlash()
     {
-        //$this->reloadFlash();
+        $flash = static::get(static::$flashKey);
 
-        return $this;
+        static::del(static::$flashKey);
+
+        return static::$flash = $flash;
     }
 
-    public function reloadFlash()
+    static public function loadFlash()
     {
-        $flash = $this->get(static::FLASH_KEY);
+        if (!static::$flashLoaded) {
+            static::reloadFlash();
 
-        $this->del(static::FLASH_KEY);
+            static::$flashLoaded = true;
+        }
 
-        $this->flash = $flash;
-
-        return $this;
+        return static::$flash;
     }
 
-    public function flash($key = null, $value = null)
+    static public function setFlash($key, $value = null)
     {
-        if (!$this->flashLoaded) {
-            $this->reloadFlash();
+        static::loadFlash();
 
-            $this->flashLoaded = true;
+        $flash = &static::getForceRef(static::$flashKey);
+
+        if (is_array($key)) {
+            $flash = array_merge($flash, $key);
+
+            static::$flash = array_merge(static::$flash, $key);
+        } else {
+            $flash[$key] = $value;
+
+            static::$flash[$key] = $value;
         }
 
-        if ($num = func_num_args()) {
-            $flash = &$this->getForceRef(static::FLASH_KEY);
-
-            if (is_array($key)) {
-                foreach(($keys = $key) as $key => $value) {
-                    $flash[$key] = $value;
-                }
-            } elseif ($num > 1) {
-                $flash[$key] = $value;
-            } else {
-                unset($flash[$key]);
-            }
-        }
-
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $flash;
     }
 
-    public function flashIndex($index = null, $value = null)
+    static public function getFlash($key = null)
     {
-        if ($num = func_num_args()) {
-            $flash = &$this->getArrayForceRef(static::FLASH_KEY);
+        static::loadFlash();
 
-            if (is_array($index)) {
-                foreach(($indexes = $index) as $index => $value) {
-                    Arr::setIndex($flash, $index, $value);
-                }
-            } elseif ($num > 1) {
-                Arr::setIndex($flash, $index, $value);
-            } else {
-                Arr::delIndex($flash, $index);
-            }
+        $flash = &static::getForceRef(static::$flashKey);
+
+        if (func_num_args()) {
+            return Arr::getRef($flash, $key);
         }
 
-        return Obj::fetchArrayVarIndex($this, $this->flash, ...func_get_args());
+        return $flash;
     }
 
     static public function ini($var, $value = null)
@@ -216,193 +206,134 @@ class Session
 
     // Start standard array methods
 
-    static public function &all()
+    static public function is()
     {
-        static::start();
+        return (bool)$_SESSION;
+    }
 
+    static public function all()
+    {
         return $_SESSION;
     }
 
-    static public function has($key, ...$keys)
+    static public function has($key)
     {
-        static::start();
-
-        return Arr::hasRef($_SESSION, $key, ...$keys);
+        return Arr::hasRef($_SESSION, $key);
     }
 
     static public function hasIndex($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::hasIndex($_SESSION, $index, $delimiter);
+        return Arr::hasIndexRef($_SESSION, $index, $delimiter);
     }
 
     static public function set($key, $value)
     {
-        static::start();
-
-        return Arr::set($_SESSION, $key, $value);
+        return static::setRef($key, $value);
     }
 
     static public function setRef($key, &$value)
     {
-        static::start();
-
-        return Arr::set($_SESSION, $key, $value);
+        return Arr::setRefValueRef($_SESSION, $key, $value);
     }
 
     static public function setIndex($index, $value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::setIndex($_SESSION, $index, $value, $delimiter);
+        return static::setIndexRef($index, $value, $delimiter);
     }
 
     static public function setIndexRef($index, &$value, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::setIndex($_SESSION, $index, $value, $delimiter);
+        return Arr::setIndexRefValueRef($_SESSION, $index, $value, $delimiter);
     }
 
     static public function get($key, $else = null)
     {
-        static::start();
-
-        return Arr::get($_SESSION, $key, $else);
+        return static::getRef($key, $else);
     }
 
     static public function &getRef($key, $else = null)
     {
-        static::start();
-
         return Arr::getRef($_SESSION, $key, $else);
     }
 
     static public function getForce($key, $else = null)
     {
-        static::start();
-
-        return Arr::getForce($_SESSION, $key, $else);
+        return static::getForceRef($key, $else);
     }
 
     static public function &getForceRef($key, $else = null)
     {
-        static::start();
-
         return Arr::getForceRef($_SESSION, $key, $else);
     }
 
     static public function getArray($key, $else = null)
     {
-        static::start();
-
-        return Arr::getArray($_SESSION, $key, $else);
+        return static::getArrayRef($key, $else);
     }
 
     static public function &getArrayRef($key, $else = null)
     {
-        static::start();
-
         return Arr::getArrayRef($_SESSION, $key, $else);
     }
 
     static public function getArrayForce($key, $else = null)
     {
-        static::start();
-
-        return Arr::getArrayForce($_SESSION, $key, $else);
+        return static::getArrayForceRef($key, $else);
     }
 
     static public function &getArrayForceRef($key, $else = null)
     {
-        static::start();
-
         return Arr::getArrayForceRef($_SESSION, $key, $else);
     }
 
     static public function getIndex($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndex($_SESSION, $index, $else, $delimiter);
+        return static::getIndexRef($index, $else, $delimiter);
     }
 
     static public function &getIndexRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
         return Arr::getIndexRef($_SESSION, $index, $else, $delimiter);
     }
 
     static public function getIndexForce($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndexForce($_SESSION, $index, $else, $delimiter);
+        return static::getIndexForceRef($index, $else, $delimiter);
     }
 
     static public function &getIndexForceRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
         return Arr::getIndexForceRef($_SESSION, $index, $else, $delimiter);
     }
 
-    static public function getIndexArray($index, $else = null)
+    static public function getIndexArray($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndexArray($_SESSION, $index, $else);
+        return static::getIndexArrayRef($index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayRef($index, $else = null)
+    static public function &getIndexArrayRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndexArrayRef($_SESSION, $index, $else);
+        return Arr::getIndexArrayRef($_SESSION, $index, $else, $delimiter);
     }
 
-    static public function getIndexArrayForce($index, $else = null)
+    static public function getIndexArrayForce($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndexArrayForce($_SESSION, $index, $else);
+        return static::getIndexArrayForceRef($index, $else, $delimiter);
     }
 
-    static public function &getIndexArrayForceRef($index, $else = null)
+    static public function &getIndexArrayForceRef($index, $else = null, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::getIndexArrayForceRef($_SESSION, $index, $else);
+        return Arr::getIndexArrayForceRef($_SESSION, $index, $else, $delimiter);
     }
 
-    static public function required($key)
+    static public function del($key)
     {
-        static::start();
-
-        return Arr::required($_SESSION, $key);
+        return Arr::delRef($_SESSION, $key);
     }
 
-    static public function &requiredRef($key)
+    static public function delIndex($index, $delimiter = Arr::INDEX_DELIMITER)
     {
-        static::start();
-
-        return Arr::requiredRef($_SESSION, $key);
-    }
-
-    static public function del($key, ...$keys)
-    {
-        static::start();
-
-        return Arr::del($_SESSION, $key, ...$keys);
-    }
-
-    static public function indexDel($index, $delimiter = Arr::INDEX_DELIMITER)
-    {
-        static::start();
-
-        return Arr::delIndex($_SESSION, $index, $delimiter);
+        return Arr::delIndexRef($_SESSION, $index, $delimiter);
     }
 
     // End standard array methods
@@ -411,8 +342,6 @@ class Session
     {
         static::start();
 
-        session_destroy();
-
-        return true;
+        return session_destroy();
     }
 }

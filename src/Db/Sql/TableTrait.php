@@ -63,7 +63,7 @@ trait TableTrait
 
     public function combineFirstUniqueKeys($values)
     {
-        Arr::bringRef($values);
+        $values = (array)$values;
 
         if (!$keys = $this->getFirstUniqueKeys()) {
             throw new \Exception('Table does not have primary keys.');
@@ -265,7 +265,7 @@ trait TableTrait
 
     public function setPrimaryKeys($columnsNames)
     {
-        $this->primaryKeys = Arr::bring($columnsNames);
+        $this->primaryKeys = (array)$columnsNames;
 
         return $this;
     }
@@ -280,7 +280,7 @@ trait TableTrait
         $this->uniqueKeys = [];
 
         foreach($allColumnsNames as $columnsNames) {
-            $this->uniqueKeys[] = Arr::bring($columnsNames);
+            $this->uniqueKeys[] = (array)$columnsNames;
         }
 
         return $this;

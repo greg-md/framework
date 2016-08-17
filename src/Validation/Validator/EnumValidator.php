@@ -2,8 +2,6 @@
 
 namespace Greg\Validation\Validator;
 
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -15,21 +13,15 @@ class EnumValidator implements ValidatorInterface
 
     public function __construct(array $values)
     {
-        $this->values($values);
+        $this->setValues($values);
 
         return $this;
     }
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
-        if (!in_array($value, $this->values())) {
-            $errors[] = 'Value is not found in the enum.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+        if (!in_array($value, $this->getValues())) {
+            $this->setError('EnumError', 'Value is not found in the enum.');
 
             return false;
         }
@@ -37,8 +29,15 @@ class EnumValidator implements ValidatorInterface
         return true;
     }
 
-    protected function values($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setValues(array $values)
     {
-        return Obj::fetchArrayReplaceVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->values = $values;
+
+        return $this;
+    }
+
+    public function getValues()
+    {
+        return $this->values;
     }
 }

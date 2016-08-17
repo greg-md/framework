@@ -10,87 +10,66 @@ class Test
 
     protected $result = null;
 
-    public function __construct($condition = null)
-    {
-        if (func_num_args()) {
-            $this->condition($condition);
-        }
-
-        return $this;
-    }
-
     public function expect($result)
     {
-        $this->expected($result);
-
-        return $this;
+        return $this->setExpected($result);
     }
 
     public function toBe($expected)
     {
-        $this->result($this->expected() == $expected);
+        $this->result = $this->getExpected() == $expected;
 
         return $this;
     }
 
     public function toEqual($expected)
     {
-        $this->result($this->expected() === $expected);
+        $this->result = ($this->getExpected() === $expected);
 
         return $this;
     }
 
-    public function condition($value = null)
+    public function setCondition($value)
     {
-        if (func_num_args()) {
-            $this->condition = $value;
+        $this->condition = $value;
 
-            return $this;
-        }
+        return $this;
+    }
 
+    public function getCondition()
+    {
         return $this->condition;
     }
 
-    public function expected($value = null)
+    public function setExpected($value)
     {
-        if (func_num_args()) {
-            $this->expected = $value;
+        $this->expected = $value;
 
-            return $this;
-        }
-
-        return $this->expected;
+        return $this;
     }
 
-    public function result($value = null)
+    public function getExpected()
     {
-        if (func_num_args()) {
-            $this->expected = (bool)$value;
-
-            return $this;
-        }
-
-        return (bool)$this->expected;
+        return $this->expected;
     }
 
     public function failed()
     {
-        return $this->result() === false;
+        return $this->result === false;
     }
 
     public function succeed()
     {
-        return $this->result() === true;
+        return $this->result === true;
+    }
+
+    public function toString()
+    {
+        return $this->getCondition() . ': ' . (is_bool($this->result) ? ($this->result ? 'true' : 'false') : 'not tested');
     }
 
     public function __toString()
     {
-        $return = $this->condition();
-
-        $result = $this->result();
-        
-        $return .= ': ' . (is_bool($result) ? ($result ? 'true' : 'false') : 'not tested');
-
-        return (string)$return;
+        return $this->toString();
     }
 }

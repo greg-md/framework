@@ -10,7 +10,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function __construct($input = [], $iteratorClass = null)
     {
-        $this->merge(Arr::bring($input));
+        $this->merge((array)$input);
 
         if ($iteratorClass !== null) {
             $this->iteratorClass($iteratorClass);
@@ -26,7 +26,7 @@ class ArrayObject implements \ArrayAccess, \IteratorAggregate, \Serializable, \C
 
     public function exchangeRef(&$input)
     {
-        Arr::bringRef($input);
+        $input = (array)$input;
 
         $this->storage = &$input;
 

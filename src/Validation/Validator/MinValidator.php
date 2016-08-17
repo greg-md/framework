@@ -2,7 +2,6 @@
 
 namespace Greg\Validation\Validator;
 
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -14,23 +13,17 @@ class MinValidator implements ValidatorInterface
 
     public function __construct($min)
     {
-        $this->min($min);
+        $this->setMin($min);
 
         return $this;
     }
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
-        $min = $this->min();
+        $min = $this->getMin();
 
         if ($value < $min) {
-            $errors[] = 'Value should be grater or equal with ' . $min . '.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('MinError', 'Value should be grater or equal with ' . $min . '.');
 
             return false;
         }
@@ -38,8 +31,15 @@ class MinValidator implements ValidatorInterface
         return true;
     }
 
-    public function min($value = null)
+    public function setMin($length)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->min = (int)$length;
+
+        return $this;
+    }
+
+    public function getMin()
+    {
+        return $this->min;
     }
 }

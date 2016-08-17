@@ -29,7 +29,7 @@ class Viewer implements \ArrayAccess
 
     public function __construct($paths = [], array $param = [])
     {
-        Arr::bringRef($paths);
+        $paths = (array)$paths;
 
         $this->paths($paths);
 

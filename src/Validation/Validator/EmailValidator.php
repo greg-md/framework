@@ -15,14 +15,8 @@ class EmailValidator implements ValidatorInterface
             return true;
         }
 
-        $errors = [];
-
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
-            $errors[] = 'Value is not an email.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('EmailError', 'Value is not an email.');
 
             return false;
         }

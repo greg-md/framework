@@ -9,6 +9,11 @@ class Image extends File
         return $this->typeFile($this->file());
     }
 
+    public function size()
+    {
+        return $this->sizeFile($this->file());
+    }
+
     public function width()
     {
         return $this->widthFile($this->file());
@@ -88,34 +93,43 @@ class Image extends File
         return $ext;
     }
 
+    static public function sizeFile($file)
+    {
+        $width = $height = 0;
+
+        if (file_exists($file)) {
+            list($width, $height) = @getimagesize($file);
+
+            if (!$width or !$height) {
+                $theFile = static::getFile($file);
+
+                if (!$width) {
+                    $width = imagesx($theFile);
+                }
+
+                if (!$height) {
+                    $height = imagesy($theFile);
+                }
+            }
+        }
+
+        return [$width, $height];
+    }
+
     static public function widthFile($file)
     {
-        if (file_exists($file)) {
-            list($width) = @getimagesize($file);
+        list($width, $height) = static::sizeFile($file);
 
-            if (!$width) {
-                $width = imagesx(static::getFile($file));
-            }
-        } else {
-            $width = 0;
-        }
+        unset($height);
 
         return $width;
     }
 
     static public function heightFile($file)
     {
-        if (file_exists($file)) {
-            list($width, $height) = @getimagesize($file);
+        list($width, $height) = static::sizeFile($file);
 
-            unset($width);
-
-            if (!$height) {
-                $height = imagesy(static::getFile($file));
-            }
-        } else {
-            $height = 0;
-        }
+        unset($width);
 
         return $height;
     }

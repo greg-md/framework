@@ -116,7 +116,7 @@ class Arr
         foreach($indexes as $index) {
             $myRef = &$myRef[$index];
 
-            static::bringRef($myRef);
+            $myRef = (array)$myRef;
         }
 
         static::setRefValueRef($myRef, $lastIndex, $value);
@@ -129,7 +129,7 @@ class Arr
         if (is_array($key)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($keys = $key as $kv => $kk) {
                 if (array_key_exists($kk, $else)) {
@@ -152,7 +152,7 @@ class Arr
         if (is_array($key)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($keys = $key as $kv => $kk) {
                 if (array_key_exists($kk, $else)) {
@@ -175,7 +175,7 @@ class Arr
         if (is_array($key)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($keys = $key as $kv => $kk) {
                 if (array_key_exists($kk, $else)) {
@@ -202,7 +202,7 @@ class Arr
         if (is_array($key)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($keys = $key as $kv => $kk) {
                 if (array_key_exists($kk, $else)) {
@@ -228,7 +228,7 @@ class Arr
     {
         $ref = static::getRef($array, $key, $else);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -237,7 +237,7 @@ class Arr
     {
         $ref = &static::getRef($array, $key, $else);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -246,7 +246,7 @@ class Arr
     {
         $ref = static::getForceRef($array, $key, $else);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -255,7 +255,7 @@ class Arr
     {
         $ref = &static::getForceRef($array, $key, $else);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -265,7 +265,7 @@ class Arr
         if (is_array($index)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($indexes = $index as $iv => $ik) {
                 if (array_key_exists($ik, $else)) {
@@ -288,7 +288,7 @@ class Arr
         if (is_array($index)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($indexes = $index as $iv => $ik) {
                 if (array_key_exists($ik, $else)) {
@@ -330,7 +330,7 @@ class Arr
         if (is_array($index)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($indexes = $index as $iv => $ik) {
                 if (array_key_exists($ik, $else)) {
@@ -353,7 +353,7 @@ class Arr
         if (is_array($index)) {
             $return = [];
 
-            static::bringRef($else);
+            $else = (array)$else;
 
             foreach($indexes = $index as $iv => $ik) {
                 if (array_key_exists($ik, $else)) {
@@ -400,7 +400,7 @@ class Arr
     {
         $ref = static::getIndexRef($array, $index, $else, $delimiter);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -409,7 +409,7 @@ class Arr
     {
         $ref = &static::getIndexRef($array, $index, $else, $delimiter);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -418,7 +418,7 @@ class Arr
     {
         $ref = static::getIndexForceRef($array, $index, $else, $delimiter);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -427,7 +427,7 @@ class Arr
     {
         $ref = &static::getIndexForceRef($array, $index, $else, $delimiter);
 
-        static::bringRef($ref);
+        $ref = (array)$ref;
 
         return $ref;
     }
@@ -784,7 +784,7 @@ class Arr
                     }
                     unset($value);
                 } else {
-                    self::bringRef($maxLevel);
+                    $maxLevel = (array)$maxLevel;
 
                     foreach((array)$maxLevel as $level) {
                         $current = &$current[$array[$level]];
@@ -910,57 +910,5 @@ class Arr
         }
 
         return $new;
-    }
-
-    /**
-     * Bring the variable to an array.
-     *
-     * @param $var
-     * @param array ...$vars
-     * @return array
-     */
-    static public function bring($var, ...$vars)
-    {
-        return static::bringRef($var, ...$vars);
-    }
-
-    static public function bringRef(&$var, &...$vars)
-    {
-        static::bringRefVar($var);
-
-        if (!$vars) {
-            return $var;
-        }
-
-        foreach($vars as &$v) {
-            static::bringRefVar($v);
-        }
-        unset($v);
-
-        array_unshift($vars, $var);
-
-        return $vars;
-    }
-
-    static public function bringVar($var)
-    {
-        return static::bringRefVar($var);
-    }
-
-    static public function bringRefVar(&$var)
-    {
-        if (is_array($var)) {
-            return $var;
-        }
-
-        if (Str::isScalar($var)) {
-            $var = (array)$var;
-
-            return $var;
-        }
-
-        $var = [$var];
-
-        return $var;
     }
 }

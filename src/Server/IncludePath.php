@@ -2,8 +2,6 @@
 
 namespace Greg\Server;
 
-use Greg\Tool\Arr;
-
 class IncludePath
 {
     const APPEND_PATH = 'append';
@@ -22,7 +20,7 @@ class IncludePath
 
     static public function add($path, $type = self::APPEND_PATH)
     {
-        Arr::bringRef($path);
+        $path = (array)$path;
 
         $incPaths = explode(PATH_SEPARATOR, get_include_path());
 
@@ -40,11 +38,6 @@ class IncludePath
     static public function reset()
     {
         return set_include_path('.');
-    }
-
-    static public function clear()
-    {
-        return set_include_path('');
     }
 
     static public function fileExists($file)

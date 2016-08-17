@@ -5,7 +5,6 @@ namespace Greg\Db\Sql;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
 use Greg\Engine\InternalTrait;
-use Greg\Tool\Arr;
 use Greg\Tool\Obj;
 use Greg\Tool\Str;
 
@@ -169,7 +168,7 @@ abstract class Query
         $k = 1;
 
         foreach($this->bindParams() as $key => $param) {
-            $param = $param !== null ? Arr::bring($param) : [$param];
+            $param = $param !== null ? (array)$param : [$param];
 
             array_unshift($param, is_int($key) ? $k++ : $key);
 

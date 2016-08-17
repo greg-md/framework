@@ -130,7 +130,7 @@ class Str
      */
     static public function startsWith($haystack, $needles)
     {
-        foreach (Arr::bring($needles) as $needle) {
+        foreach ((array)$needles as $needle) {
             if (strpos($haystack, $needle) === 0) return true;
             //if (mb_substr($haystack, 0, mb_strlen($needle)) === $needle) return true;
         }
@@ -140,7 +140,7 @@ class Str
 
     static public function endsWith($haystack, $needles)
     {
-        foreach (Arr::bring($needles) as $needle) {
+        foreach ((array)$needles as $needle) {
             if (mb_substr($haystack, -mb_strlen($needle)) === $needle) return true;
         }
 
@@ -231,7 +231,7 @@ class Str
             $length = mb_strlen(html_entity_decode($string, ENT_QUOTES, 'UTF-8')) - $start;
         }
 
-        $delimiter = Arr::bring($delimiter);
+        $delimiter = (array)$delimiter;
 
         $string = '>' . $string . '<';
 

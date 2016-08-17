@@ -3,7 +3,6 @@
 namespace Greg\Validation\Validator;
 
 use Greg\System\DateTime;
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -17,7 +16,7 @@ class DateTimeFromValidator implements ValidatorInterface
 
     public function __construct($from, $includeFrom = null)
     {
-        $this->from($from);
+        $this->setFrom($from);
 
         if ($includeFrom !== null) {
             $this->includeFrom($includeFrom);
@@ -32,18 +31,12 @@ class DateTimeFromValidator implements ValidatorInterface
             return true;
         }
 
-        $errors = [];
-
         $value = DateTime::toTimestamp($value);
 
-        $from = DateTime::toTimestamp($this->from());
+        $from = DateTime::toTimestamp($this->getFrom());
 
         if ($this->includeFrom() ? $value <= $from : $value < $from) {
-            $errors[] = 'Value should be greater than ' . DateTime::toStringDateTime($from) . '.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('DateTimeFromError', 'Value should be greater than ' . DateTime::toStringDateTime($from) . '.');
 
             return false;
         }
@@ -51,13 +44,26 @@ class DateTimeFromValidator implements ValidatorInterface
         return true;
     }
 
-    public function from($value = null)
+    public function setFrom($datetime)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->from = (string)$datetime;
+
+        return $this;
+    }
+
+    public function getFrom()
+    {
+        return $this->from;
     }
 
     public function includeFrom($value = null)
     {
-        return Obj::fetchBoolVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        if (func_num_args()) {
+            $this->includeFrom = (bool)$value;
+
+            return $this;
+        }
+
+        return $this->includeFrom;
     }
 }

@@ -6,15 +6,15 @@ use Greg\Engine\InternalTrait;
 use Greg\Http\Request;
 use Greg\Regex\InNamespace;
 use Greg\Storage\AccessorTrait;
+use Greg\Storage\ArrayAccessTrait;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 use Greg\Tool\Regex;
 use Greg\Tool\Str;
 use Greg\Tool\Url;
 
 class Route implements \ArrayAccess
 {
-    use AccessorTrait, RouterTrait, InternalTrait;
+    use AccessorTrait, ArrayAccessTrait, RouterTrait, InternalTrait;
 
     const TYPE_GET = 'get';
 
@@ -28,51 +28,57 @@ class Route implements \ArrayAccess
 
     protected $action = null;
 
-    protected $settings = [
-        'name' => null,
-        'type' => null,
-        'data' => null,
-        'strict' => true,
-        'encodeValues' => true,
-        'delimiter' => '/',
-        'regexMatchDelimiter' => false,
-        'middleware' => null,
-        'defaults' => [],
-    ];
+    protected $name = null;
+
+    protected $type = null;
+
+    protected $host = null;
+
+    protected $data = [];
+
+    protected $strict = true;
+
+    protected $encodeValues = true;
+
+    protected $delimiter = '/';
+
+    protected $regexMatchDelimiter = '/';
+
+    protected $middleware = [];
+
+    protected $defaultParams = [];
 
     protected $onMatch = [];
 
-    protected $lastMatchedPath = null;
+    protected $path = null;
 
-    protected $lastMatchedCleanParams = [];
+    protected $cleanParams = [];
 
+    /**
+     * @var Route|null
+     */
     protected $parent = null;
 
+    /**
+     * @var Router|null
+     */
     protected $router = null;
 
-    public function __construct($format, $action, array $settings = [])
+    public function __construct($format, $action)
     {
-        $this->format($format);
+        $this->setFormat($format);
 
-        $this->action($action);
-
-        $this->settings($settings);
+        $this->setAction($action);
 
         return $this;
     }
 
-    /**
-     * @param $format
-     * @param $action
-     * @param array $settings
-     * @return Route
-     */
     public function createRoute($format, $action, array $settings = [])
     {
-        return $this->_createRoute($format, $action, $settings)->parent($this);
+        return $this->_createRoute($format, $action, $settings)->setParent($this);
     }
 
-    protected function getRegexPattern()
+    protected function regexPattern()
     {
         $curlyBrR = new InNamespace('{', '}', false);
 
@@ -93,7 +99,7 @@ class Route implements \ArrayAccess
 
         $defaults = [];
 
-        $pattern = $this->getRegexPattern();
+        $pattern = $this->regexPattern();
 
         // find all "{param}?" and "[format]?"
         if (preg_match_all($pattern, $format, $matches)) {
@@ -162,10 +168,10 @@ class Route implements \ArrayAccess
 
             $default = Arr::get($matches, 2);
 
-            $regex = Arr::hasRef($matches, 3) ? Regex::disableGroups($matches[3]) : null;
+            $regex = Arr::has($matches, 3) ? Regex::disableGroups($matches[3]) : null;
 
             if (!$regex) {
-                $regex = ($this->regexMatchDelimiter() ? '.+' : '[^' . Regex::quote($this->delimiter()) . ']+');
+                $regex = ($this->regexMatchDelimiter() ? '.+' : '[^' . Regex::quote($this->getDelimiter()) . ']+');
 
                 if ($greedy) {
                     $regex .= '?';
@@ -181,7 +187,7 @@ class Route implements \ArrayAccess
         try {
             $this->runBeforeMiddleware();
 
-            $result = $this->dispatchAction($this->action(), $params);
+            $result = $this->dispatchAction($this->getAction(), $params);
 
             $this->runAfterMiddleware();
 
@@ -191,12 +197,28 @@ class Route implements \ArrayAccess
         }
     }
 
+    public function addMiddleware($object)
+    {
+        if (!is_object($object)) {
+            throw new \Exception('Middleware is not an object.');
+        }
+
+        $this->middleware[] = $object;
+
+        return $this;
+    }
+
+    public function getMiddleware()
+    {
+        return $this->middleware;
+    }
+
     public function getAllMiddleware()
     {
-        $middleware = $this->middleware();
+        $middleware = $this->middleware;
 
-        if ($parent = $this->parent()) {
-            $parentMiddleware = $parent->middleware();
+        if ($parent = $this->getParent()) {
+            $parentMiddleware = $parent->getAllMiddleware();
 
             $middleware = array_merge($parentMiddleware, $middleware);
         }
@@ -207,8 +229,6 @@ class Route implements \ArrayAccess
     protected function runBeforeMiddleware()
     {
         foreach($this->getAllMiddleware() as $middleware) {
-            $middleware = $this->fetchMiddleware($middleware);
-
             if ($this->execBeforeMiddleware($middleware) === false) {
                 break;
             }
@@ -220,23 +240,12 @@ class Route implements \ArrayAccess
     protected function runAfterMiddleware()
     {
         foreach($this->getAllMiddleware() as $middleware) {
-            $middleware = $this->fetchMiddleware($middleware);
-
             if ($this->execAfterMiddleware($middleware) === false) {
                 break;
             }
         }
 
         return $this;
-    }
-
-    protected function fetchMiddleware($middleware)
-    {
-        if (!is_object($middleware)) {
-            throw new \Exception('Middleware is not an object.');
-        }
-
-        return $middleware;
     }
 
     protected function execBeforeMiddleware($middleware)
@@ -260,7 +269,7 @@ class Route implements \ArrayAccess
     protected function dispatchAction($action, array $params = [])
     {
         if (is_callable($action)) {
-            return $this->callCallable($action, $params + $this->lastMatchedParams() + $this->settings('defaults'), $this);
+            return $this->callCallable($action, $params + $this->params() + $this->getDefaultParams(), $this);
         }
 
         return null;
@@ -268,10 +277,8 @@ class Route implements \ArrayAccess
 
     protected function dispatchException(\Exception $e)
     {
-        if ($error = $this->onError()) {
-            $route = $this->_createRoute('', ...$error)->onError([], true);
-
-            return $route->dispatch([
+        if ($errorAction = $this->getErrorAction()) {
+            return $this->_createRoute('', $errorAction)->dispatch([
                 'exception' => $e,
             ]);
         }
@@ -285,7 +292,7 @@ class Route implements \ArrayAccess
             return false;
         }
 
-        list($compiled, $compiledParams, $compiledDefaults) = $this->compile($this->format());
+        list($compiled, $compiledParams, $compiledDefaults) = $this->compile($this->getFormat());
 
         $pattern = '^' . $compiled . (($this->isGroup() or !$this->strict()) ? '(.*)' : '') . '$';
 
@@ -322,7 +329,7 @@ class Route implements \ArrayAccess
                 if (!$this->isGroup() and !$this->strict()) {
                     $remain = array_pop($matches);
 
-                    $remain = Str::splitPath($remain, $this->delimiter());
+                    $remain = Str::splitPath($remain, $this->getDelimiter());
 
                     $params = array_merge($params, $this->chunkParams($remain));
                 }
@@ -331,20 +338,20 @@ class Route implements \ArrayAccess
 
                 $cleanParams = $params;
 
-                $params = $this->bindRouteParams($params);
+                $params = $this->bindInRouteParams($params);
 
-                $this->lastMatchedPath($path);
+                $this->setPath($path);
 
-                $this->lastMatchedCleanParams($cleanParams, Obj::PROP_REPLACE);
+                $this->setCleanParams($cleanParams);
 
-                $this->lastMatchedParams($params, Obj::PROP_REPLACE);
+                $this->setParams($params);
 
                 if ($matchedRoute !== $this) {
-                    $matchedRoute->lastMatchedPath($path);
+                    $matchedRoute->setPath($path);
 
-                    $matchedRoute->lastMatchedCleanParams($cleanParams);
+                    $matchedRoute->setCleanParams($cleanParams);
 
-                    $matchedRoute->lastMatchedParams($params);
+                    $matchedRoute->setParams($params);
                 }
 
                 $matchedParams = $params;
@@ -367,46 +374,46 @@ class Route implements \ArrayAccess
         return $this;
     }
 
-    public function bindRouteParams(array $params)
+    public function bindInRouteParams(array $params)
     {
-        $params = $this->bindParams($params);
+        $params = $this->bindInParams($params);
 
-        if ($router = $this->router()) {
-            $params = $router->bindParams($params);
+        if ($router = $this->getRouter()) {
+            $params = $router->bindInParams($params);
         }
 
         return $params;
     }
 
-    public function hasRouteBoundOutParam($key)
+    public function hasRouteBoundOut($name)
     {
-        if ($this->hasBoundOutParam($key)) {
+        if ($this->hasBoundOut($name)) {
             return true;
         }
 
-        if ($parent = $this->parent()) {
-            return $parent->hasRouteBoundOutParam($key);
+        if ($parent = $this->getParent()) {
+            return $parent->hasRouteBoundOut($name);
         }
 
-        if ($router = $this->router()) {
-            return $router->hasBoundOutParam($key);
+        if ($router = $this->getRouter()) {
+            return $router->hasBoundOut($name);
         }
 
         return false;
     }
 
-    public function getRouteBoundOutParam($key, array $params = [])
+    public function getRouteBoundOutParam($name, array $params = [])
     {
-        if ($this->hasBoundOutParam($key)) {
-            return $this->getBoundOutParam($key, $params);
+        if ($this->hasBoundOut($name)) {
+            return $this->getBoundOutParam($name, $params);
         }
 
-        if ($parent = $this->parent()) {
-            return $parent->getRouteBoundOutParam($key, $params);
+        if ($parent = $this->getParent()) {
+            return $parent->getRouteBoundOutParam($name, $params);
         }
 
-        if ($router = $this->router()) {
-            return $router->getBoundOutParam($key, $params);
+        if ($router = $this->getRouter()) {
+            return $router->getBoundOutParam($name, $params);
         }
 
         return null;
@@ -414,22 +421,22 @@ class Route implements \ArrayAccess
 
     public function isGet()
     {
-        return $this->type() == static::TYPE_GET;
+        return $this->getType() == static::TYPE_GET;
     }
 
     public function isPost()
     {
-        return $this->type() == static::TYPE_POST;
+        return $this->getType() == static::TYPE_POST;
     }
 
     public function isHidden()
     {
-        return $this->type() == static::TYPE_HIDDEN;
+        return $this->getType() == static::TYPE_HIDDEN;
     }
 
     public function isGroup()
     {
-        return $this->type() == static::TYPE_GROUP;
+        return $this->getType() == static::TYPE_GROUP;
     }
 
     public function chunkParams($params)
@@ -449,10 +456,10 @@ class Route implements \ArrayAccess
     {
         $params = array_filter($params);
 
-        list($compiled) = $this->fetchFormat($this->format(), $params);
+        list($compiled) = $this->fetchFormat($this->getFormat(), $params);
 
-        if ($parent = $this->parent()) {
-            $params += $parent->lastMatchedParams();
+        if ($parent = $this->getParent()) {
+            $params += $parent->params();
 
             $compiled = $parent->fetchPath($params) . ($compiled !== '/' ? $compiled : null);
         }
@@ -472,7 +479,7 @@ class Route implements \ArrayAccess
             if ($this->strict()) {
                 $compiled .= '?' . http_build_query($params);
             } else {
-                $delimiter = $this->delimiter();
+                $delimiter = $this->getDelimiter();
 
                 // Need to make double encoding and then decode values
                 $params = Arr::each($params, function($value, $key) {
@@ -483,7 +490,7 @@ class Route implements \ArrayAccess
             }
         }
 
-        if ($host = $this->settings('host')) {
+        if ($host = $this->getHost()) {
             list($hostCompiled) = $this->fetchFormat($host);
 
             $compiled = $hostCompiled . $compiled;
@@ -510,7 +517,7 @@ class Route implements \ArrayAccess
 
     protected function fetchFormat($format, &$params = [], $required = true)
     {
-        $pattern = $this->getRegexPattern();
+        $pattern = $this->regexPattern();
 
         $defaultParams = $usedParams = [];
 
@@ -537,7 +544,7 @@ class Route implements \ArrayAccess
 
                         $paramRequired = !$matches[$paramRK][$key];
 
-                        if (!Arr::has($params, $paramName) and $this->hasRouteBoundOutParam($paramName)) {
+                        if (!Arr::has($params, $paramName) and $this->hasRouteBoundOut($paramName)) {
                             $value = $this->getRouteBoundOutParam($paramName, $params);
                         } else {
                             $value = Arr::get($params, $paramName, $paramDefault);
@@ -548,7 +555,7 @@ class Route implements \ArrayAccess
                                 if (!$required) {
                                     return null;
                                 }
-                                throw new \Exception('Param `' . $paramName . '` is required in route `' . ($this->name() ?: $this->format()) . '`.');
+                                throw new \Exception('Param `' . $paramName . '` is required in route `' . ($this->getName() ?: $this->getFormat()) . '`.');
                             }
 
                             $compiled[] = $this->encode($value);
@@ -588,120 +595,231 @@ class Route implements \ArrayAccess
             $compiled = $format;
         }
 
-        $defaultParams and Arr::del($params, ...$defaultParams);
+        $defaultParams and Arr::del($params, $defaultParams);
 
         if (!$required and !$usedParams) {
             return null;
         }
 
-        $usedParams and Arr::del($params, ...$usedParams);
+        $usedParams and Arr::del($params, $usedParams);
 
         return [$compiled, $usedParams];
     }
 
-    public function name($value = null, $type = Obj::PROP_REPLACE)
+    public function setName($name)
     {
-        return Obj::fetchStrVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function type($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function strict($value = null)
-    {
-        return Obj::fetchBoolVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function encodeValues($value = null)
-    {
-        return Obj::fetchBoolVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function delimiter($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function regexMatchDelimiter($value = null)
-    {
-        return Obj::fetchBoolVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function data($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function middleware($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, Arr::getRef($this->settings, __FUNCTION__), ...func_get_args());
-    }
-
-    public function format($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function action($value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function settings($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function lastMatchedPath($value = null, $type = Obj::PROP_REPLACE)
-    {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function lastMatchedParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->storage, ...func_get_args());
-    }
-
-    public function lastMatchedCleanParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function parent(Route $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function router(Router $value = null)
-    {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    /* Magic methods for ArrayAccess interface */
-
-    public function offsetExists($key)
-    {
-        return Arr::hasRef($this->storage, $key);
-    }
-
-    public function offsetSet($key, $value)
-    {
-        Arr::set($this->storage, $key, $value);
+        $this->name = (string)$name;
 
         return $this;
     }
 
-    public function &offsetGet($key)
+    public function getName()
     {
-        return $this->storage[$key];
+        return $this->name;
     }
 
-    public function offsetUnset($key)
+    public function setType($name)
     {
-        Arr::del($this->storage, $key);
+        $this->type = (string)$name;
 
         return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function setHost($name)
+    {
+        $this->host = (string)$name;
+
+        return $this;
+    }
+
+    public function getHost()
+    {
+        return $this->name;
+    }
+
+    public function strict($type = null)
+    {
+        if (func_num_args()) {
+            $this->strict = (bool)$type;
+
+            return $this;
+        }
+
+        return $this->strict;
+    }
+
+    public function encodeValues($type = null)
+    {
+        if (func_num_args()) {
+            $this->encodeValues = (bool)$type;
+
+            return $this;
+        }
+
+        return $this->encodeValues;
+    }
+
+    public function setDelimiter($delimiter)
+    {
+        $this->delimiter = (string)$delimiter;
+
+        return $this;
+    }
+
+    public function getDelimiter()
+    {
+        return $this->delimiter;
+    }
+
+    public function regexMatchDelimiter($type = null)
+    {
+        if (func_num_args()) {
+            $this->regexMatchDelimiter = (bool)$type;
+
+            return $this;
+        }
+
+        return $this->regexMatchDelimiter;
+    }
+
+    public function setData($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->data = array_merge($this->data, $key);
+        } else {
+            $this->data[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    public function hasData($key)
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    public function getData($key = null)
+    {
+        if (func_num_args()) {
+            return $this->hasData($key) ? $this->data[$key] : null;
+        }
+
+        return $this->data;
+    }
+
+    public function setDefaultParams($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->defaultParams = array_merge($this->defaultParams, $key);
+        } else {
+            $this->defaultParams[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    public function hasDefaultParam($key)
+    {
+        return array_key_exists($key, $this->defaultParams);
+    }
+
+    public function getDefaultParams($key = null)
+    {
+        if (func_num_args()) {
+            return $this->hasDefaultParam($key) ? $this->defaultParams[$key] : null;
+        }
+
+        return $this->defaultParams;
+    }
+
+    public function setFormat($format)
+    {
+        $this->format = (string)$format;
+
+        return $this;
+    }
+
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    public function setAction($action)
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    public function setPath($path = null)
+    {
+        $this->path = $path;
+
+        return $this;
+    }
+
+    public function path()
+    {
+        return $this->path;
+    }
+
+    public function setParams(array $params)
+    {
+        return $this->setStorage($params);
+    }
+
+    public function params($key = null)
+    {
+        return func_num_args() ? $this->getFromStorage($key) : $this->getStorage();
+    }
+
+    public function setCleanParams(array $params)
+    {
+        $this->cleanParams = $params;
+
+        return $this;
+    }
+
+    public function cleanParams($key = null)
+    {
+        if (func_num_args()) {
+            return array_key_exists($key, $this->cleanParams) ? $this->cleanParams[$key] : null;
+        }
+
+        return $this->cleanParams;
+    }
+
+    public function setParent(Route $route)
+    {
+        $this->parent = $route;
+
+        return $this;
+    }
+
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    public function setRouter(Router $router)
+    {
+        $this->router = $router;
+
+        return $this;
+    }
+
+    public function getRouter()
+    {
+        return $this->router;
     }
 }

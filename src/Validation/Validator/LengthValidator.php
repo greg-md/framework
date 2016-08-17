@@ -2,7 +2,6 @@
 
 namespace Greg\Validation\Validator;
 
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -10,27 +9,21 @@ class LengthValidator implements ValidatorInterface
 {
     use ValidatorTrait;
 
-    protected $length = null;
+    protected $length = 0;
 
     public function __construct($length)
     {
-        $this->length($length);
+        $this->setLength($length);
 
         return $this;
     }
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
-        $length = $this->length();
+        $length = $this->getLength();
 
         if (mb_strlen($value) != $length) {
-            $errors[] = 'Value length should be ' . $length . '.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('LengthError', 'Value length should be ' . $length . '.');
 
             return false;
         }
@@ -38,8 +31,15 @@ class LengthValidator implements ValidatorInterface
         return true;
     }
 
-    public function length($value = null)
+    public function setLength($length)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->length = (int)$length;
+
+        return $this;
+    }
+
+    public function getLength()
+    {
+        return $this->length;
     }
 }

@@ -3,7 +3,6 @@
 namespace Greg\Validation\Validator;
 
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -15,23 +14,17 @@ class SameAsValidator implements ValidatorInterface
 
     public function __construct($sameAs)
     {
-        $this->sameAs($sameAs);
+        $this->setSameAs($sameAs);
 
         return $this;
     }
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
-        $sameAs = $this->sameAs();
+        $sameAs = $this->getSameAs();
 
         if ($value !== Arr::get($values, $sameAs)) {
-            $errors[] = 'Value is not the same as `' . $sameAs . '`.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('SameAsError', 'Value is not the same as `' . $sameAs . '`.');
 
             return false;
         }
@@ -39,8 +32,15 @@ class SameAsValidator implements ValidatorInterface
         return true;
     }
 
-    public function sameAs($value = null)
+    public function setSameAs($string)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->sameAs = (string)$string;
+
+        return $this;
+    }
+
+    public function getSameAs()
+    {
+        return $this->sameAs;
     }
 }

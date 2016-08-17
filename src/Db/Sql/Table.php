@@ -566,7 +566,7 @@ class Table
             $references = array_keys($this->references());
         }
 
-        $references = Arr::bring($references);
+        $references = (array)$references;
 
         $tablesReferences = Arr::group($this->references(), 'ReferencedTableName', false);
 
@@ -750,9 +750,7 @@ class Table
             $relationships = array_keys($this->relationships());
         }
 
-        $relationships = Arr::bring($relationships);
-
-        if ($relationships) {
+        if ($relationships = (array)$relationships) {
             foreach($items as &$item) {
                 $item['relationships'] = [];
             }
@@ -958,7 +956,7 @@ class Table
             $dependencies = array_keys($this->dependencies());
         }
 
-        $dependencies = Arr::bring($dependencies);
+        $dependencies = (array)$dependencies;
 
         foreach($dependencies as $dependenceName => $dependenceParams) {
             if (is_int($dependenceName)) {
@@ -1273,7 +1271,7 @@ class Table
             $dependencies = array_keys($this->dependencies());
         }
 
-        return Arr::bring($dependencies);
+        return (string)$dependencies;
     }
 
     protected function prepareRowableTableDependenceFormat(&$rows, $name)
@@ -1387,7 +1385,7 @@ class Table
             $references = array_keys($this->references());
         }
 
-        return Arr::bring($references);
+        return (array)$references;
     }
 
     protected function prepareRowableTableReferencesFormat(&$rows, $tableName)
@@ -1510,7 +1508,7 @@ class Table
             $relationships = array_keys($this->relationships());
         }
 
-        return Arr::bring($relationships);
+        return (array)$relationships;
     }
 
     protected function prepareRowableTableRelationshipsFormat(&$rows, $relationships)

@@ -165,7 +165,7 @@ class Binder
             if (is_callable($object)) {
                 $object = $this->call($object);
             } else {
-                $object = Arr::bring($object);
+                $object = (array)$object;
 
                 $object = $this->loadClassInstance(...$object);
             }

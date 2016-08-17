@@ -4,7 +4,6 @@ namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
 use Greg\Storage\AccessorTrait;
-use Greg\Tool\Arr;
 
 class FileCache extends CacheStorage
 {
@@ -154,7 +153,7 @@ class FileCache extends CacheStorage
     {
         $this->loadStorage();
 
-        $ids = func_num_args() ? Arr::bring($ids) : array_keys($this->getStorage());
+        $ids = func_num_args() ? (array)$ids : array_keys($this->getStorage());
 
         foreach($ids as $id) {
             $this->remove($this->fetchFileName($id));

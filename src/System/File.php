@@ -39,7 +39,7 @@ class File
 
     static public function fixFileDir($file, $recursive = false)
     {
-        return Dir::fix(dirname($file), $recursive);
+        return Directory::fix(dirname($file), $recursive);
     }
 
     static public function fixFileDirRecursive($file)

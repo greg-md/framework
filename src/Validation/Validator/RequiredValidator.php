@@ -11,14 +11,8 @@ class RequiredValidator implements ValidatorInterface
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
         if (!$value) {
-            $errors[] = 'Value is required.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('RequiredError', 'Value is required.');
 
             return false;
         }

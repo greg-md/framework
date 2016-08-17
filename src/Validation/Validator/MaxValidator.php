@@ -2,7 +2,6 @@
 
 namespace Greg\Validation\Validator;
 
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -14,23 +13,17 @@ class MaxValidator implements ValidatorInterface
 
     public function __construct($max)
     {
-        $this->max($max);
+        $this->setMax($max);
 
         return $this;
     }
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
-        $max = $this->max();
+        $max = $this->getMax();
 
         if ($value > $max) {
-            $errors[] = 'Value should be less or equal with ' . $max . '.';
-        }
-
-        if ($errors) {
-            $this->errors($errors, true);
+            $this->setError('MaxError', 'Value should be less or equal with ' . $max . '.');
 
             return false;
         }
@@ -38,8 +31,15 @@ class MaxValidator implements ValidatorInterface
         return true;
     }
 
-    public function max($value = null)
+    public function setMax($length)
     {
-        return Obj::fetchIntVar($this, $this->{__FUNCTION__}, true, ...func_get_args());
+        $this->max = (int)$length;
+
+        return $this;
+    }
+
+    public function getMax()
+    {
+        return $this->max;
     }
 }

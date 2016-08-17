@@ -2,13 +2,11 @@
 
 namespace Greg\Html;
 
-use Greg\Tool\Arr;
-
 class HeadStyle extends HtmlScript
 {
     public function fetchItem($item)
     {
-        $attr = Arr::bring($item['attr']);
+        $attr = (array)$item['attr'];
 
         $attr['rel'] = 'stylesheet';
 

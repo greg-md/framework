@@ -154,7 +154,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $relationships = &$this->firstAssoc('relationships');
 
-        Arr::bringRef($relationships);
+        $relationships = (array)$relationships;
 
         return Arr::getArrayRef($relationships, $name);
     }
@@ -165,7 +165,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $relationships = &$this->firstAssocDefault('relationships');
 
-        Arr::bringRef($relationships);
+        $relationships = (array)$relationships;
 
         return Arr::getArrayRef($relationships, $name);
     }
@@ -209,7 +209,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $references = &$this->firstAssoc('references');
 
-        Arr::bringRef($references);
+        $references = (array)$references;
 
         return Arr::getArrayRef($references, $name);
     }
@@ -220,7 +220,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $references = &$this->firstAssocDefault('references');
 
-        Arr::bringRef($references);
+        $references = (array)$references;
 
         return Arr::getArrayRef($references, $name);
     }
@@ -276,7 +276,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $dependencies = &$this->firstAssoc('dependencies');
 
-        Arr::bringRef($dependencies);
+        $dependencies = (array)$dependencies;
 
         return Arr::getArrayRef($dependencies, $name);
     }
@@ -287,7 +287,7 @@ class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Seri
 
         $dependencies = &$this->firstAssocDefault('dependencies');
 
-        Arr::bringRef($dependencies);
+        $dependencies = (array)$dependencies;
 
         return Arr::getArrayRef($dependencies, $name);
     }

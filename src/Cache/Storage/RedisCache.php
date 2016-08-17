@@ -3,7 +3,6 @@
 namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
-use Greg\Tool\Arr;
 
 class RedisCache extends CacheStorage
 {
@@ -68,7 +67,7 @@ class RedisCache extends CacheStorage
         $adapter = $this->getAdapter();
 
         if (func_num_args()) {
-            Arr::bringRef($ids);
+            $ids = (array)$ids;
 
             $adapter->delete($ids);
         } else {

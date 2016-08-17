@@ -2,7 +2,6 @@
 
 namespace Greg\Validation\Validator;
 
-use Greg\Tool\Obj;
 use Greg\Validation\ValidatorInterface;
 use Greg\Validation\ValidatorTrait;
 
@@ -10,12 +9,12 @@ class IntValidator implements ValidatorInterface
 {
     use ValidatorTrait;
 
-    protected $type = null;
+    protected $unsigned = false;
 
-    public function __construct($type = null)
+    public function __construct($unsigned = null)
     {
-        if ($type !== null) {
-            $this->type($type);
+        if ($unsigned !== null) {
+            $this->unsigned($unsigned);
         }
 
         return $this;
@@ -23,18 +22,14 @@ class IntValidator implements ValidatorInterface
 
     public function validate($value, array $values = [])
     {
-        $errors = [];
-
         if ($value != (int)$value) {
-            $errors[] = 'Value is not integer.';
+            $this->setError('IntError', 'Value is not integer.');
 
-            if ($this->type() === 'unsigned' and $value < 0) {
-                $errors[] = 'Value is not unsigned.';
-            }
+            return false;
         }
 
-        if ($errors) {
-            $this->errors($errors, true);
+        if ($this->unsigned() and $value < 0) {
+            $this->setError('IntUnsignedError', 'Value is not unsigned.');
 
             return false;
         }
@@ -42,8 +37,18 @@ class IntValidator implements ValidatorInterface
         return true;
     }
 
-    public function type($value = null)
+    public function unsigned($value = null)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        if (func_num_args()) {
+            if (!is_bool($value)) {
+                $value = ($value === 'unsigned');
+            }
+
+            $this->unsigned = (bool)$value;
+
+            return $this;
+        }
+
+        return $this->unsigned;
     }
 }

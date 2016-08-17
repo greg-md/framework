@@ -179,7 +179,7 @@ trait ConditionsTrait
         $isRow = false;
 
         if (is_array($column)) {
-            $value = Arr::bring($value);
+            $value = (array)$value;
 
             if (sizeof($column) > 1) {
                 $isRow = true;
@@ -252,7 +252,7 @@ trait ConditionsTrait
 
     protected function bindArrayExpr($value)
     {
-        return '(' . implode(', ', array_fill(0, sizeof(Arr::bring($value)), '?')) . ')';
+        return '(' . implode(', ', array_fill(0, sizeof((array)$value), '?')) . ')';
     }
 
     public function conditionsToString()

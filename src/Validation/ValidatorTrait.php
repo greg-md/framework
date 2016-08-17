@@ -2,19 +2,26 @@
 
 namespace Greg\Validation;
 
-use Greg\Tool\Obj;
-
 trait ValidatorTrait
 {
     protected $errors = [];
 
     public function getErrors()
     {
-        return $this->errors();
+        return $this->errors;
     }
 
-    protected function errors($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setErrors(array $errors)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->errors = $errors;
+
+        return $this;
+    }
+
+    public function setError($key, $message)
+    {
+        $this->errors[$key] = $message;
+
+        return $this;
     }
 }

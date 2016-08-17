@@ -20,11 +20,6 @@ class Validator
         'Greg\\Validation\\Validator',
     ];
 
-    public function __construct(array $validators = [])
-    {
-        $this->validators($validators);
-    }
-
     public function validate(array $params = [], $validateAll = true)
     {
         $errors = [];

@@ -19,23 +19,14 @@ class Translator implements \ArrayAccess
 
     protected $newTranslates = [];
 
-    public function __construct(array $languages = [], array $translates = [])
-    {
-        $this->languages($languages);
-
-        $this->storage = $translates;
-
-        return $this;
-    }
-
     public function isLanguage($language)
     {
-        return in_array($language, $this->languages());
+        return in_array($language, $this->getLanguages());
     }
 
     public function isDefault($language)
     {
-        return $language == $this->defaultLanguage();
+        return $language == $this->getDefaultLanguage();
     }
 
     public function translate($key, ...$args)
@@ -46,11 +37,11 @@ class Translator implements \ArrayAccess
     public function translateKey($key, $text, ...$args)
     {
         if (!$this->has($key)) {
-            $this->newTranslates($key, $text);
+            $this->setNewTranslate($key, $text);
         }
 
         if (sizeof($args) == 1) {
-            $args = Arr::bring($args[0]);
+            $args = (array)$args[0];
         }
 
         $replacements = [];
@@ -68,28 +59,77 @@ class Translator implements \ArrayAccess
         return sprintf($this->get($key, $text), ...$args);
     }
 
-    public function translates($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getTranslates($key = null)
     {
-        return $this->storage(...func_get_args());
+        if (func_num_args()) {
+            return $this->getFromStorage($key);
+        }
+
+        return $this->getStorage();
     }
 
-    public function language($value = null, $type = Obj::PROP_REPLACE)
+    public function setTranslate($key, $value)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->setToStorage($key, $value);
     }
 
-    public function defaultLanguage($value = null, $type = Obj::PROP_REPLACE)
+    public function setTranslates(array $items)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->addToStorage($items);
     }
 
-    public function languages($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setLanguage($name)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->language = (string)$name;
+
+        return $this;
     }
 
-    public function newTranslates($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getLanguage()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->language;
+    }
+
+    public function setDefaultLanguage($name)
+    {
+        $this->defaultLanguage = (string)$name;
+
+        return $this;
+    }
+
+    public function getDefaultLanguage()
+    {
+        return $this->defaultLanguage;
+    }
+
+    public function setLanguages(array $languages)
+    {
+        $this->languages = $languages;
+
+        return $this;
+    }
+
+    public function getLanguages()
+    {
+        return $this->languages;
+    }
+
+    public function setNewTranslate($key, $value)
+    {
+        $this->newTranslates[$key] = $value;
+
+        return $this;
+    }
+
+    public function setNewTranslates(array $translates)
+    {
+        $this->newTranslates = $translates;
+
+        return $this;
+    }
+
+    public function getNewTranslates()
+    {
+        return $this->newTranslates;
     }
 }

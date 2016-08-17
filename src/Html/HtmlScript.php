@@ -83,7 +83,7 @@ class HtmlScript
 
     protected function addSrc($where, $type, $sources, $condition = null, array $attr = [])
     {
-        Arr::bringRef($sources);
+        $sources = (array)$sources;
 
         foreach($sources as $src) {
             $thisAttr = $attr;
@@ -108,7 +108,7 @@ class HtmlScript
 
     protected function addText($where, $type, $texts, $condition = null, array $attr = [])
     {
-        Arr::bringRef($texts);
+        $texts = (array)$texts;
 
         foreach($texts as $text) {
             $param = [

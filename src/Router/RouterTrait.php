@@ -3,7 +3,6 @@
 namespace Greg\Router;
 
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 
 trait RouterTrait
 {
@@ -12,24 +11,15 @@ trait RouterTrait
      */
     protected $routes = [];
 
-    protected $onError = [];
+    protected $bindersIn = [];
+
+    protected $boundInParams = [];
 
     protected $bindersOut = [];
 
     protected $boundOutParams = [];
 
-    protected $binders = [];
-
-    protected $boundParams = [];
-
-    public function addMore(array $routes)
-    {
-        foreach($routes as $args) {
-            $this->any(...Arr::bring($args));
-        }
-
-        return $this;
-    }
+    protected $errorAction = null;
 
     public function any($format, $action, array $settings = [])
     {
@@ -78,33 +68,9 @@ trait RouterTrait
         return $route;
     }
 
-    public function setRoute($format, $action, $settings = null)
+    public function setRoute($format, $action, array $settings = null)
     {
         $this->routes[] = $route = $this->createRoute($format, $action, $settings);
-
-        return $route;
-    }
-
-    public function hasRoute($name)
-    {
-        foreach($this->routes as $route) {
-            if ($routeName = $route->name() and $routeName == $name) {
-                return true;
-            }
-
-            if ($route->hasRoute($name)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function getRoute($name)
-    {
-        if (!$route = $this->findRoute($name)) {
-            throw new \Exception('Route `' . $name . '` not found.');
-        }
 
         return $route;
     }
@@ -112,7 +78,7 @@ trait RouterTrait
     public function findRoute($name)
     {
         foreach($this->routes as $route) {
-            if ($routeName = $route->name() and $routeName == $name) {
+            if ($routeName = $route->getName() and $routeName == $name) {
                 return $route;
             }
 
@@ -124,6 +90,20 @@ trait RouterTrait
         return null;
     }
 
+    public function hasRoute($name)
+    {
+        return $this->findRoute($name) ? true : false;
+    }
+
+    public function getRoute($name)
+    {
+        if (!$route = $this->findRoute($name)) {
+            throw new \Exception('Route `' . $name . '` not found.');
+        }
+
+        return $route;
+    }
+
     public function getRoutes()
     {
         return $this->routes;
@@ -131,7 +111,7 @@ trait RouterTrait
 
     public function hasRoutes()
     {
-        return $this->routes ? true : false;
+        return (bool)$this->routes;
     }
 
     public function createRoute($format, $action, array $settings = [])
@@ -141,11 +121,7 @@ trait RouterTrait
 
     protected function _createRoute($format, $action, array $settings = [])
     {
-        $route = $this->newRoute($format, $action, $settings);
-
-        $route->onError($this->onError());
-
-        return $route;
+        return $this->newRoute($format, $action, $settings);
     }
 
     protected function newRoute($format, $action, array $settings = [])
@@ -173,86 +149,102 @@ trait RouterTrait
 
     public function bindOut($name, $result)
     {
-        return $this->bindersOut($name, $result);
+        $this->bindersOut[$name] = $result;
+
+        return $this;
     }
 
-    public function hasBoundOutParam($key)
+    protected function hasBoundOut($name)
     {
-        return Arr::has($this->bindersOut(), $key);
+        return array_key_exists($name, $this->bindersOut);
     }
 
-    public function getBoundOutParam($key, array $params = [])
+    protected function getBoundOut($name)
     {
-        if (Arr::has($this->boundOutParams(), $key)) {
-            return $this->boundOutParams($key);
+        return $this->hasBoundOut($name) ? $this->bindersOut[$name] : null;
+    }
+
+    public function getBoundOutParam($name, array $params = [])
+    {
+        if (array_key_exists($name, $this->boundOutParams)) {
+            return $this->boundOutParams[$name];
         }
 
-        if ($binder = $this->bindersOut($key)) {
+        if ($binder = $this->getBoundOut($name)) {
             $value = is_callable($binder) ? $this->callCallable($binder, $params) : $binder;
 
-            $this->boundOutParams($key, $value);
+            $this->boundOutParams[$name] = $value;
         } else {
-            $value = Arr::get($params, $key);
+            $value = Arr::get($params, $name);
         }
 
         return $value;
     }
 
-    public function bind($name, callable $result)
+    public function bindOutParams(array $params)
     {
-        return $this->binders($name, $result);
-    }
-
-    public function bindParams(array $params)
-    {
-        foreach($params as $key => &$value) {
-            $value = $this->getBoundParam($key, $params);
+        foreach($params as $name => &$value) {
+            $value = $this->getBoundOutParam($name, $params);
         }
         unset($value);
 
         return $params;
     }
 
-    public function getBoundParam($key, array $params)
+    public function bindIn($name, callable $result)
     {
-        if (Arr::has($this->boundParams(), $key)) {
-            return $this->boundParams($key);
+        $this->bindersIn[$name] = $result;
+
+        return $this;
+    }
+
+    protected function hasBoundIn($name)
+    {
+        return array_key_exists($name, $this->bindersIn);
+    }
+
+    protected function getBoundIn($name)
+    {
+        return $this->hasBoundIn($name) ? $this->bindersIn[$name] : null;
+    }
+
+    public function getBoundInParam($name, array $params = [])
+    {
+        if (array_key_exists($name, $this->boundInParams)) {
+            return $this->boundInParams[$name];
         }
 
-        if ($binder = $this->binders($key)) {
+        if ($binder = $this->getBoundIn($name)) {
             $value = $this->callCallable($binder, $params);
 
-            $this->boundParams($key, $value);
+            $this->boundInParams[$name] = $value;
         } else {
-            $value = Arr::get($params, $key);
+            $value = Arr::get($params, $name);
         }
 
         return $value;
     }
 
-    public function onError($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function bindInParams(array $params)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        foreach($params as $name => &$value) {
+            $value = $this->getBoundInParam($name, $params);
+        }
+        unset($value);
+
+        return $params;
     }
 
-    protected function bindersOut($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setErrorAction($action)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->errorAction = $action;
+
+        return $this;
     }
 
-    protected function boundOutParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getErrorAction()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    protected function binders($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    protected function boundParams($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->errorAction;
     }
 
     abstract protected function callCallable(callable $callable, ...$args);

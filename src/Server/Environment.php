@@ -39,7 +39,7 @@ class Environment
         }
 
         foreach ($environments as $environment => $hosts) {
-            Arr::bringRef($hosts);
+            $hosts = (array)$hosts;
             // To determine the current environment, we'll simply iterate through the possible
             // environments and look for the host that matches the host for this request we
             // are currently processing here, then return back these environment's names.

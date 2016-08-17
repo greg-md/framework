@@ -3,7 +3,6 @@
 namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
-use Greg\Tool\Arr;
 
 class SqliteCache extends CacheStorage
 {
@@ -126,7 +125,7 @@ class SqliteCache extends CacheStorage
 
     public function delete($ids = [])
     {
-        Arr::bringRef($ids);
+        $ids = (array)$ids;
 
         if ($ids) {
             foreach($ids as &$id) {

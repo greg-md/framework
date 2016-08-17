@@ -24,7 +24,7 @@ class Listener implements ListenerInterface
             throw new \Exception('Event registrar should be an object.');
         }
 
-        foreach(Arr::bring($eventName) as $eName) {
+        foreach((array)$eventName as $eName) {
             $method = lcfirst(Str::phpName($eName));
 
             if (!method_exists($object, $method)) {
