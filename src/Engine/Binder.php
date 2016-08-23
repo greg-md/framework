@@ -2,10 +2,8 @@
 
 namespace Greg\Engine;
 
-use Greg\Storage\AccessorTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
-use Greg\Tool\Str;
+use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Str;
 
 class Binder
 {

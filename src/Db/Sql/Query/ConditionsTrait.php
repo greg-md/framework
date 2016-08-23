@@ -3,7 +3,6 @@
 namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\StorageInterface;
-use Greg\Tool\Arr;
 
 trait ConditionsTrait
 {

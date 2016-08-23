@@ -3,7 +3,6 @@
 namespace Greg\Db\Sql;
 
 use Greg\Db\Sql\Table\RowInterface;
-use Greg\Tool\Obj;
 
 class TableRelationship
 {

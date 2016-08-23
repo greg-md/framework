@@ -2,16 +2,15 @@
 
 namespace Greg\Db\Sql;
 
-use Greg\Cache\StorageInterface;
+use Greg\Cache\CacheStorageInterface;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Query\Where;
 use Greg\Db\Sql\Table\Column;
 use Greg\Db\Sql\Table\Row;
 use Greg\Engine\InternalTrait;
-use Greg\System\DateTime;
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
-use Greg\Tool\Url;
+use Greg\Support\DateTime;
+use Greg\Support\Arr;
+use Greg\Support\Url;
 
 /**
  * Class Table
@@ -1982,10 +1981,10 @@ class Table
     }
 
     /**
-     * @param StorageInterface $value
-     * @return StorageInterface|null
+     * @param CacheStorageInterface $value
+     * @return CacheStorageInterface|null
      */
-    public function cacheStorage(StorageInterface $value = null)
+    public function cacheStorage(CacheStorageInterface $value = null)
     {
         return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
     }

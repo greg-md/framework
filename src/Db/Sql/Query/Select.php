@@ -4,8 +4,7 @@ namespace Greg\Db\Sql\Query;
 
 use Greg\Db\Sql\Query;
 use Greg\Db\Sql\Table;
-use Greg\Tool\Debug;
-use Greg\Tool\Obj;
+use Greg\Support\Debug;
 
 /**
  * Class Select

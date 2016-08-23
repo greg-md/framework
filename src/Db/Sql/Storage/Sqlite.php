@@ -9,7 +9,6 @@ use Greg\Db\Sql\Storage\Sqlite\Query\Select;
 use Greg\Db\Sql\Storage\Sqlite\Query\Update;
 use Greg\Db\Sql\StorageInterface;
 use Greg\Engine\InternalTrait;
-use Greg\Tool\Obj;
 
 class Sqlite implements StorageInterface
 {

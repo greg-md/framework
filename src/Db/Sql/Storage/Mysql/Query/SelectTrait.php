@@ -2,8 +2,6 @@
 
 namespace Greg\Db\Sql\Storage\Mysql\Query;
 
-use Greg\Tool\Obj;
-
 trait SelectTrait
 {
     protected function parseLimit(&$query)

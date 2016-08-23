@@ -2,8 +2,6 @@
 
 namespace Greg\Db\Sql\Storage\Adapter;
 
-use Greg\Tool\Obj;
-
 class Pdo extends \PDO implements AdapterInterface
 {
     protected $stmtClass = Pdo\Stmt::class;
@@ -22,14 +20,14 @@ class Pdo extends \PDO implements AdapterInterface
     public function init()
     {
         if ($this->stmtClass()) {
-            $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$this->stmtClass(), [$this]]);
+            $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [$this->stmtClass(), [$this]]);
         }
 
-        $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+        $this->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
 
-        $this->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+        $this->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
 
         return $this;
     }

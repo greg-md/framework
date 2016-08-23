@@ -4,9 +4,8 @@ namespace Greg\Db\Sql\Storage\Adapter\Pdo;
 
 use Greg\Db\Sql\Storage\Adapter\Pdo;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
-use Greg\Tool\Type;
+use Greg\Support\Arr;
+use Greg\Support\Type;
 
 class Stmt extends \PDOStatement implements StmtInterface
 {

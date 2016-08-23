@@ -2,8 +2,6 @@
 
 namespace Greg\Db\Sql\Query;
 
-use Greg\Tool\Obj;
-
 class Expr
 {
     protected $data = null;

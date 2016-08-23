@@ -3,7 +3,6 @@
 namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
-use Greg\Tool\Obj;
 
 class RowsPagination extends Rows
 {

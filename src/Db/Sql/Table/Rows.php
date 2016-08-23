@@ -20,7 +20,7 @@ class Rows extends RowAbstract
 
     public function toArray($recursive = true)
     {
-        $items = $this->storage;
+        $items = $this->getStorage();
 
         if ($recursive) {
             foreach($items as $key => $item) {

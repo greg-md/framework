@@ -5,8 +5,7 @@ namespace Greg\Db\Sql;
 use Greg\Db\Sql\Query\Expr;
 use Greg\Db\Sql\Storage\Adapter\StmtInterface;
 use Greg\Engine\InternalTrait;
-use Greg\Tool\Obj;
-use Greg\Tool\Str;
+use Greg\Support\Str;
 
 abstract class Query
 {

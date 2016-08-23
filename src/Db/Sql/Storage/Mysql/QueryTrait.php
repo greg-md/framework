@@ -2,7 +2,7 @@
 
 namespace Greg\Db\Sql\Storage\Mysql;
 
-use Greg\Tool\Arr;
+use Greg\Support\Arr;
 
 trait QueryTrait
 {

@@ -3,7 +3,7 @@
 namespace Greg\Cache;
 
 use Greg\Engine\InternalTrait;
-use Greg\Http\Request;
+use Greg\Support\Http\Request;
 
 abstract class CacheStorage implements CacheStorageInterface
 {

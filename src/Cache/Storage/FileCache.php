@@ -3,7 +3,7 @@
 namespace Greg\Cache\Storage;
 
 use Greg\Cache\CacheStorage;
-use Greg\Storage\AccessorTrait;
+use Greg\Support\Storage\AccessorTrait;
 
 class FileCache extends CacheStorage
 {

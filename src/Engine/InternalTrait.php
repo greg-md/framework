@@ -2,8 +2,7 @@
 
 namespace Greg\Engine;
 
-use Greg\Tool\Debug;
-use Greg\Tool\Obj;
+use Greg\Support\Debug;
 
 trait InternalTrait
 {

@@ -5,9 +5,8 @@ namespace Greg\Db\Sql\Table;
 use Greg\Db\Sql\Table;
 use Greg\Db\Sql\TableRelationship;
 use Greg\Engine\InternalTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Debug;
-use Greg\Tool\Obj;
+use Greg\Support\Arr;
+use Greg\Support\Debug;
 
 class Rowable implements RowInterface, \ArrayAccess, \IteratorAggregate/*, \Serializable*/, \Countable
 {

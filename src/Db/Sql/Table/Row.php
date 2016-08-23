@@ -4,7 +4,6 @@ namespace Greg\Db\Sql\Table;
 
 use Greg\Db\Sql\Table;
 use Greg\Db\Sql\TableRelationship;
-use Greg\Tool\Obj;
 
 class Row extends RowAbstract implements RowInterface
 {
