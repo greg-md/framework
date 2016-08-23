@@ -4,12 +4,14 @@ namespace Greg\Validation;
 
 use Greg\Engine\InternalTrait;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 
 class Validator
 {
     use InternalTrait;
 
+    /**
+     * @var ValidatorInterface[][]
+     */
     protected $validators = [];
 
     protected $params = [];
@@ -20,107 +22,113 @@ class Validator
         'Greg\\Validation\\Validator',
     ];
 
-    public function validate(array $params = [], $validateAll = true)
+    public function validate(array $params = [])
     {
-        $errors = [];
+        $this->setParams($params);
 
-        foreach($this->validators() as $key => $validators) {
-            if (!Arr::has($params, $key)) {
-                if ($validateAll) {
-                    $params[$key] = null;
-                } else {
-                    continue;
-                }
-            }
-
-            $value = Arr::get($params, $key);
-
-            $paramErrors = [];
-
+        foreach($this->getValidators() as $key => $validators) {
             foreach ($validators as $validator) {
-                if (is_array($validator)) {
-                    $vName = array_shift($validator);
-
-                    $vArgs = $validator;
-                } else {
-                    $parts = explode(':', $validator, 2);
-
-                    $vName = array_shift($parts);
-
-                    $vArgs = $parts ? explode(',', array_shift($parts)) : [];
+                if (!$validator->validate(Arr::getRef($params, $key), $params)) {
+                    $this->addErrors($key, $validator->getErrors());
                 }
-
-                $className = $this->getClassByName($vName);
-
-                /** @var $class ValidatorInterface */
-                $class = $this->loadClassInstance($className, ...$vArgs);
-
-                if (!$class->validate($value, $params)) {
-                    $paramErrors = array_merge($paramErrors, $class->getErrors());
-                }
-            }
-
-            if ($paramErrors) {
-                $errors[$key] = $paramErrors;
             }
         }
 
-        $this->params($params);
-
-        if ($errors) {
-            $this->errors($errors, true);
-
-            return false;
-        }
-
-        return true;
+        return !$this->hasErrors();
     }
 
     public function getClassByName($name)
     {
-        foreach($this->namespaces() as $namespace) {
-            $class = $namespace . '\\' . ucfirst($name) . 'Validator';
+        foreach($this->getNamespaces() as $namespace) {
+            $className = $namespace . '\\' . ucfirst($name) . 'Validator';
 
-            if (class_exists($class)) {
-                return $class;
+            if (class_exists($className)) {
+                return $className;
             }
         }
 
         throw new \Exception('Validator `' . $name . '` not found.');
     }
 
-    public function get($name, $else = null)
+    public function addValidator($key, $validator)
     {
-        return Arr::get($this->params, $name, $else);
+        if (!is_object($validator)) {
+            if (is_array($validator)) {
+                $name = array_shift($validator);
+
+                $args = $validator;
+            } else {
+                $parts = explode(':', $validator, 2);
+
+                $name = array_shift($parts);
+
+                $args = $parts ? explode(',', array_shift($parts)) : [];
+            }
+
+            $className = $this->getClassByName($name);
+
+            $validator = $this->loadClassInstance($className, ...$args);
+        }
+
+        if (!($validator instanceof ValidatorInterface)) {
+            throw new \Exception('Validator should be an instance of `ValidatorInterface`.');
+        }
+
+        $this->validators[$key][] = $validator;
     }
 
-    public function getAll()
+    public function getValidators()
     {
-        return $this->params();
+        return $this->validators;
+    }
+
+    protected function setParams(array $params)
+    {
+        $this->params = $params;
+
+        return $this;
+    }
+
+    public function getParam($name, $else = null)
+    {
+        return Arr::getRef($this->getParams(), $name, $else);
+    }
+
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    protected function addErrors($key, array $errors)
+    {
+        if (!isset($this->errors[$key])) {
+            $this->errors[$key] = $errors;
+        } else {
+            $this->errors[$key] = array_merge($this->errors[$key], $errors);
+        }
+
+        return $this;
+    }
+
+    protected function setErrors($key, array $errors)
+    {
+        $this->errors[$key] = $errors;
+
+        return $this;
+    }
+
+    public function hasErrors()
+    {
+        return (bool)$this->errors;
     }
 
     public function getErrors()
     {
-        return $this->errors();
+        return $this->errors;
     }
 
-    protected function validators($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getNamespaces()
     {
-        return Obj::fetchArrayReplaceVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    protected function params($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayReplaceVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    protected function errors($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    protected function namespaces($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->namespaces;
     }
 }

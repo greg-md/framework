@@ -6,9 +6,9 @@ use Greg\Engine\InternalTrait;
 use Greg\Http\Response;
 use Greg\Storage\AccessorTrait;
 use Greg\Storage\ArrayAccessTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
 use Greg\Tool\Str;
+use Greg\View\Compiler\BladeCompiler;
+use Greg\View\Compiler\CompilerInterface;
 
 class Viewer implements \ArrayAccess
 {
@@ -20,6 +20,9 @@ class Viewer implements \ArrayAccess
 
     protected $content = null;
 
+    /**
+     * @var Viewer|null
+     */
     protected $parent = null;
 
     /**
@@ -27,20 +30,18 @@ class Viewer implements \ArrayAccess
      */
     protected $compilers = [];
 
-    public function __construct($paths = [], array $param = [])
+    public function __construct($paths = [], array $data = [])
     {
-        $paths = (array)$paths;
+        $this->setPaths((array)$paths);
 
-        $this->paths($paths);
-
-        $this->storage = $param;
+        $this->setStorage($data);
 
         return $this;
     }
 
     public function fetchLayout($name)
     {
-        return $this->fetch($name, ...$this->layouts());
+        return $this->fetch($name, ...$this->layouts);
     }
 
     public function fetch($name, $layout = null, $_ = null)
@@ -80,7 +81,7 @@ class Viewer implements \ArrayAccess
 
     public function renderLayout($name, array $params = [])
     {
-        return $this->render($name, $params, ...$this->layouts());
+        return $this->render($name, $params, ...$this->layouts);
     }
 
     public function render($name, array $params = [], $layout = null, $_ = null)
@@ -117,7 +118,7 @@ class Viewer implements \ArrayAccess
 
         $viewer->assign($params);
 
-        $viewer->parent($this);
+        $viewer->setParent($this);
 
         return $viewer->fetchFile($file, $responseObject);
     }
@@ -142,7 +143,7 @@ class Viewer implements \ArrayAccess
 
         $viewer->assign($params, true);
 
-        $viewer->parent($this);
+        $viewer->setParent($this);
 
         return $viewer->fetchFile($file, $responseObject);
     }
@@ -170,7 +171,7 @@ class Viewer implements \ArrayAccess
 
             $viewer->assign(array_merge(['item' => $item, 'key' => $key], $params), true);
 
-            $viewer->parent($this);
+            $viewer->setParent($this);
 
             $content[] = $viewer->fetchFile($file, false);
         }
@@ -215,7 +216,7 @@ class Viewer implements \ArrayAccess
 
     /**
      * @param $file
-     * @return bool|CompilerInterface|Compiler\Blade
+     * @return bool|CompilerInterface|BladeCompiler
      * @throws \Exception
      */
     public function findCompilerByFile($file)
@@ -246,7 +247,7 @@ class Viewer implements \ArrayAccess
 
     public function getCompiler($extension)
     {
-        if (!Arr::hasRef($this->compilers, $extension)) {
+        if (!array_key_exists($extension, $this->compilers)) {
             throw new \Exception('View compiler for extension `' . $extension . '` not found.');
         }
 
@@ -287,24 +288,22 @@ class Viewer implements \ArrayAccess
             array_shift($layout);
         }
 
-        $this->content($content);
+        $this->setContent($content);
 
         foreach($layouts = $layout as $layout) {
             $content = $this->fetchName($layout, $responseObject);
 
-            $this->content($content);
+            $this->setContent($content);
         }
 
-        $this->content(null);
+        $this->setContent(null);
 
         return $content;
     }
 
     public function getFile($name)
     {
-        $paths = $this->paths();
-
-        if (!$paths) {
+        if (!$paths = $this->getPaths()) {
             throw new \Exception('Undefined view paths.');
         }
 
@@ -358,27 +357,39 @@ class Viewer implements \ArrayAccess
         return $this->get($key);
     }
 
-    public function paths($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function setPaths(array $paths)
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->paths = $paths;
+
+        return $this;
     }
 
-    public function layouts($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getPaths()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->paths;
     }
 
-    public function content($value = null, $type = Obj::PROP_REPLACE)
+    public function setContent($content)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->content = (string)$content;
+
+        return $this;
     }
 
-    /**
-     * @param Viewer $value
-     * @return $this|Viewer
-     */
-    public function parent(Viewer $value = null)
+    public function getContent()
     {
-        return Obj::fetchVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->content;
+    }
+
+    public function setParent(Viewer $viewer)
+    {
+        $this->parent = $viewer;
+
+        return $this;
+    }
+
+    public function getParent()
+    {
+        return $this->parent;
     }
 }

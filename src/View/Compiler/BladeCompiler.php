@@ -7,14 +7,12 @@ use Greg\Engine\InternalTrait;
 use Greg\Regex\InNamespace;
 use Greg\System\File;
 use Greg\Tool\Arr;
-use Greg\Tool\Obj;
-use Greg\View\CompilerInterface;
 
-class Blade implements CompilerInterface
+class BladeCompiler implements CompilerInterface
 {
     use InternalTrait;
 
-    protected $cachePath = null;
+    protected $compilationPath = null;
 
     protected $compilers = [
         'compileStatements',
@@ -53,21 +51,21 @@ class Blade implements CompilerInterface
         'stop' => 'compileStop',
     ];
 
-    public function __construct($cachePath)
+    public function __construct($compilationPath)
     {
-        $this->cachePath($cachePath);
+        $this->setCompilationPath($compilationPath);
 
         return $this;
     }
 
-    public function getCacheFileName($id)
+    public function getCompilationFileName($id)
     {
         return md5($id) . '.php';
     }
 
-    public function getCacheFile($id)
+    public function getCompilationFile($id)
     {
-        return $this->cachePath() . '/' . $this->getCacheFileName($id);
+        return $this->getCompilationPath() . DIRECTORY_SEPARATOR . $this->getCompilationFileName($id);
     }
 
     public function expiredFile($file)
@@ -76,18 +74,18 @@ class Blade implements CompilerInterface
             return true;
         }
 
-        $cacheFile = $this->getCacheFile($file);
+        $compilationFile = $this->getCompilationFile($file);
 
-        if (!file_exists($cacheFile)) {
+        if (!file_exists($compilationFile)) {
             return true;
         }
 
-        return filemtime($file) > filemtime($cacheFile);
+        return filemtime($file) > filemtime($compilationFile);
     }
 
     public function save($id, $string)
     {
-        $file = $this->getCacheFile($id);
+        $file = $this->getCompilationFile($id);
 
         File::fixFileDirRecursive($file);
 
@@ -102,13 +100,13 @@ class Blade implements CompilerInterface
             $this->save($file, $this->compileFile($file));
         }
 
-        return $this->getCacheFile($file);
+        return $this->getCompilationFile($file);
     }
 
     public function compileFile($file)
     {
         if (!file_exists($file)) {
-            throw new \Exception('Blade file not found.');
+            throw new \Exception('Blade file `' . $file . '` not found.');
         }
 
         return $this->compileString(file_get_contents($file));
@@ -361,18 +359,15 @@ class Blade implements CompilerInterface
         return $pattern;
     }
 
-    public function cachePath($value = null, $type = Obj::PROP_REPLACE)
+    public function setCompilationPath($path)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->compilationPath = (string)$path;
+
+        return $this;
     }
 
-    public function statements($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
+    public function getCompilationPath()
     {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
-    }
-
-    public function emptyStatements($key = null, $value = null, $type = Obj::PROP_APPEND, $replace = false)
-    {
-        return Obj::fetchArrayVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->compilationPath;
     }
 }
