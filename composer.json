@@ -1,23 +1,31 @@
 {
-    "name": "greg-md/framework",
-    "type": "library",
-    "description": "Greg Framework",
-    "keywords": ["greg","framework"],
-    "homepage": "https://github.com/greg-md/framework",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Grigorii Duca",
-            "email": "contact@greg.md",
-            "homepage": "http://greg.md",
-            "role": "Developer"
-        }
-    ],
-    "require": {},
-    "minimum-stability": "dev",
-    "autoload": {
-        "psr-4": {
-            "Greg\\": "src/"
-        }
+  "name": "greg-md/framework",
+  "type": "library",
+  "description": "Greg Framework",
+  "keywords": ["greg","framework"],
+  "homepage": "https://github.com/greg-md/framework",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Grigorii Duca",
+      "email": "contact@greg.md",
+      "homepage": "http://greg.md",
+      "role": "Developer"
     }
+  ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/greg-md/php-support"
+    }
+  ],
+  "require": {
+    "greg-md/php-support": "dev-master"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "Greg\\": "src/"
+    }
+  }
 }
