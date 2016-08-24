@@ -17,10 +17,15 @@
     {
       "type": "vcs",
       "url": "https://github.com/greg-md/php-support"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/greg-md/php-orm"
     }
   ],
   "require": {
-    "greg-md/php-support": "dev-master"
+    "greg-md/php-support": "dev-master",
+    "greg-md/php-orm": "dev-master"
   },
   "minimum-stability": "dev",
   "autoload": {
