@@ -4,12 +4,6 @@ namespace Greg\Pagination;
 
 class BasePagination implements \Countable
 {
-    protected $total = 0;
-
-    protected $page = 1;
-
-    protected $limit = 10;
-
     /**
      * @var PaginationInterface|null
      */
@@ -33,7 +27,7 @@ class BasePagination implements \Countable
 
     public function count()
     {
-        return $this->getAdapter()->count();
+        return $this->getAdapter()->getPaginationCount();
     }
 
     public function offset()
@@ -73,39 +67,18 @@ class BasePagination implements \Countable
         return $this->getPage() < $this->maxPage();
     }
 
-    public function setTotal($number)
-    {
-        $this->total = (int)$number;
-
-        return $this;
-    }
-
     public function getTotal()
     {
-        return $this->total;
-    }
-
-    public function setPage($number)
-    {
-        $this->page = (int)$number;
-
-        return $this;
+        return $this->getAdapter()->getPaginationTotal();
     }
 
     public function getPage()
     {
-        return $this->page;
-    }
-
-    public function setLimit($number)
-    {
-        $this->limit = (int)$number;
-
-        return $this;
+        return $this->getAdapter()->getPaginationPage();
     }
 
     public function getLimit()
     {
-        return $this->limit;
+        return $this->getAdapter()->getPaginationLimit();
     }
 }

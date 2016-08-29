@@ -4,5 +4,11 @@ namespace Greg\Pagination;
 
 interface PaginationInterface
 {
-    public function count();
+    public function getPaginationCount();
+
+    public function getPaginationTotal();
+
+    public function getPaginationPage();
+
+    public function getPaginationLimit();
 }
