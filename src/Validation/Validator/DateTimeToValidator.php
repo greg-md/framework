@@ -36,7 +36,7 @@ class DateTimeToValidator implements ValidatorInterface
         $to = DateTime::toTimestamp($this->getTo());
 
         if ($this->includeTo() ? $value >= $to : $value > $to) {
-            $this->setError('DateTimeToError', 'Value should be less than ' . DateTime::toStringDateTime($to) . '.');
+            $this->setError('DateTimeToError', 'Value should be less than ' . DateTime::toDateTimeString($to) . '.');
 
             return false;
         }
