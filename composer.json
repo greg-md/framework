@@ -1,36 +1,30 @@
 {
-  "name": "greg-md/framework",
+  "name": "greg-md/php-framework",
   "type": "library",
-  "description": "Greg Framework",
-  "keywords": ["greg","framework"],
-  "homepage": "https://github.com/greg-md/framework",
+  "description": "Greg PHP Framework",
+  "keywords": [ "greg", "php-framework" ],
+  "homepage": "https://github.com/greg-md/php-framework",
   "license": "MIT",
   "authors": [
-    {
-      "name": "Grigorii Duca",
-      "email": "contact@greg.md",
-      "homepage": "http://greg.md",
-      "role": "Developer"
-    }
+    { "name": "Grigorii Duca", "email": "contact@greg.md", "homepage": "http://greg.md/" }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/greg-md/php-support"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/greg-md/php-orm"
-    }
-  ],
+  "minimum-stability": "dev",
   "require": {
+    "php": "^5.6 || ^7.0",
     "greg-md/php-support": "dev-master",
     "greg-md/php-orm": "dev-master"
   },
-  "minimum-stability": "dev",
+  "require-dev": {
+    "phpunit/phpunit": "5.5.*"
+  },
   "autoload": {
     "psr-4": {
       "Greg\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Greg\\Tests\\": "tests/"
     }
   }
 }
