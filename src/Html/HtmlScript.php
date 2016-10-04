@@ -2,8 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Storage\AccessorTrait;
-use Greg\Tool\Arr;
+use Greg\Support\Accessor\AccessorTrait;
 
 class HtmlScript
 {
@@ -97,9 +96,9 @@ class HtmlScript
             ];
 
             if ($type == static::PREPEND) {
-                $this->storage[$where] = array_merge([$param], $this->storage[$where]);
+                $this->accessor[$where] = array_merge([$param], $this->accessor[$where]);
             } else {
-                $this->storage[$where][] = $param;
+                $this->accessor[$where][] = $param;
             }
         }
 
@@ -118,9 +117,9 @@ class HtmlScript
             ];
 
             if ($type == static::PREPEND) {
-                $this->storage[$where] = array_merge([$param], $this->storage[$where]);
+                $this->accessor[$where] = array_merge([$param], $this->accessor[$where]);
             } else {
-                $this->storage[$where][] = $param;
+                $this->accessor[$where][] = $param;
             }
         }
 
@@ -132,10 +131,10 @@ class HtmlScript
         $html = [];
 
         foreach(static::ORDER as $type) {
-            foreach((array)$this->getFromStorage($type) as $item) {
+            foreach((array)$this->getFromAccessor($type) as $item) {
                 $element = new HtmlElement('script', $item['attr'], $item['condition']);
 
-                $element->inner($item['inner']);
+                $element->setInner($item['inner']);
 
                 $html[] = $element;
             }

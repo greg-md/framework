@@ -2,7 +2,7 @@
 
 namespace Greg\Event;
 
-use Greg\Tool\Str;
+use Greg\Support\Str;
 
 trait SubscriberTrait
 {
@@ -47,8 +47,4 @@ trait SubscriberTrait
 
         return $this;
     }
-
-    abstract protected function callCallable(callable $callable, ...$args);
-
-    abstract protected function callCallableWith(callable $callable, ...$args);
 }

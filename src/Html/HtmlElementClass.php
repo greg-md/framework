@@ -2,7 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Storage\AccessorTrait;
+use Greg\Support\Accessor\AccessorTrait;
 
 class HtmlElementClass
 {
@@ -12,10 +12,10 @@ class HtmlElementClass
     {
         if (is_array($class)) {
             foreach(($classes = $class) as $class) {
-                $this->storage[$class] = $id;
+                $this->accessor[$class] = $id;
             }
         } else {
-            $this->storage[$class] = $id;
+            $this->accessor[$class] = $id;
         }
 
         return $this;
@@ -23,13 +23,13 @@ class HtmlElementClass
 
     public function delete($class)
     {
-        unset($this->storage[$class]);
+        unset($this->accessor[$class]);
 
         return $this;
     }
 
     public function __toString()
     {
-        return implode(' ', array_keys($this->storage));
+        return implode(' ', array_keys($this->accessor));
     }
 }

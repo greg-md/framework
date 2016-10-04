@@ -2,9 +2,8 @@
 
 namespace Greg\Html;
 
-use Greg\Storage\AccessorTrait;
-use Greg\Storage\ArrayAccessTrait;
-use Greg\Tool\Obj;
+use Greg\Support\Accessor\AccessorTrait;
+use Greg\Support\Accessor\ArrayAccessTrait;
 
 class HtmlElement implements \ArrayAccess
 {
@@ -25,15 +24,15 @@ class HtmlElement implements \ArrayAccess
     public function __construct($name = null, array $attr = [], $condition = null)
     {
         if ($name !== null) {
-            $this->name($name);
+            $this->setName($name);
         }
 
         if ($attr) {
-            $this->storage($attr);
+            $this->addToAccessor($attr);
         }
 
         if ($condition !== null) {
-            $this->condition($condition);
+            $this->setCondition($condition);
         }
 
         return $this;
@@ -44,29 +43,68 @@ class HtmlElement implements \ArrayAccess
         return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
     }
 
-    public function name($value = null, $type = Obj::PROP_REPLACE)
+    public function setName($name)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->name = (string) $name;
+
+        return $this;
     }
 
-    public function inner($value = null, $type = Obj::PROP_REPLACE)
+    public function getName()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        if (!$this->name) {
+            throw new \Exception('Undefined tag name.');
+        }
+
+        return $this->name;
     }
 
-    public function before($value = null, $type = Obj::PROP_REPLACE)
+    public function setInner($html)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->inner = (string) $html;
+
+        return $this;
     }
 
-    public function after($value = null, $type = Obj::PROP_REPLACE)
+    public function getInner()
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return $this->inner;
     }
 
-    public function condition($value = null, $type = Obj::PROP_REPLACE)
+    public function setBefore($html)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        $this->before = (string) $html;
+
+        return $this;
+    }
+
+    public function getBefore()
+    {
+        return $this->before;
+    }
+
+    public function setAfter($html)
+    {
+        $this->after = (string) $html;
+
+        return $this;
+    }
+
+    public function getAfter()
+    {
+        return $this->after;
+    }
+
+    public function setCondition($condition)
+    {
+        $this->condition = (string) $condition;
+
+        return $this;
+    }
+
+    public function getCondition()
+    {
+        return $this->condition;
     }
 
     public function startTag()
@@ -80,7 +118,7 @@ class HtmlElement implements \ArrayAccess
     {
         $attr = [];
 
-        foreach ($this->storage as $key => $value) {
+        foreach ($this->getAccessor() as $key => $value) {
             $value = htmlspecialchars((string)$value);
 
             if ($value != '') {
@@ -95,18 +133,7 @@ class HtmlElement implements \ArrayAccess
 
     protected function short()
     {
-        return in_array($this->name(), explode(',', static::SHORT_TAGS));
-    }
-
-    protected function getName()
-    {
-        $name = $this->name();
-
-        if (!$name) {
-            throw new \Exception('Undefined tag name.');
-        }
-
-        return $name;
+        return in_array($this->getName(), explode(',', static::SHORT_TAGS));
     }
 
     public function endTag()
@@ -116,18 +143,13 @@ class HtmlElement implements \ArrayAccess
 
     public function toString()
     {
-        $string = $this->startTag() . $this->inner() . $this->endTag();
+        $string = $this->startTag() . $this->getInner() . $this->endTag();
 
-        if ($condition = $this->condition()) {
+        if ($condition = $this->getCondition()) {
             $string = '<!--[if ' . $condition . ']>' . $string . '<![endif]-->';
         }
 
-        return $this->before() . $string . $this->after();
-    }
-
-    public function __call($method, $args)
-    {
-        return $this->storage($method, ...$args);
+        return $this->getBefore() . $string . $this->getAfter();
     }
 
     public function __toString()

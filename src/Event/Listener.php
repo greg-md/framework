@@ -2,10 +2,9 @@
 
 namespace Greg\Event;
 
-use Greg\Engine\InternalTrait;
-use Greg\Storage\AccessorTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Str;
+use Greg\Support\Accessor\AccessorTrait;
+use Greg\Support\InternalTrait;
+use Greg\Support\Str;
 
 class Listener implements ListenerInterface
 {
@@ -13,7 +12,7 @@ class Listener implements ListenerInterface
 
     public function on($eventName, callable $callable)
     {
-        $this->storage[$eventName][] = $callable;
+        $this->accessor[$eventName][] = $callable;
 
         return $this;
     }
@@ -49,7 +48,7 @@ class Listener implements ListenerInterface
 
     public function fireArgs($eventName, array $args = [])
     {
-        foreach((array)$this->getFromStorage($eventName) as $function) {
+        foreach((array)$this->getFromAccessor($eventName) as $function) {
             $this->callCallable($function, ...$args);
         }
 
@@ -68,7 +67,7 @@ class Listener implements ListenerInterface
 
     public function fireWithArgs($eventName, array $args = [])
     {
-        foreach((array)$this->getFromStorage($eventName) as $function) {
+        foreach((array)$this->getFromAccessor($eventName) as $function) {
             $this->callCallableWith($function, ...$args);
         }
 

@@ -1,8 +1,10 @@
 <?php
 
-namespace Greg\Engine;
+namespace Greg\Application;
 
-use Greg\Support\Storage\AccessorTrait;
+use Greg\Support\Accessor\AccessorTrait;
+use Greg\Support\InternalTrait;
+use Greg\Support\Obj;
 use Greg\Support\Str;
 
 class Binder
@@ -137,11 +139,11 @@ class Binder
 
     public function set($name, $object)
     {
-        if ($this->inStorage($name)) {
+        if ($this->inAccessor($name)) {
             throw new \Exception('Object `' . $name . '` is already in use in binder.');
         }
 
-        $this->setToStorage($name, $object);
+        $this->setToAccessor($name, $object);
 
         return $this;
     }
@@ -157,7 +159,7 @@ class Binder
 
     public function get($name)
     {
-        $object = $this->getFromStorage($name);
+        $object = $this->getFromAccessor($name);
 
         if ($object and !is_object($object)) {
             if (is_callable($object)) {
@@ -168,7 +170,7 @@ class Binder
                 $object = $this->loadClassInstance(...$object);
             }
 
-            $this->setToStorage($name, $object);
+            $this->setToAccessor($name, $object);
         }
 
         return $object;

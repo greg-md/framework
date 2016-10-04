@@ -2,16 +2,6 @@
 
 namespace Greg\Router;
 
-use Greg\Engine\InternalTrait;
-use Greg\Http\Request;
-use Greg\Regex\InNamespace;
-use Greg\Storage\AccessorTrait;
-use Greg\Storage\ArrayAccessTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Regex;
-use Greg\Tool\Str;
-use Greg\Tool\Url;
-
 class Route implements \ArrayAccess
 {
     use AccessorTrait, ArrayAccessTrait, RouterTrait, InternalTrait;

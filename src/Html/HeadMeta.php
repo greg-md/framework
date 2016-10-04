@@ -2,7 +2,7 @@
 
 namespace Greg\Html;
 
-use Greg\Storage\AccessorTrait;
+use Greg\Support\Accessor\AccessorTrait;
 
 class HeadMeta
 {
@@ -10,25 +10,27 @@ class HeadMeta
 
     public function getName($name)
     {
-        return $this->getFromStorage($name);
+        return $this->getFromAccessor($name);
     }
 
     public function setName($name, $content)
     {
-        $this->setToStorage($name, [
+        $this->setToAccessor($name, [
             'name' => $name,
             'content' => HtmlElement::clearAttrValue($content),
         ]);
+
+        return $this;
     }
 
     public function getProperty($name)
     {
-        return $this->getFromStorage($name);
+        return $this->getFromAccessor($name);
     }
 
     public function setProperty($name, $content)
     {
-        $this->setToStorage($name, [
+        $this->setToAccessor($name, [
             'property' => $name,
             'content' => HtmlElement::clearAttrValue($content),
         ]);
@@ -36,25 +38,27 @@ class HeadMeta
 
     public function getHttpEquiv($name)
     {
-        return $this->getFromStorage($name);
+        return $this->getFromAccessor($name);
     }
 
     public function setHttpEquiv($name, $content)
     {
-        $this->setToStorage($name, [
+        $this->setToAccessor($name, [
             'http-equiv' => $name,
             'content' => HtmlElement::clearAttrValue($content),
         ]);
+
+        return $this;
     }
 
     public function getCharset()
     {
-        return $this->getFromStorage('charset');
+        return $this->getFromAccessor('charset');
     }
 
     public function setCharset($charset)
     {
-        $this->setToStorage('charset', [
+        $this->setToAccessor('charset', [
             'charset' => HtmlElement::clearAttrValue($charset),
         ]);
     }
@@ -131,7 +135,7 @@ class HeadMeta
     {
         $items = [];
 
-        foreach($this->getStorage() as $id => $attr) {
+        foreach($this->getAccessor() as $id => $attr) {
             $items[$id] = new HtmlElement('meta', $attr);
         }
 
