@@ -6,7 +6,7 @@ class HeadStyle extends HtmlScript
 {
     public function fetchItem($item)
     {
-        $attr = (array)$item['attr'];
+        $attr = (array) $item['attr'];
 
         $attr['rel'] = 'stylesheet';
 

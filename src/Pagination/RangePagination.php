@@ -60,7 +60,7 @@ class RangePagination extends BasePagination
 
     public function setInterval($number)
     {
-        $this->interval = (int)$number;
+        $this->interval = (int) $number;
 
         return $this;
     }

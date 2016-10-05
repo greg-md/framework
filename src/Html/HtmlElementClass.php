@@ -11,7 +11,7 @@ class HtmlElementClass
     public function add($class, $id = null)
     {
         if (is_array($class)) {
-            foreach(($classes = $class) as $class) {
+            foreach (($classes = $class) as $class) {
                 $this->accessor[$class] = $id;
             }
         } else {

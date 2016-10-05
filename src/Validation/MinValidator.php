@@ -30,7 +30,7 @@ class MinValidator implements ValidatorInterface
 
     public function setMin($length)
     {
-        $this->min = (int)$length;
+        $this->min = (int) $length;
 
         return $this;
     }

@@ -26,7 +26,7 @@ class Validator
     {
         $this->setParams($params);
 
-        foreach($this->getValidators() as $key => $validators) {
+        foreach ($this->getValidators() as $key => $validators) {
             foreach ($validators as $validator) {
                 if (!$validator->validate(Arr::getRef($params, $key), $params)) {
                     $this->addErrors($key, $validator->getErrors());
@@ -39,7 +39,7 @@ class Validator
 
     public function getClassByName($name)
     {
-        foreach($this->getNamespaces() as $namespace) {
+        foreach ($this->getNamespaces() as $namespace) {
             $className = $namespace . '\\' . ucfirst($name) . 'Validator';
 
             if (class_exists($className)) {
@@ -119,7 +119,7 @@ class Validator
 
     public function hasErrors()
     {
-        return (bool)$this->errors;
+        return (bool) $this->errors;
     }
 
     public function getErrors()
