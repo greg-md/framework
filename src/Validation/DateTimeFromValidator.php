@@ -44,7 +44,7 @@ class DateTimeFromValidator implements ValidatorInterface
 
     public function setFrom($datetime)
     {
-        $this->from = (string)$datetime;
+        $this->from = (string) $datetime;
 
         return $this;
     }
@@ -57,7 +57,7 @@ class DateTimeFromValidator implements ValidatorInterface
     public function includeFrom($value = null)
     {
         if (func_num_args()) {
-            $this->includeFrom = (bool)$value;
+            $this->includeFrom = (bool) $value;
 
             return $this;
         }

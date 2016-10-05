@@ -32,7 +32,7 @@ class Viewer implements \ArrayAccess
 
     public function __construct($paths = [], array $data = [])
     {
-        $this->setPaths((array)$paths);
+        $this->setPaths((array) $paths);
 
         $this->setAccessor($data);
 
@@ -166,7 +166,7 @@ class Viewer implements \ArrayAccess
     {
         $content = [];
 
-        foreach($items as $key => $item) {
+        foreach ($items as $key => $item) {
             $viewer = clone $this;
 
             $viewer->assign(array_merge(['item' => $item, 'key' => $key], $params), true);
@@ -216,18 +216,20 @@ class Viewer implements \ArrayAccess
 
     /**
      * @param $file
-     * @return bool|CompilerInterface|BladeCompiler
+     *
      * @throws \Exception
+     *
+     * @return bool|CompilerInterface|BladeCompiler
      */
     public function findCompilerByFile($file)
     {
         $compilers = $this->compilers;
 
-        uksort($compilers, function($a, $b) {
+        uksort($compilers, function ($a, $b) {
             return gmp_cmp($a, $b) * -1;
         });
 
-        foreach($compilers as $extension => $compiler) {
+        foreach ($compilers as $extension => $compiler) {
             if (Str::endsWith($file, $extension)) {
                 return $this->getCompiler($extension);
             }
@@ -290,7 +292,7 @@ class Viewer implements \ArrayAccess
 
         $this->setContent($content);
 
-        foreach($layouts = $layout as $layout) {
+        foreach ($layouts = $layout as $layout) {
             $content = $this->fetchName($layout, $responseObject);
 
             $this->setContent($content);
@@ -309,9 +311,9 @@ class Viewer implements \ArrayAccess
 
         $extensions = $this->getExtensions();
 
-        foreach($paths as $path) {
+        foreach ($paths as $path) {
             if (is_dir($path)) {
-                foreach($extensions as $extension) {
+                foreach ($extensions as $extension) {
                     $file = $path . DIRECTORY_SEPARATOR . ltrim($name . $extension, '\/');
 
                     if (is_file($file)) {
@@ -371,7 +373,7 @@ class Viewer implements \ArrayAccess
 
     public function setContent($content)
     {
-        $this->content = (string)$content;
+        $this->content = (string) $content;
 
         return $this;
     }

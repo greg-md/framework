@@ -30,7 +30,7 @@ class MaxValidator implements ValidatorInterface
 
     public function setMax($length)
     {
-        $this->max = (int)$length;
+        $this->max = (int) $length;
 
         return $this;
     }

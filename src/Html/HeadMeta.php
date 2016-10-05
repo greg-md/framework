@@ -16,7 +16,7 @@ class HeadMeta
     public function setName($name, $content)
     {
         $this->setToAccessor($name, [
-            'name' => $name,
+            'name'    => $name,
             'content' => HtmlElement::clearAttrValue($content),
         ]);
 
@@ -32,7 +32,7 @@ class HeadMeta
     {
         $this->setToAccessor($name, [
             'property' => $name,
-            'content' => HtmlElement::clearAttrValue($content),
+            'content'  => HtmlElement::clearAttrValue($content),
         ]);
     }
 
@@ -45,7 +45,7 @@ class HeadMeta
     {
         $this->setToAccessor($name, [
             'http-equiv' => $name,
-            'content' => HtmlElement::clearAttrValue($content),
+            'content'    => HtmlElement::clearAttrValue($content),
         ]);
 
         return $this;
@@ -135,7 +135,7 @@ class HeadMeta
     {
         $items = [];
 
-        foreach($this->getAccessor() as $id => $attr) {
+        foreach ($this->getAccessor() as $id => $attr) {
             $items[$id] = new HtmlElement('meta', $attr);
         }
 

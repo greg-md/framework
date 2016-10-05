@@ -23,7 +23,7 @@ class Listener implements ListenerInterface
             throw new \Exception('Event registrar should be an object.');
         }
 
-        foreach((array)$eventName as $eName) {
+        foreach ((array) $eventName as $eName) {
             $method = lcfirst(Str::phpName($eName));
 
             if (!method_exists($object, $method)) {
@@ -48,7 +48,7 @@ class Listener implements ListenerInterface
 
     public function fireArgs($eventName, array $args = [])
     {
-        foreach((array)$this->getFromAccessor($eventName) as $function) {
+        foreach ((array) $this->getFromAccessor($eventName) as $function) {
             $this->callCallable($function, ...$args);
         }
 
@@ -67,7 +67,7 @@ class Listener implements ListenerInterface
 
     public function fireWithArgs($eventName, array $args = [])
     {
-        foreach((array)$this->getFromAccessor($eventName) as $function) {
+        foreach ((array) $this->getFromAccessor($eventName) as $function) {
             $this->callCallableWith($function, ...$args);
         }
 
