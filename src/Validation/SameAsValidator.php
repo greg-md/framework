@@ -32,7 +32,7 @@ class SameAsValidator implements ValidatorInterface
 
     public function setSameAs($string)
     {
-        $this->sameAs = (string)$string;
+        $this->sameAs = (string) $string;
 
         return $this;
     }

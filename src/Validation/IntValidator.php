@@ -19,7 +19,7 @@ class IntValidator implements ValidatorInterface
 
     public function validate($value, array $values = [])
     {
-        if ($value != (int)$value) {
+        if ($value != (int) $value) {
             $this->setError('IntError', 'Value is not integer.');
 
             return false;
@@ -41,7 +41,7 @@ class IntValidator implements ValidatorInterface
                 $value = ($value === 'unsigned');
             }
 
-            $this->unsigned = (bool)$value;
+            $this->unsigned = (bool) $value;
 
             return $this;
         }

@@ -44,7 +44,7 @@ class DateTimeToValidator implements ValidatorInterface
 
     public function setTo($datetime)
     {
-        $this->to = (string)$datetime;
+        $this->to = (string) $datetime;
 
         return $this;
     }
@@ -57,7 +57,7 @@ class DateTimeToValidator implements ValidatorInterface
     public function includeTo($value = null)
     {
         if (func_num_args()) {
-            $this->includeTo = (bool)$value;
+            $this->includeTo = (bool) $value;
 
             return $this;
         }

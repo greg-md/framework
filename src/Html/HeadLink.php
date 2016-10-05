@@ -35,7 +35,7 @@ class HeadLink
     {
         $items = [];
 
-        foreach($this->getAccessor() as $id => $attr) {
+        foreach ($this->getAccessor() as $id => $attr) {
             $items[$id] = new HtmlElement('link', $attr);
         }
 

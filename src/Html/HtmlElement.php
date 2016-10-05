@@ -38,7 +38,7 @@ class HtmlElement implements \ArrayAccess
         return $this;
     }
 
-    static public function clearAttrValue($content)
+    public static function clearAttrValue($content)
     {
         return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
     }
@@ -119,7 +119,7 @@ class HtmlElement implements \ArrayAccess
         $attr = [];
 
         foreach ($this->getAccessor() as $key => $value) {
-            $value = htmlspecialchars((string)$value);
+            $value = htmlspecialchars((string) $value);
 
             if ($value != '') {
                 $key .= '="' . $value . '"';

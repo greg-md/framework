@@ -82,17 +82,17 @@ class HtmlScript
 
     protected function addSrc($where, $type, $sources, $condition = null, array $attr = [])
     {
-        $sources = (array)$sources;
+        $sources = (array) $sources;
 
-        foreach($sources as $src) {
+        foreach ($sources as $src) {
             $thisAttr = $attr;
 
             $thisAttr['src'] = $src;
 
             $param = [
-                'inner' => null,
+                'inner'     => null,
                 'condition' => $condition,
-                'attr' => $thisAttr,
+                'attr'      => $thisAttr,
             ];
 
             if ($type == static::PREPEND) {
@@ -107,13 +107,13 @@ class HtmlScript
 
     protected function addText($where, $type, $texts, $condition = null, array $attr = [])
     {
-        $texts = (array)$texts;
+        $texts = (array) $texts;
 
-        foreach($texts as $text) {
+        foreach ($texts as $text) {
             $param = [
-                'inner' => $text,
+                'inner'     => $text,
                 'condition' => $condition,
-                'attr' => $attr,
+                'attr'      => $attr,
             ];
 
             if ($type == static::PREPEND) {
@@ -130,8 +130,8 @@ class HtmlScript
     {
         $html = [];
 
-        foreach(static::ORDER as $type) {
-            foreach((array)$this->getFromAccessor($type) as $item) {
+        foreach (static::ORDER as $type) {
+            foreach ((array) $this->getFromAccessor($type) as $item) {
                 $element = new HtmlElement('script', $item['attr'], $item['condition']);
 
                 $element->setInner($item['inner']);

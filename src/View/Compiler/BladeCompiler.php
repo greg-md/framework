@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Greg\View\Compiler;
 
 use Greg\Support\Arr;
@@ -22,29 +21,29 @@ class BladeCompiler implements CompilerInterface
     ];
 
     protected $statements = [
-        'if' => 'compileIf',
-        'elseif' => 'compileElseIf',
-        'unless' => 'compileUnless',
+        'if'         => 'compileIf',
+        'elseif'     => 'compileElseIf',
+        'unless'     => 'compileUnless',
         'elseunless' => 'compileElseUnless',
-        'for' => 'compileFor',
-        'foreach' => 'compileForeach',
-        'while' => 'compileWhile',
+        'for'        => 'compileFor',
+        'foreach'    => 'compileForeach',
+        'while'      => 'compileWhile',
 
         'switch' => 'compileSwitch',
-        'case' => 'compileCase',
+        'case'   => 'compileCase',
     ];
 
     protected $emptyStatements = [
-        'endif' => 'compileEndIf',
-        'endunless' => 'compileEndUnless',
-        'endfor' => 'compileEndFor',
+        'endif'      => 'compileEndIf',
+        'endunless'  => 'compileEndUnless',
+        'endfor'     => 'compileEndFor',
         'endforeach' => 'compileEndForeach',
-        'endwhile' => 'compileEndWhile',
-        'forelse' => 'compileForelse',
+        'endwhile'   => 'compileEndWhile',
+        'forelse'    => 'compileForelse',
         'endforelse' => 'compileEndForelse',
 
-        'default' => 'compileDefault',
-        'break' => 'compileBreak',
+        'default'   => 'compileDefault',
+        'break'     => 'compileBreak',
         'endswitch' => 'compileEndSwitch',
 
         'else' => 'compileElse',
@@ -129,7 +128,8 @@ class BladeCompiler implements CompilerInterface
     /**
      * Parse the tokens from the template.
      *
-     * @param  array  $token
+     * @param array $token
+     *
      * @return string
      */
     protected function parseToken(array $token)
@@ -151,21 +151,21 @@ class BladeCompiler implements CompilerInterface
 
     public function compileComments($string)
     {
-        return $this->inNamespaceRegex('{{--', '--}}')->replaceCallback(function($matches) {
+        return $this->inNamespaceRegex('{{--', '--}}')->replaceCallback(function ($matches) {
             return '<?php /* ' . $matches['captured'] . ' */ ?>';
         }, $string, 'i');
     }
 
     public function compileRawEchos($string)
     {
-        return $this->inNamespaceRegex('{!!', '!!}')->replaceCallback(function($matches) {
+        return $this->inNamespaceRegex('{!!', '!!}')->replaceCallback(function ($matches) {
             return $this->compileRawEcho($matches['captured']);
         }, $string, 'i');
     }
 
     public function compileContentEchos($string)
     {
-        return $this->inNamespaceRegex('{{', '}}')->replaceCallback(function($matches) {
+        return $this->inNamespaceRegex('{{', '}}')->replaceCallback(function ($matches) {
             return $this->compileContentEcho($matches['captured']);
         }, $string, 'i');
     }
@@ -202,7 +202,7 @@ class BladeCompiler implements CompilerInterface
 
         $pattern = '@(?:(?\'statement\'' . $statements . ')' . $exprRegex . '|(?\'empty\'' . $emptyStatements . ')\b;?)' . $extendsRegex;
 
-        return preg_replace_callback('#' . $pattern . '#i', function($matches) {
+        return preg_replace_callback('#' . $pattern . '#i', function ($matches) {
             if ($statement = Arr::get($matches, 'empty')) {
                 $callable = $this->emptyStatements[$statement];
 
@@ -361,7 +361,7 @@ class BladeCompiler implements CompilerInterface
 
     public function setCompilationPath($path)
     {
-        $this->compilationPath = (string)$path;
+        $this->compilationPath = (string) $path;
 
         return $this;
     }

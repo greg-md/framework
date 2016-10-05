@@ -38,13 +38,13 @@ class Translator implements \ArrayAccess
             $this->setNewTranslate($key, $text);
         }
 
-        if (sizeof($args) == 1) {
-            $args = (array)$args[0];
+        if (count($args) == 1) {
+            $args = (array) $args[0];
         }
 
         $replacements = [];
 
-        foreach($args as $key => $value) {
+        foreach ($args as $key => $value) {
             if (!is_int($key)) {
                 $replacements['{' . $key . '}'] = $value;
 
@@ -78,7 +78,7 @@ class Translator implements \ArrayAccess
 
     public function setLanguage($name)
     {
-        $this->language = (string)$name;
+        $this->language = (string) $name;
 
         return $this;
     }
@@ -90,7 +90,7 @@ class Translator implements \ArrayAccess
 
     public function setDefaultLanguage($name)
     {
-        $this->defaultLanguage = (string)$name;
+        $this->defaultLanguage = (string) $name;
 
         return $this;
     }

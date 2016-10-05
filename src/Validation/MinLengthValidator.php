@@ -30,7 +30,7 @@ class MinLengthValidator implements ValidatorInterface
 
     public function setLength($length)
     {
-        $this->length = (int)$length;
+        $this->length = (int) $length;
 
         return $this;
     }
