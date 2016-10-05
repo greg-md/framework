@@ -1,15 +1,12 @@
 <?php
 
-namespace Greg\Validation\Validator;
+namespace Greg\Validation;
 
-use Greg\Validation\ValidatorInterface;
-use Greg\Validation\ValidatorTrait;
-
-class LengthValidator implements ValidatorInterface
+class MinLengthValidator implements ValidatorInterface
 {
     use ValidatorTrait;
 
-    protected $length = 0;
+    protected $length = null;
 
     public function __construct($length)
     {
@@ -22,8 +19,8 @@ class LengthValidator implements ValidatorInterface
     {
         $length = $this->getLength();
 
-        if (mb_strlen($value) != $length) {
-            $this->setError('LengthError', 'Value length should be ' . $length . '.');
+        if (mb_strlen($value) < $length) {
+            $this->setError('MinLength', 'Value length should be grater or equal with ' . $length . '.');
 
             return false;
         }

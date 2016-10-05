@@ -1,10 +1,8 @@
 <?php
 
-namespace Greg\Validation\Validator;
+namespace Greg\Validation;
 
-use Greg\Tool\Arr;
-use Greg\Validation\ValidatorInterface;
-use Greg\Validation\ValidatorTrait;
+use Greg\Support\Arr;
 
 class SameAsValidator implements ValidatorInterface
 {

@@ -1,10 +1,8 @@
 <?php
 
-namespace Greg\Validation\Validator;
+namespace Greg\Validation;
 
-use Greg\System\DateTime;
-use Greg\Validation\ValidatorInterface;
-use Greg\Validation\ValidatorTrait;
+use Greg\Support\DateTime;
 
 class DateTimeToValidator implements ValidatorInterface
 {

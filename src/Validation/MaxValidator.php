@@ -1,9 +1,6 @@
 <?php
 
-namespace Greg\Validation\Validator;
-
-use Greg\Validation\ValidatorInterface;
-use Greg\Validation\ValidatorTrait;
+namespace Greg\Validation;
 
 class MaxValidator implements ValidatorInterface
 {

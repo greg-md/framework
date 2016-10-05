@@ -3,10 +3,10 @@
 
 namespace Greg\View\Compiler;
 
-use Greg\Engine\InternalTrait;
-use Greg\Regex\InNamespace;
-use Greg\System\File;
-use Greg\Tool\Arr;
+use Greg\Support\Arr;
+use Greg\Support\File;
+use Greg\Support\InternalTrait;
+use Greg\Support\Regex\InNamespaceRegex;
 
 class BladeCompiler implements CompilerInterface
 {
@@ -194,7 +194,7 @@ class BladeCompiler implements CompilerInterface
 
         $exprNamespace->recursive(true);
 
-        $exprNamespace->recursiveGroup('recursive');
+        $exprNamespace->setRecursiveGroup('recursive');
 
         $exprRegex = '[\s\t]*(?\'recursive\'' . $exprNamespace . ')';
 
@@ -344,17 +344,17 @@ class BladeCompiler implements CompilerInterface
 
     protected function inNamespaceRegex($start, $end = null)
     {
-        $pattern = new InNamespace($start, $end ?: $start);
+        $pattern = new InNamespaceRegex($start, $end ?: $start);
 
         $pattern->recursive(false);
 
-        $pattern->capturedKey('captured');
+        $pattern->setCapturedKey('captured');
 
         $pattern->disableInQuotes();
 
-        $pattern->newLines(true);
+        $pattern->newLines();
 
-        $pattern->trim(true);
+        $pattern->trim();
 
         return $pattern;
     }

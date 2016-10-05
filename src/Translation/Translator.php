@@ -2,10 +2,8 @@
 
 namespace Greg\Translation;
 
-use Greg\Storage\AccessorTrait;
-use Greg\Storage\ArrayAccessTrait;
-use Greg\Tool\Arr;
-use Greg\Tool\Obj;
+use Greg\Support\Accessor\AccessorTrait;
+use Greg\Support\Accessor\ArrayAccessTrait;
 
 class Translator implements \ArrayAccess
 {
@@ -62,20 +60,20 @@ class Translator implements \ArrayAccess
     public function getTranslates($key = null)
     {
         if (func_num_args()) {
-            return $this->getFromStorage($key);
+            return $this->getFromAccessor($key);
         }
 
-        return $this->getStorage();
+        return $this->getAccessor();
     }
 
     public function setTranslate($key, $value)
     {
-        return $this->setToStorage($key, $value);
+        return $this->setToAccessor($key, $value);
     }
 
     public function setTranslates(array $items)
     {
-        return $this->addToStorage($items);
+        return $this->addToAccessor($items);
     }
 
     public function setLanguage($name)

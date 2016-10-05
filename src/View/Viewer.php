@@ -2,11 +2,11 @@
 
 namespace Greg\View;
 
-use Greg\Engine\InternalTrait;
-use Greg\Http\Response;
-use Greg\Storage\AccessorTrait;
-use Greg\Storage\ArrayAccessTrait;
-use Greg\Tool\Str;
+use Greg\Support\Accessor\AccessorTrait;
+use Greg\Support\Accessor\ArrayAccessTrait;
+use Greg\Support\Http\Response;
+use Greg\Support\InternalTrait;
+use Greg\Support\Str;
 use Greg\View\Compiler\BladeCompiler;
 use Greg\View\Compiler\CompilerInterface;
 
@@ -34,7 +34,7 @@ class Viewer implements \ArrayAccess
     {
         $this->setPaths((array)$paths);
 
-        $this->setStorage($data);
+        $this->setAccessor($data);
 
         return $this;
     }
@@ -342,7 +342,7 @@ class Viewer implements \ArrayAccess
 
     public function assign($key, $value = null)
     {
-        $this->storage[$key] = $value;
+        $this->setToAccessor($key, $value);
 
         return $this;
     }

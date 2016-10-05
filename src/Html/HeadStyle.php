@@ -12,7 +12,7 @@ class HeadStyle extends HtmlScript
 
         $element = new HtmlElement($item['inner'] ? 'style' : 'link', $attr, $item['condition']);
 
-        $element->inner($item['inner']);
+        $element->setInner($item['inner']);
 
         return $element;
     }

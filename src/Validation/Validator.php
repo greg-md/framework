@@ -2,8 +2,8 @@
 
 namespace Greg\Validation;
 
-use Greg\Engine\InternalTrait;
-use Greg\Tool\Arr;
+use Greg\Support\Arr;
+use Greg\Support\InternalTrait;
 
 class Validator
 {
