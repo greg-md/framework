@@ -2,30 +2,35 @@
 
 namespace Greg;
 
+use Greg\Event\Listener;
+use Greg\Event\SubscriberInterface;
+use Greg\Loader\ClassLoader;
+use Greg\Router\Router;
 use Greg\Support\Accessor\ArrayAccessTrait;
 use Greg\Support\Arr;
-use Greg\Support\Binder;
+use Greg\Support\Http\Request;
+use Greg\Support\Http\Response;
+use Greg\Support\IoC\IoCContainer;
+use Greg\Support\IoC\IoCManager;
+use Greg\Support\Server;
 use Greg\Support\Session;
+use Greg\Support\Str;
+use Greg\Translation\Translator;
+use Greg\View\Viewer;
 
 class Application implements \ArrayAccess
 {
-    use ArrayAccessTrait, ApplicationTrait;
+    use ArrayAccessTrait;
+
+    protected $appName = 'greg';
 
     const EVENT_INIT = 'app.init';
 
     const EVENT_RUN = 'app.run';
 
-    const EVENT_ROUTER_DISPATCHING = 'app.router.dispatching';
-
-    const EVENT_ROUTER_DISPATCHED = 'app.router.dispatched';
+    const EVENT_DISPATCHING = 'app.dispatching';
 
     const EVENT_DISPATCHED = 'app.dispatched';
-
-    const EVENT_ERROR_DISPATCHED = 'app.error.dispatched';
-
-    const EVENT_FINISHED = 'app.finished';
-
-    protected $path = null;
 
     public function __construct(array $settings = [], $appName = null)
     {
@@ -33,7 +38,7 @@ class Application implements \ArrayAccess
             $this->setAppName($appName);
         }
 
-        $this->memory('app', $this);
+        $this->setToMemory('app', $this);
 
         $this->setAccessor(Arr::fixIndexes($settings));
 
@@ -42,255 +47,39 @@ class Application implements \ArrayAccess
 
     public function init()
     {
-        $this->initBinder();
+        $this->loadComponents();
 
-        // Add staffs to Binder
-        $this->binder()->setObjects([$this]);
-
-        $this->initLoader();
-
-        $this->initListener();
-
-        $this->initSession();
-
-        $this->initTranslator();
-
-        $this->initViewer();
-
-        $this->initRouter();
-
-        $this->initComponents();
-
-        // Fire app init event
-        $this->listener()->fire(static::EVENT_INIT);
+        $this->getListener()->fire(static::EVENT_INIT);
 
         return $this;
     }
 
-    public function initBinder()
+    protected function loadComponents()
     {
-        dd('huh');
-        // Load Binder
-        $this->binder($model = new Binder());
-
-        // Add Binder to Binder
-        $model->setObject($model);
+        foreach($this->getIndexArray('app.components') as $component) {
+            $this->addComponent($component);
+        }
 
         return $this;
     }
 
-    public function getBinder()
+    public function addComponent($component)
     {
-        if (!$model = $this->binder()) {
-            throw new \Exception('Application binder was not initiated.');
+        if (!is_object($component)) {
+            $component = $this->loadInstance($component);
         }
 
-        return $model;
-    }
+        $this->setToMemory('component:' . get_class($component), $component);
 
-    public function initLoader()
-    {
-        // Load ClassLoader
-        $this->loader($model = new ClassLoader($this->getIndexArray('loader.paths')));
+        $this->getIoCContainer()->setObject($component);
 
-        // Register the ClassLoader to autoload
-        $model->register(true);
-
-        // Add ClassLoader to Binder
-        $this->binder()->setObject($model);
+        if ($component instanceof SubscriberInterface) {
+            $component->subscribe($this->getListener());
+        }
 
         return $this;
     }
 
-    public function getLoader()
-    {
-        if (!$model = $this->loader()) {
-            throw new \Exception('Application loader was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function initListener()
-    {
-        // Load Listener
-        $this->listener($model = Listener::create($this->appName(),
-                                    $this->getIndexArray('listener.events'),
-                                    $this->getIndexArray('listener.subscribers')));
-
-        // Add Listener to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function getListener()
-    {
-        if (!$model = $this->listener()) {
-            throw new \Exception('Application listener was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function initSession()
-    {
-        // Load Session
-        $this->session($model = new Session());
-
-        // Add Session to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function initTranslator()
-    {
-        // Load Translator
-        $this->translator($model = new Translator(
-                            $this->getIndexArray('translator.languages'),
-                            $this->getIndexArray('translator.translates')));
-
-        // Add Translator to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function getTranslator()
-    {
-        if (!$model = $this->translator()) {
-            throw new \Exception('Application translator was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function initViewer()
-    {
-        // Load Translator
-        $this->viewer($model = Viewer::create($this->appName(),
-                        $this->getIndexArray('viewer.paths'),
-                        $this->getIndexArray('viewer.params')));
-
-        // Add Viewer to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function getViewer()
-    {
-        if (!$model = $this->viewer()) {
-            throw new \Exception('Application viewer was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function initRouter()
-    {
-        // Load Dispatcher
-        $this->router($model = Router::create($this->appName(), $this->getIndexArray('router.routes'), $this->getIndexArray('router.onError')));
-
-        // Add Dispatcher to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function getRouter()
-    {
-        if (!$model = $this->router()) {
-            throw new \Exception('Application router was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function initComponents()
-    {
-        // Load Components
-        $this->components($model = Components::create($this->appName(), $this->getIndexArray('app.components')));
-
-        // Add Components to Binder
-        $this->binder()->setObject($model);
-
-        return $this;
-    }
-
-    public function getComponents()
-    {
-        if (!$model = $this->components()) {
-            throw new \Exception('Application components was not initiated.');
-        }
-
-        return $model;
-    }
-
-    public function loadInstance($className, ...$args)
-    {
-        return $this->loadInstanceArgs($className, $args);
-    }
-
-    public function loadInstanceArgs($className, array $args = [])
-    {
-        $binder = $this->binder();
-
-        /* @var $class InternalTrait */
-        $class = $binder ? $binder->loadInstanceArgs($className, $args) : Obj::loadInstanceArgs($className, $args);
-
-        if (method_exists($class, 'appName')) {
-            $class->appName($this->appName());
-        }
-
-        if (method_exists($class, 'init')) {
-            $binder ? $binder->call([$class, 'init']) : $class->init();
-        }
-
-        // Call all methods which starts with init
-        foreach(get_class_methods($class) as $methodName) {
-            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
-                $binder ? $binder->call([$class, $methodName]) : $class->{$methodName}();
-            }
-        }
-
-        return $class;
-    }
-
-    public function getInstance($className)
-    {
-        $instance = $this->memory('instances/' . $className);
-
-        if (!$instance) {
-            $binder = $this->binder();
-
-            /* @var $instance InternalTrait */
-            $instance = $binder ? $binder->loadInstance($className) : Obj::loadInstance($className);
-
-            $instance->appName($this->appName());
-
-            if (method_exists($instance, 'init')) {
-                $binder ? $binder->call([$instance, 'init']) : $instance->init();
-            }
-
-            // Call all methods which starts with init
-            foreach(get_class_methods($instance) as $methodName) {
-                if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
-                    $binder ? $binder->call([$instance, $methodName]) : $instance->{$methodName}();
-                }
-            }
-
-            $this->memory('instances/' . $className, $instance);
-        }
-
-        return $instance;
-    }
-
-    /**
-     * @param string $path
-     * @return Response
-     */
     public function run($path = '/')
     {
         if (!func_num_args()) {
@@ -299,99 +88,38 @@ class Application implements \ArrayAccess
             $path = $path ?: '/';
         }
 
-        $this->path($path);
+        $this->getListener()->fireWith(static::EVENT_RUN, $path);
 
-        $this->listener()->fireRef(static::EVENT_RUN);
+        if ($route = $this->getRouter()->findRouteByPath($path)) {
+            $this->getListener()->fireWith(static::EVENT_DISPATCHING, $path, $route);
 
-        $response = $this->router()->dispatchPath($path, $route, [
-            Router::EVENT_DISPATCHING => static::EVENT_ROUTER_DISPATCHING,
-            Router::EVENT_DISPATCHED => static::EVENT_ROUTER_DISPATCHED,
-        ]);
+            $response = $route->dispatch();
 
-        if (Str::isScalar($response)) {
-            $response = Response::create($this->appName(), $response);
+            if (Str::isScalar($response)) {
+                $response = new Response($response);
+            }
+
+            $this->getListener()->fireWith(static::EVENT_DISPATCHED, $path, $route, $response);
+        } else {
+            $response = new Response();
         }
-
-        // finish with layout request
-        $this->listener()->fireWith(static::EVENT_DISPATCHED, $response, $route);
-
-        $this->listener()->fire(static::EVENT_FINISHED);
 
         return $response;
     }
 
-    public function action($name = null, $controllerName = null, array $params = [], ...$others)
+    /**
+     * @param string $path
+     * @return Response
+     */
+    public function dispatch($path)
     {
-        $name = $name ?: 'index';
+        $response = $this->getRouter()->dispatchPath($path);
 
-        $controllerName = $controllerName ?: 'base';
-
-        Arr::bringRef($controllerName);
-
-        $controller = $this->loadController($controllerName);
-
-        $actionMethod = Str::phpName($name);
-
-        if (!method_exists($controller, $actionMethod)) {
-            throw new \Exception('Action `' . $name . '` not found in controller `' . implode('/', $controllerName) . '`.');
+        if (Str::isScalar($response)) {
+            $response = new Response($response);
         }
 
-        $request = Request::create($this->appName(), $params);
-
-        return $this->binder()->callWith([$controller, $actionMethod], $request, ...array_values($params), ...$others);
-    }
-
-    public function loadController($name)
-    {
-        Arr::bringRef($name);
-
-        /* @var $class InternalTrait */
-        if ($class = $this->controllerExists($name)) {
-            return $class::newInstance($this->appName());
-        }
-
-        throw new \Exception('Controller `' . implode('/', $name) . '` not found.');
-    }
-
-    public function controllerExists($name)
-    {
-        return Obj::classExists($name, array_merge($this->controllersPrefixes(), ['']), 'Controllers\\');
-    }
-
-    public function once($name, callable $callable)
-    {
-        $this->setIndex('once.' . $name, $callable);
-
-        return $this;
-    }
-
-    public function loadOnce($name)
-    {
-        $callable = $this->getIndex('once.' . $name);
-
-        if ($callable) {
-            $this->set($name, $this->binder()->call($callable));
-        }
-
-        return $this;
-    }
-
-    public function get($key, $else = null)
-    {
-        if (!$this->has($key)) {
-            $this->loadOnce($key);
-        }
-
-        return Arr::get($this->storage, $key, $else);
-    }
-
-    public function &offsetGet($key)
-    {
-        if (!$this->has($key)) {
-            $this->loadOnce($key);
-        }
-
-        return $this->storage[$key];
+        return $response;
     }
 
     public function basePath()
@@ -404,85 +132,167 @@ class Application implements \ArrayAccess
         return $this->getIndex('app.public_path') ?: Server::documentRoot();
     }
 
-    /**
-     * @param ClassLoader $loader
-     * @return ClassLoader|bool
-     */
-    public function loader(ClassLoader $loader = null)
+    public function getIoCContainer()
     {
-        return $this->memory('loader', ...func_get_args());
+        if (!$class = $this->getFromMemory('ioc_container')) {
+            $this->setToMemory('ioc_container', $class = new IoCContainer());
+
+            $class->setObject($class);
+
+            $class->setObject($this);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Binder $binder
-     * @return Binder|bool
-     */
-    public function binder(Binder $binder = null)
+    public function getIoCManager()
     {
-        return $this->memory('binder', ...func_get_args());
+        if (!$class = $this->getFromMemory('ioc_manager')) {
+            $class = (new IoCManager())->setIoCContainer($this->getIoCContainer());
+
+            $this->setToMemory('ioc_manager', $class);
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Listener $listener
-     * @return Listener|bool
-     */
-    public function listener(Listener $listener = null)
+    public function getLoader()
     {
-        return $this->memory('listener', ...func_get_args());
+        if (!$class = $this->getFromMemory('loader')) {
+            $this->setToMemory('loader', $class = new ClassLoader());
+
+            $class->register(true);
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Session $session
-     * @return Session|bool
-     */
-    public function session(Session $session = null)
+    public function getListener()
     {
-        return $this->memory('session', ...func_get_args());
+        if (!$class = $this->getFromMemory('listener')) {
+            $this->setToMemory('listener', $class = new Listener($this->getIoCManager()));
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Translator $translator
-     * @return Translator|bool
-     */
-    public function translator(Translator $translator = null)
+    public function getSession()
     {
-        return $this->memory('translator', ...func_get_args());
+        if (!$class = $this->getFromMemory('session')) {
+            $this->setToMemory('session', $class = new Session());
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Viewer $translator
-     * @return Viewer|bool
-     */
-    public function viewer(Viewer $translator = null)
+    public function getTranslator()
     {
-        return $this->memory('viewer', ...func_get_args());
+        if (!$class = $this->getFromMemory('translator')) {
+            $this->setToMemory('translator', $class = new Translator());
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Components $components
-     * @return Components|bool
-     */
-    public function components(Components $components = null)
+    public function getViewer()
     {
-        return $this->memory('components', ...func_get_args());
+        if (!$class = $this->getFromMemory('viewer')) {
+            $this->setToMemory('viewer', $class = new Viewer());
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    public function getLastRunPath()
+    public function getRouter()
     {
-        return $this->path();
+        if (!$class = $this->getFromMemory('router')) {
+            $this->setToMemory('router', $class = new Router($this->getIoCManager()));
+
+            $this->getIoCContainer()->setObject($class);
+        }
+
+        return $class;
     }
 
-    /**
-     * @param Router $router
-     * @return Router|bool
-     */
-    public function router(Router $router = null)
+    public function setToMemory($key, $value)
     {
-        return $this->memory('router', ...func_get_args());
+        Memory::setValueRef($this->getAppName() . '@' . $key, $value);
+
+        return $this;
     }
 
-    protected function path($value = null, $type = Obj::PROP_REPLACE)
+    public function getFromMemory($key)
     {
-        return Obj::fetchStrVar($this, $this->{__FUNCTION__}, ...func_get_args());
+        return Memory::getRef($this->getAppName() . '@' . $key);
+    }
+
+    public function setAppName($name)
+    {
+        $this->appName = (string) $name;
+
+        return $this;
+    }
+
+    public function getAppName()
+    {
+        return $this->appName;
+    }
+
+    public function loadInstance($className, ...$args)
+    {
+        return $this->loadInstanceArgs($className, $args);
+    }
+
+    public function loadInstanceArgs($className, array $args = [])
+    {
+        $class = $this->getIoCContainer()->loadInstanceArgs($className, $args);
+
+        // Disable autorun init methods for a while
+        //$this->initClassInstance($class);
+
+        return $class;
+    }
+
+    protected function initClassInstance($class)
+    {
+        $ioc = $this->getIoCContainer();
+
+        if (method_exists($class, 'init')) {
+            $ioc->call([$class, 'init']);
+        }
+
+        // Call all methods which starts with init
+        foreach(get_class_methods($class) as $methodName) {
+            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
+                $ioc->call([$class, $methodName]);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getInstance($className)
+    {
+        $instance = $this->getFromMemory('instances:' . $className);
+
+        if (!$instance) {
+            $instance = $this->loadInstance($className);
+
+            $this->setToMemory('instances:' . $className, $instance);
+        }
+
+        return $instance;
     }
 }

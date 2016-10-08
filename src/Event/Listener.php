@@ -3,12 +3,23 @@
 namespace Greg\Event;
 
 use Greg\Support\Accessor\AccessorTrait;
-use Greg\Support\InternalTrait;
+use Greg\Support\IoC\IoCManagerAccessorTrait;
+use Greg\Support\IoC\IoCManagerInterface;
+use Greg\Support\Obj;
 use Greg\Support\Str;
 
 class Listener implements ListenerInterface
 {
-    use AccessorTrait, InternalTrait;
+    use AccessorTrait, IoCManagerAccessorTrait;
+
+    public function __construct(IoCManagerInterface $ioCManager = null)
+    {
+        if ($ioCManager) {
+            $this->setIoCManager($ioCManager);
+        }
+
+        return $this;
+    }
 
     public function on($eventName, callable $callable)
     {
@@ -49,7 +60,11 @@ class Listener implements ListenerInterface
     public function fireArgs($eventName, array $args = [])
     {
         foreach ((array) $this->getFromAccessor($eventName) as $function) {
-            $this->callCallable($function, ...$args);
+            if ($ioc = $this->getIoCManager()) {
+                $ioc->callCallable($function, ...$args);
+            } else {
+                Obj::callCallable($function, ...$args);
+            }
         }
 
         return $this;
@@ -68,15 +83,12 @@ class Listener implements ListenerInterface
     public function fireWithArgs($eventName, array $args = [])
     {
         foreach ((array) $this->getFromAccessor($eventName) as $function) {
-            $this->callCallableWith($function, ...$args);
+            if ($ioc = $this->getIoCManager()) {
+                $ioc->callCallableWith($function, ...$args);
+            } else {
+                Obj::callCallableWith($function, ...$args);
+            }
         }
-
-        return $this;
-    }
-
-    public function subscribe(SubscriberInterface $subscriber)
-    {
-        $subscriber->subscribe($this);
 
         return $this;
     }

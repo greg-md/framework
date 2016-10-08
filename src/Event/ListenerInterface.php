@@ -19,6 +19,4 @@ interface ListenerInterface
     public function fireWithRef($event, &...$args);
 
     public function fireWithArgs($event, array $args = []);
-
-    public function subscribe(SubscriberInterface $subscriber);
 }
