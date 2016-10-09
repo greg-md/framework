@@ -32,6 +32,8 @@ class Application implements \ArrayAccess
 
     const EVENT_DISPATCHED = 'app.dispatched';
 
+    const EVENT_FINISHED = 'app.finished';
+
     public function __construct(array $settings = [], $appName = null)
     {
         if ($appName !== null) {
@@ -56,22 +58,24 @@ class Application implements \ArrayAccess
 
     protected function loadComponents()
     {
-        foreach($this->getIndexArray('app.components') as $component) {
-            $this->addComponent($component);
+        foreach($this->getIndexArray('app.components') as $key => $component) {
+            $this->addComponent($component, $key);
         }
 
         return $this;
     }
 
-    public function addComponent($component)
+    public function addComponent($component, $name = null)
     {
         if (!is_object($component)) {
-            $component = $this->loadInstance($component);
+            $component = $this->getIoCContainer()->loadInstance($component);
         }
 
-        $this->setToMemory('component:' . get_class($component), $component);
+        $this->setToMemory('component:' . $name ?: get_class($component), $component);
 
         $this->getIoCContainer()->setObject($component);
+
+        $this->initClassInstance($component);
 
         if ($component instanceof SubscriberInterface) {
             $component->subscribe($this->getListener());
@@ -103,6 +107,8 @@ class Application implements \ArrayAccess
         } else {
             $response = new Response();
         }
+
+        $this->getListener()->fireWith(static::EVENT_FINISHED, $path);
 
         return $response;
     }
@@ -140,6 +146,38 @@ class Application implements \ArrayAccess
             $class->setObject($class);
 
             $class->setObject($this);
+
+            $class->set(IoCManager::class, function() {
+                return $this->getIoCManager();
+            });
+
+            $class->set(ClassLoader::class, function() {
+                return $this->getLoader();
+            });
+
+            $class->set(Listener::class, function() {
+                return $this->getListener();
+            });
+
+            $class->set(Session::class, function() {
+                return $this->getSession();
+            });
+
+            $class->set(Translator::class, function() {
+                return $this->getTranslator();
+            });
+
+            $class->set(Viewer::class, function() {
+                return $this->getViewer();
+            });
+
+            $class->set(Router::class, function() {
+                return $this->getRouter();
+            });
+
+            $class->addPrefixes($this->getIndexArray('app.injectable_prefixes'));
+
+            $class->setMore($this->getIndexArray('app.injectable'));
         }
 
         return $class;
@@ -152,7 +190,7 @@ class Application implements \ArrayAccess
 
             $this->setToMemory('ioc_manager', $class);
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -165,7 +203,7 @@ class Application implements \ArrayAccess
 
             $class->register(true);
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -176,7 +214,7 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('listener')) {
             $this->setToMemory('listener', $class = new Listener($this->getIoCManager()));
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -187,7 +225,7 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('session')) {
             $this->setToMemory('session', $class = new Session());
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -198,7 +236,7 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('translator')) {
             $this->setToMemory('translator', $class = new Translator());
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -209,7 +247,7 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('viewer')) {
             $this->setToMemory('viewer', $class = new Viewer());
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -220,7 +258,7 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('router')) {
             $this->setToMemory('router', $class = new Router($this->getIoCManager()));
 
-            $this->getIoCContainer()->setObject($class);
+            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
@@ -250,6 +288,39 @@ class Application implements \ArrayAccess
         return $this->appName;
     }
 
+    protected function initClassInstance($class)
+    {
+        $ioc = $this->getIoCContainer();
+
+        if (method_exists($class, 'init')) {
+            $ioc->call([$class, 'init']);
+        }
+
+        // Call all methods which starts with "init"
+        foreach(get_class_methods($class) as $methodName) {
+            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
+                $ioc->call([$class, $methodName]);
+            }
+        }
+
+        return $this;
+    }
+
+    public function inject($name, $object = null)
+    {
+        $this->getIoCContainer()->set($name, $object);
+
+        return $this;
+    }
+
+    public function scope(callable $callable)
+    {
+        $this->getIoCContainer()->call($callable);
+
+        return $this;
+    }
+
+    /*
     public function loadInstance($className, ...$args)
     {
         return $this->loadInstanceArgs($className, $args);
@@ -265,24 +336,6 @@ class Application implements \ArrayAccess
         return $class;
     }
 
-    protected function initClassInstance($class)
-    {
-        $ioc = $this->getIoCContainer();
-
-        if (method_exists($class, 'init')) {
-            $ioc->call([$class, 'init']);
-        }
-
-        // Call all methods which starts with init
-        foreach(get_class_methods($class) as $methodName) {
-            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
-                $ioc->call([$class, $methodName]);
-            }
-        }
-
-        return $this;
-    }
-
     public function getInstance($className)
     {
         $instance = $this->getFromMemory('instances:' . $className);
@@ -295,4 +348,5 @@ class Application implements \ArrayAccess
 
         return $instance;
     }
+    */
 }

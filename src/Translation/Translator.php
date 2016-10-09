@@ -2,12 +2,11 @@
 
 namespace Greg\Translation;
 
-use Greg\Support\Accessor\AccessorTrait;
 use Greg\Support\Accessor\ArrayAccessTrait;
 
 class Translator implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait;
+    use ArrayAccessTrait;
 
     protected $language = 'en';
 
