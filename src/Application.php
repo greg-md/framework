@@ -58,7 +58,7 @@ class Application implements \ArrayAccess
 
     protected function loadComponents()
     {
-        foreach($this->getIndexArray('app.components') as $key => $component) {
+        foreach ($this->getIndexArray('app.components') as $key => $component) {
             $this->addComponent($component, $key);
         }
 
@@ -115,6 +115,7 @@ class Application implements \ArrayAccess
 
     /**
      * @param string $path
+     *
      * @return Response
      */
     public function dispatch($path)
@@ -147,31 +148,31 @@ class Application implements \ArrayAccess
 
             $class->setObject($this);
 
-            $class->set(IoCManager::class, function() {
+            $class->set(IoCManager::class, function () {
                 return $this->getIoCManager();
             });
 
-            $class->set(ClassLoader::class, function() {
+            $class->set(ClassLoader::class, function () {
                 return $this->getLoader();
             });
 
-            $class->set(Listener::class, function() {
+            $class->set(Listener::class, function () {
                 return $this->getListener();
             });
 
-            $class->set(Session::class, function() {
+            $class->set(Session::class, function () {
                 return $this->getSession();
             });
 
-            $class->set(Translator::class, function() {
+            $class->set(Translator::class, function () {
                 return $this->getTranslator();
             });
 
-            $class->set(Viewer::class, function() {
+            $class->set(Viewer::class, function () {
                 return $this->getViewer();
             });
 
-            $class->set(Router::class, function() {
+            $class->set(Router::class, function () {
                 return $this->getRouter();
             });
 
@@ -297,7 +298,7 @@ class Application implements \ArrayAccess
         }
 
         // Call all methods which starts with "init"
-        foreach(get_class_methods($class) as $methodName) {
+        foreach (get_class_methods($class) as $methodName) {
             if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
                 $ioc->call([$class, $methodName]);
             }
