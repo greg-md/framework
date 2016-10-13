@@ -307,7 +307,7 @@ class Application implements \ArrayAccess
 
     protected function addDispatcherToRouter(Router $router)
     {
-        $router->setDispatcher(function($action) {
+        $router->setDispatcher(function ($action) {
             $parts = explode('@', $action, 2);
 
             if (!isset($parts[1])) {
@@ -402,6 +402,5 @@ class Application implements \ArrayAccess
 
     public function once($name, callable $callable = null)
     {
-
     }
 }
