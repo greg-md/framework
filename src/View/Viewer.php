@@ -2,17 +2,16 @@
 
 namespace Greg\View;
 
-use Greg\Support\Accessor\AccessorTrait;
 use Greg\Support\Accessor\ArrayAccessTrait;
 use Greg\Support\Http\Response;
-use Greg\Support\InternalTrait;
+use Greg\Support\Obj;
 use Greg\Support\Str;
 use Greg\View\Compiler\BladeCompiler;
 use Greg\View\Compiler\CompilerInterface;
 
 class Viewer implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait, InternalTrait;
+    use ArrayAccessTrait;
 
     protected $paths = [];
 
@@ -256,7 +255,7 @@ class Viewer implements \ArrayAccess
         $compiler = &$this->compilers[$extension];
 
         if (is_callable($compiler)) {
-            $compiler = $this->callCallable($compiler);
+            $compiler = Obj::callCallable($compiler);
         }
 
         if (!($compiler instanceof CompilerInterface)) {

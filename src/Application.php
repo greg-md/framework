@@ -12,6 +12,7 @@ use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
 use Greg\Support\IoC\IoCContainer;
 use Greg\Support\IoC\IoCManager;
+use Greg\Support\Obj;
 use Greg\Support\Server;
 use Greg\Support\Session;
 use Greg\Support\Str;
@@ -23,6 +24,8 @@ class Application implements \ArrayAccess
     use ArrayAccessTrait;
 
     protected $appName = 'greg';
+
+    protected $controllersPrefixes = [];
 
     const EVENT_INIT = 'app.init';
 
@@ -49,9 +52,37 @@ class Application implements \ArrayAccess
 
     public function init()
     {
+        $this->setControllersPrefixes($this->getIndexArray('app.controllers_prefixes'));
+
         $this->loadComponents();
 
         $this->getListener()->fire(static::EVENT_INIT);
+
+        return $this;
+    }
+
+    public function setControllersPrefixes(array $prefixes)
+    {
+        $this->controllersPrefixes = $prefixes;
+
+        return $this;
+    }
+
+    public function getControllersPrefixes()
+    {
+        return $this->controllersPrefixes;
+    }
+
+    public function appendControllersPrefixes(array $prefixes)
+    {
+        $this->controllersPrefixes = array_merge($this->controllersPrefixes, $prefixes);
+
+        return $this;
+    }
+
+    public function prependControllersPrefixes(array $prefixes)
+    {
+        $this->controllersPrefixes = array_merge($prefixes, $this->controllersPrefixes);
 
         return $this;
     }
@@ -72,8 +103,6 @@ class Application implements \ArrayAccess
         }
 
         $this->setToMemory('component:' . $name ?: get_class($component), $component);
-
-        $this->getIoCContainer()->setObject($component);
 
         $this->initClassInstance($component);
 
@@ -99,7 +128,7 @@ class Application implements \ArrayAccess
 
             $response = $route->dispatch();
 
-            if (Str::isScalar($response)) {
+            if (!($response instanceof Response)) {
                 $response = new Response($response);
             }
 
@@ -136,6 +165,11 @@ class Application implements \ArrayAccess
     public function publicPath()
     {
         return $this->getIndex('app.public_path') ?: Server::documentRoot();
+    }
+
+    public function debugMode()
+    {
+        return (bool) $this->getIndex('app.debug_mode');
     }
 
     public function getIoCContainer()
@@ -236,6 +270,10 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('translator')) {
             $this->setToMemory('translator', $class = new Translator());
 
+            if ($translates = $this->getIndexArray('app.translates')) {
+                $class->setTranslates($translates);
+            }
+
             $this->getIoCContainer()->setObjectForce($class);
         }
 
@@ -258,10 +296,53 @@ class Application implements \ArrayAccess
         if (!$class = $this->getFromMemory('router')) {
             $this->setToMemory('router', $class = new Router($this->getIoCManager()));
 
+            $this->addDispatcherToRouter($class);
+
             $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
+    }
+
+    protected function addDispatcherToRouter(Router $router)
+    {
+        $router->setDispatcher(function($action) {
+            $parts = explode('@', $action, 2);
+
+            if (!isset($parts[1])) {
+                throw new \Exception('Action name is not defined in router controller `' . $parts[0] . '`.');
+            }
+
+            list($controllerName, $actionName) = $parts;
+
+            $action = [$this->getController($controllerName), $actionName];
+
+            return $action;
+        });
+
+        return $this;
+    }
+
+    protected function getController($name)
+    {
+        if (!$className = $this->controllerExists($name)) {
+            throw new \Exception('Controller `' . $name . '` not found.');
+        }
+
+        if (!$class = $this->getFromMemory('controller:' . $className)) {
+            $class = $this->getIoCContainer()->loadInstance($className);
+
+            $this->setToMemory('controller:' . $className, $class);
+
+            $this->initClassInstance($class);
+        }
+
+        return $class;
+    }
+
+    public function controllerExists($name)
+    {
+        return Obj::classExists($name, array_merge($this->getControllersPrefixes(), ['']));
     }
 
     public function setToMemory($key, $value)
@@ -315,38 +396,11 @@ class Application implements \ArrayAccess
 
     public function scope(callable $callable)
     {
-        $this->getIoCContainer()->call($callable);
-
-        return $this;
+        return $this->getIoCContainer()->call($callable);
     }
 
-    /*
-    public function loadInstance($className, ...$args)
+    public function once($name, callable $callable = null)
     {
-        return $this->loadInstanceArgs($className, $args);
+
     }
-
-    public function loadInstanceArgs($className, array $args = [])
-    {
-        $class = $this->getIoCContainer()->loadInstanceArgs($className, $args);
-
-        // Disable autorun init methods for a while
-        //$this->initClassInstance($class);
-
-        return $class;
-    }
-
-    public function getInstance($className)
-    {
-        $instance = $this->getFromMemory('instances:' . $className);
-
-        if (!$instance) {
-            $instance = $this->loadInstance($className);
-
-            $this->setToMemory('instances:' . $className, $instance);
-        }
-
-        return $instance;
-    }
-    */
 }
