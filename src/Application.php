@@ -4,20 +4,15 @@ namespace Greg;
 
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
-use Greg\Loader\ClassLoader;
 use Greg\Router\Router;
 use Greg\Support\Accessor\ArrayAccessTrait;
 use Greg\Support\Arr;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
 use Greg\Support\IoC\IoCContainer;
-use Greg\Support\IoC\IoCManager;
 use Greg\Support\Obj;
 use Greg\Support\Server;
-use Greg\Support\Session;
 use Greg\Support\Str;
-use Greg\Translation\Translator;
-use Greg\View\Viewer;
 
 class Application implements \ArrayAccess
 {
@@ -182,28 +177,8 @@ class Application implements \ArrayAccess
 
             $class->setObject($this);
 
-            $class->set(IoCManager::class, function () {
-                return $this->getIoCManager();
-            });
-
-            $class->set(ClassLoader::class, function () {
-                return $this->getLoader();
-            });
-
             $class->set(Listener::class, function () {
                 return $this->getListener();
-            });
-
-            $class->set(Session::class, function () {
-                return $this->getSession();
-            });
-
-            $class->set(Translator::class, function () {
-                return $this->getTranslator();
-            });
-
-            $class->set(Viewer::class, function () {
-                return $this->getViewer();
             });
 
             $class->set(Router::class, function () {
@@ -218,73 +193,14 @@ class Application implements \ArrayAccess
         return $class;
     }
 
-    public function getIoCManager()
-    {
-        if (!$class = $this->getFromMemory('ioc_manager')) {
-            $class = (new IoCManager())->setIoCContainer($this->getIoCContainer());
-
-            $this->setToMemory('ioc_manager', $class);
-
-            $this->getIoCContainer()->setObjectForce($class);
-        }
-
-        return $class;
-    }
-
-    public function getLoader()
-    {
-        if (!$class = $this->getFromMemory('loader')) {
-            $this->setToMemory('loader', $class = new ClassLoader());
-
-            $class->register(true);
-
-            $this->getIoCContainer()->setObjectForce($class);
-        }
-
-        return $class;
-    }
-
     public function getListener()
     {
         if (!$class = $this->getFromMemory('listener')) {
-            $this->setToMemory('listener', $class = new Listener($this->getIoCManager()));
+            $this->setToMemory('listener', $class = new Listener());
 
-            $this->getIoCContainer()->setObjectForce($class);
-        }
+            $class->setCallCallable([$this->getIoCContainer(), 'call']);
 
-        return $class;
-    }
-
-    public function getSession()
-    {
-        if (!$class = $this->getFromMemory('session')) {
-            $this->setToMemory('session', $class = new Session());
-
-            $this->getIoCContainer()->setObjectForce($class);
-        }
-
-        return $class;
-    }
-
-    public function getTranslator()
-    {
-        if (!$class = $this->getFromMemory('translator')) {
-            $this->setToMemory('translator', $class = new Translator());
-
-            if ($translates = $this->getIndexArray('app.translates')) {
-                $class->setTranslates($translates);
-            }
-
-            $this->getIoCContainer()->setObjectForce($class);
-        }
-
-        return $class;
-    }
-
-    public function getViewer()
-    {
-        if (!$class = $this->getFromMemory('viewer')) {
-            $this->setToMemory('viewer', $class = new Viewer());
+            $class->setCallCallableWith([$this->getIoCContainer(), 'callWith']);
 
             $this->getIoCContainer()->setObjectForce($class);
         }
@@ -295,7 +211,9 @@ class Application implements \ArrayAccess
     public function getRouter()
     {
         if (!$class = $this->getFromMemory('router')) {
-            $this->setToMemory('router', $class = new Router($this->getIoCManager()));
+            $this->setToMemory('router', $class = new Router());
+
+            $class->setCallCallableWith([$this->getIoCContainer(), 'callWith']);
 
             $this->addDispatcherToRouter($class);
 
@@ -402,5 +320,6 @@ class Application implements \ArrayAccess
 
     public function once($name, callable $callable = null)
     {
+        throw new \Exception('Application->once() is under construction.');
     }
 }

@@ -4,7 +4,6 @@ namespace Greg\Event;
 
 use Greg\Support\Accessor\AccessorTrait;
 use Greg\Support\IoC\IoCManagerAccessorTrait;
-use Greg\Support\IoC\IoCManagerInterface;
 use Greg\Support\Obj;
 use Greg\Support\Str;
 
@@ -12,14 +11,9 @@ class Listener implements ListenerInterface
 {
     use AccessorTrait, IoCManagerAccessorTrait;
 
-    public function __construct(IoCManagerInterface $ioCManager = null)
-    {
-        if ($ioCManager) {
-            $this->setIoCManager($ioCManager);
-        }
+    protected $callCallable = null;
 
-        return $this;
-    }
+    protected $callCallableWith = null;
 
     public function on($eventName, callable $callable)
     {
@@ -60,11 +54,7 @@ class Listener implements ListenerInterface
     public function fireArgs($eventName, array $args = [])
     {
         foreach ((array) $this->getFromAccessor($eventName) as $function) {
-            if ($ioc = $this->getIoCManager()) {
-                $ioc->callCallable($function, ...$args);
-            } else {
-                Obj::callCallable($function, ...$args);
-            }
+            $this->callCallable($function, ...$args);
         }
 
         return $this;
@@ -83,13 +73,51 @@ class Listener implements ListenerInterface
     public function fireWithArgs($eventName, array $args = [])
     {
         foreach ((array) $this->getFromAccessor($eventName) as $function) {
-            if ($ioc = $this->getIoCManager()) {
-                $ioc->callCallableWith($function, ...$args);
-            } else {
-                Obj::callCallableWith($function, ...$args);
-            }
+            $this->callCallableWith($function, ...$args);
         }
 
         return $this;
+    }
+
+    public function setCallCallable(callable $callable)
+    {
+        $this->callCallable = $callable;
+
+        return $this;
+    }
+
+    public function getCallCallable()
+    {
+        return $this->callCallable;
+    }
+
+    public function setCallCallableWith(callable $callable)
+    {
+        $this->callCallableWith = $callable;
+
+        return $this;
+    }
+
+    public function getCallCallableWith()
+    {
+        return $this->callCallableWith;
+    }
+
+    protected function callCallable(callable $callable, ...$args)
+    {
+        if ($callable = $this->getCallCallable()) {
+            return Obj::callCallable($callable, ...func_get_args());
+        }
+
+        return Obj::callCallable(...func_get_args());
+    }
+
+    protected function callCallableWith(callable $callable, ...$args)
+    {
+        if ($callable = $this->getCallCallableWith()) {
+            return Obj::callCallable($callable, ...func_get_args());
+        }
+
+        return Obj::callCallableWith(...func_get_args());
     }
 }
