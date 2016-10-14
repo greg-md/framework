@@ -105,8 +105,8 @@ class Listener implements ListenerInterface
 
     protected function callCallable(callable $callable, ...$args)
     {
-        if ($callable = $this->getCallCallable()) {
-            return Obj::callCallable($callable, ...func_get_args());
+        if ($callCallable = $this->getCallCallable()) {
+            return Obj::callCallable($callCallable, ...func_get_args());
         }
 
         return Obj::callCallable(...func_get_args());
@@ -114,8 +114,8 @@ class Listener implements ListenerInterface
 
     protected function callCallableWith(callable $callable, ...$args)
     {
-        if ($callable = $this->getCallCallableWith()) {
-            return Obj::callCallable($callable, ...func_get_args());
+        if ($callCallableWith = $this->getCallCallableWith()) {
+            return Obj::callCallable($callCallableWith, ...func_get_args());
         }
 
         return Obj::callCallableWith(...func_get_args());
