@@ -132,7 +132,7 @@ class Application implements \ArrayAccess
             $response = new Response();
         }
 
-        $this->getListener()->fireWith(static::EVENT_FINISHED, $path);
+        $this->getListener()->fireWith(static::EVENT_FINISHED, $path, $response);
 
         return $response;
     }
