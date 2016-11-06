@@ -2,7 +2,9 @@
 
 namespace Greg\Console;
 
-use Greg\Application;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ConsoleKernel
 {
@@ -18,7 +20,13 @@ class ConsoleKernel
 
     protected $app = null;
 
-    public function __construct(Application $app)
+    protected $consoleName = 'Greg Application';
+
+    protected $consoleVersion = '1.0.0';
+
+    protected $commands = [];
+
+    public function __construct(\Greg\Application $app)
     {
         $this->app = $app;
 
@@ -45,13 +53,28 @@ class ConsoleKernel
         return $this;
     }
 
-    public function run()
+    public function run(InputInterface $input = null, OutputInterface $output = null)
     {
         $listener = $this->app->getListener();
 
         $listener->fireWith(static::EVENT_RUN);
 
+        $app = new Application($this->consoleName, $this->consoleVersion);
+
+        $this->loadCommands($app);
+
+        $response = $app->run($input, $output);
+
         $listener->fireWith(static::EVENT_FINISHED);
+
+        return $response;
+    }
+
+    protected function loadCommands(Application $app)
+    {
+        foreach ($this->commands as $command) {
+            $app->add($command);
+        }
 
         return $this;
     }

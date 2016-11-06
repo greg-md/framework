@@ -74,11 +74,11 @@ class Application implements \ArrayAccess
     {
         $this->getListener()->fireWith(static::EVENT_RUN);
 
-        $this->scope($callable);
+        $response = $this->scope($callable);
 
         $this->getListener()->fireWith(static::EVENT_FINISHED);
 
-        return $this;
+        return $response;
     }
 
     public function basePath()
