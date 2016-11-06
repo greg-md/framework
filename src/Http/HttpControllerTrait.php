@@ -4,7 +4,7 @@ namespace Greg\Http;
 
 use Greg\Support\Http\Response;
 
-trait ControllerTrait
+trait HttpControllerTrait
 {
     protected function response()
     {

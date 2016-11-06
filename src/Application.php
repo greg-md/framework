@@ -4,33 +4,21 @@ namespace Greg;
 
 use Greg\Event\Listener;
 use Greg\Event\SubscriberInterface;
-use Greg\Router\Router;
-use Greg\Support\Accessor\ArrayAccessTrait;
-use Greg\Support\Arr;
-use Greg\Support\Http\Request;
-use Greg\Support\Http\Response;
 use Greg\Support\IoC\IoCContainer;
-use Greg\Support\Obj;
 use Greg\Support\Server;
 use Greg\Support\Str;
 
 class Application implements \ArrayAccess
 {
-    use ArrayAccessTrait;
-
-    protected $appName = 'greg';
-
-    protected $controllersPrefixes = [];
-
     const EVENT_INIT = 'app.init';
 
     const EVENT_RUN = 'app.run';
 
-    const EVENT_DISPATCHING = 'app.dispatching';
-
-    const EVENT_DISPATCHED = 'app.dispatched';
-
     const EVENT_FINISHED = 'app.finished';
+
+    protected $appName = 'greg';
+
+    protected $config = null;
 
     public function __construct(array $settings = [], $appName = null)
     {
@@ -40,15 +28,15 @@ class Application implements \ArrayAccess
 
         $this->setToMemory('app', $this);
 
-        $this->setAccessor(Arr::fixIndexes($settings));
+        $this->config = new Config($settings);
+
+        $this->init();
 
         return $this;
     }
 
-    public function init()
+    protected function init()
     {
-        $this->setControllersPrefixes($this->getIndexArray('app.controllers_prefixes'));
-
         $this->loadComponents();
 
         $this->getListener()->fire(static::EVENT_INIT);
@@ -56,35 +44,9 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function setControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = $prefixes;
-
-        return $this;
-    }
-
-    public function getControllersPrefixes()
-    {
-        return $this->controllersPrefixes;
-    }
-
-    public function appendControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = array_merge($this->controllersPrefixes, $prefixes);
-
-        return $this;
-    }
-
-    public function prependControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = array_merge($prefixes, $this->controllersPrefixes);
-
-        return $this;
-    }
-
     protected function loadComponents()
     {
-        foreach ($this->getIndexArray('app.components') as $key => $component) {
+        foreach ($this->config()->getIndexArray('app.components') as $key => $component) {
             $this->addComponent($component, $key);
         }
 
@@ -108,86 +70,58 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function run($path = '/')
+    public function run(callable $callable)
     {
-        if (!func_num_args()) {
-            $path = Request::relativeUriPath();
-        } else {
-            $path = $path ?: '/';
-        }
+        $this->getListener()->fireWith(static::EVENT_RUN);
 
-        $this->getListener()->fireWith(static::EVENT_RUN, $path);
+        $this->scope($callable);
 
-        if ($route = $this->getRouter()->findRouteByPath($path)) {
-            $this->getListener()->fireWith(static::EVENT_DISPATCHING, $path, $route);
+        $this->getListener()->fireWith(static::EVENT_FINISHED);
 
-            $response = $route->dispatch();
-
-            if (!($response instanceof Response)) {
-                $response = new Response($response);
-            }
-
-            $this->getListener()->fireWith(static::EVENT_DISPATCHED, $path, $route, $response);
-        } else {
-            $response = new Response();
-        }
-
-        $this->getListener()->fireWith(static::EVENT_FINISHED, $path, $response);
-
-        return $response;
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return Response
-     */
-    public function dispatch($path)
-    {
-        $response = $this->getRouter()->dispatchPath($path);
-
-        if (Str::isScalar($response)) {
-            $response = new Response($response);
-        }
-
-        return $response;
+        return $this;
     }
 
     public function basePath()
     {
-        return $this->getIndex('app.base_path') ?: realpath(Server::documentRoot() . '/..');
+        return $this['app.base_path'] ?: realpath(Server::documentRoot() . '/..');
     }
 
     public function publicPath()
     {
-        return $this->getIndex('app.public_path') ?: Server::documentRoot();
+        return $this['app.public_path'] ?: Server::documentRoot();
     }
 
     public function debugMode()
     {
-        return (bool) $this->getIndex('app.debug_mode');
+        return (bool) $this['app.debug_mode'];
     }
 
+    /**
+     * @return IoCContainer
+     * @throws \Exception
+     */
     public function getIoCContainer()
     {
         if (!$class = $this->getFromMemory('ioc_container')) {
             $this->setToMemory('ioc_container', $class = new IoCContainer());
 
-            $class->setObject($class);
+            $class->object($class);
 
-            $class->setObject($this);
+            $class->object($this);
 
-            $class->set(Listener::class, function () {
+            $class->inject(Listener::class, function () {
                 return $this->getListener();
             });
 
-            $class->set(Router::class, function () {
-                return $this->getRouter();
-            });
+            $class->addPrefixes($this->config->getIndexArray('app.injectable_prefixes'));
 
-            $class->addPrefixes($this->getIndexArray('app.injectable_prefixes'));
-
-            $class->setMore($this->getIndexArray('app.injectable'));
+            foreach($this->config->getIndexArray('app.injectable') as $abstract => $loader) {
+                if (is_int($abstract)) {
+                    $class->inject($loader);
+                } else {
+                    $class->inject($abstract, $loader);
+                }
+            }
         }
 
         return $class;
@@ -201,67 +135,9 @@ class Application implements \ArrayAccess
             $class->setCallCallable([$this->getIoCContainer(), 'call']);
 
             $class->setCallCallableWith([$this->getIoCContainer(), 'callWith']);
-
-            $this->getIoCContainer()->setObjectForce($class);
         }
 
         return $class;
-    }
-
-    public function getRouter()
-    {
-        if (!$class = $this->getFromMemory('router')) {
-            $this->setToMemory('router', $class = new Router());
-
-            $class->setCallCallableWith([$this->getIoCContainer(), 'callWith']);
-
-            $this->addDispatcherToRouter($class);
-
-            $this->getIoCContainer()->setObjectForce($class);
-        }
-
-        return $class;
-    }
-
-    protected function addDispatcherToRouter(Router $router)
-    {
-        $router->setDispatcher(function ($action) {
-            $parts = explode('@', $action, 2);
-
-            if (!isset($parts[1])) {
-                throw new \Exception('Action name is not defined in router controller `' . $parts[0] . '`.');
-            }
-
-            list($controllerName, $actionName) = $parts;
-
-            $action = [$this->getController($controllerName), $actionName];
-
-            return $action;
-        });
-
-        return $this;
-    }
-
-    protected function getController($name)
-    {
-        if (!$className = $this->controllerExists($name)) {
-            throw new \Exception('Controller `' . $name . '` not found.');
-        }
-
-        if (!$class = $this->getFromMemory('controller:' . $className)) {
-            $class = $this->getIoCContainer()->loadInstance($className);
-
-            $this->setToMemory('controller:' . $className, $class);
-
-            $this->initClassInstance($class);
-        }
-
-        return $class;
-    }
-
-    public function controllerExists($name)
-    {
-        return Obj::classExists($name, array_merge($this->getControllersPrefixes(), ['']));
     }
 
     public function setToMemory($key, $value)
@@ -276,6 +152,11 @@ class Application implements \ArrayAccess
         return Memory::getRef($this->getAppName() . '@' . $key);
     }
 
+    public function hasInMemory($key)
+    {
+        return Memory::has($this->getAppName() . '@' . $key);
+    }
+
     public function setAppName($name)
     {
         $this->appName = (string) $name;
@@ -288,7 +169,7 @@ class Application implements \ArrayAccess
         return $this->appName;
     }
 
-    protected function initClassInstance($class)
+    public function initClassInstance($class)
     {
         $ioc = $this->getIoCContainer();
 
@@ -306,16 +187,30 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function inject($name, $object = null)
+    public function inject($abstract, $loader = null)
     {
-        $this->getIoCContainer()->set($name, $object);
+        $this->getIoCContainer()->inject($abstract, $loader);
 
         return $this;
     }
 
-    public function make($name)
+    public function concrete($abstract, $concrete)
     {
-        return $this->getIoCContainer()->getExpected($name);
+        $this->getIoCContainer()->concrete($abstract, $concrete);
+
+        return $this;
+    }
+
+    public function object($concrete)
+    {
+        $this->getIoCContainer()->object($concrete);
+
+        return $this;
+    }
+
+    public function expect($name)
+    {
+        return $this->getIoCContainer()->expect($name);
     }
 
     public function load($name, ...$args)
@@ -328,8 +223,28 @@ class Application implements \ArrayAccess
         return $this->getIoCContainer()->call($callable);
     }
 
-    public function once($name, callable $callable = null)
+    public function config()
     {
-        throw new \Exception('Application->once() is under construction.');
+        return $this->config;
+    }
+
+    public function offsetExists($key)
+    {
+        return $this->config->hasIndex($key);
+    }
+
+    public function offsetSet($key, $value)
+    {
+        return $this->config->setIndex($key, $value);
+    }
+
+    public function offsetGet($key)
+    {
+        return $this->config->getIndex($key);
+    }
+
+    public function offsetUnset($key)
+    {
+        return $this->config->delIndex($key);
     }
 }
