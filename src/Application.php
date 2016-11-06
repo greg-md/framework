@@ -97,8 +97,9 @@ class Application implements \ArrayAccess
     }
 
     /**
-     * @return IoCContainer
      * @throws \Exception
+     *
+     * @return IoCContainer
      */
     public function getIoCContainer()
     {
@@ -115,7 +116,7 @@ class Application implements \ArrayAccess
 
             $class->addPrefixes($this->config->getIndexArray('app.injectable_prefixes'));
 
-            foreach($this->config->getIndexArray('app.injectable') as $abstract => $loader) {
+            foreach ($this->config->getIndexArray('app.injectable') as $abstract => $loader) {
                 if (is_int($abstract)) {
                     $class->inject($loader);
                 } else {
