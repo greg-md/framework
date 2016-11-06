@@ -313,6 +313,16 @@ class Application implements \ArrayAccess
         return $this;
     }
 
+    public function make($name)
+    {
+        return $this->getIoCContainer()->getExpected($name);
+    }
+
+    public function load($name, ...$args)
+    {
+        return $this->getIoCContainer()->loadInstanceArgs($name, $args);
+    }
+
     public function scope(callable $callable)
     {
         return $this->getIoCContainer()->call($callable);
