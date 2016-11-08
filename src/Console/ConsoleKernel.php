@@ -2,80 +2,51 @@
 
 namespace Greg\Console;
 
+use Greg\ApplicationStrategy;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConsoleKernel
+class ConsoleKernel implements ConsoleKernelStrategy
 {
-    const EVENT_INIT = 'http.init';
+    private $app = null;
 
-    const EVENT_RUN = 'http.run';
+    private $consoleApp = null;
 
-    const EVENT_DISPATCHING = 'http.dispatching';
-
-    const EVENT_DISPATCHED = 'http.dispatched';
-
-    const EVENT_FINISHED = 'http.finished';
-
-    protected $app = null;
-
-    protected $consoleName = 'Greg Application';
-
-    protected $consoleVersion = '1.0.0';
-
-    protected $commands = [];
-
-    public function __construct(\Greg\Application $app)
+    public function __construct(ApplicationStrategy $app)
     {
         $this->app = $app;
 
-        $this->init();
+        $this->consoleApp = new Application('Greg Application', '1.0.0');
+
+        $this->boot();
 
         return $this;
     }
 
-    protected function init()
+    protected function boot()
     {
-        $this->loadComponents();
 
-        $this->app->getListener()->fire(static::EVENT_INIT);
-
-        return $this;
-    }
-
-    protected function loadComponents()
-    {
-        foreach ($this->app->config()->getIndexArray('console.components') as $key => $component) {
-            $this->app->addComponent($component, $key);
-        }
-
-        return $this;
     }
 
     public function run(InputInterface $input = null, OutputInterface $output = null)
     {
-        $listener = $this->app->getListener();
+        $this->app->fireWith(static::EVENT_RUN, $this->consoleApp);
 
-        $listener->fireWith(static::EVENT_RUN);
+        $response = $this->consoleApp->run($input, $output);
 
-        $app = new Application($this->consoleName, $this->consoleVersion);
-
-        $this->loadCommands($app);
-
-        $response = $app->run($input, $output);
-
-        $listener->fireWith(static::EVENT_FINISHED);
+        $this->app->fireWith(static::EVENT_FINISHED, $this->consoleApp);
 
         return $response;
     }
 
-    protected function loadCommands(Application $app)
+    public function app()
     {
-        foreach ($this->commands as $command) {
-            $app->add($command);
-        }
+        return $this->app;
+    }
 
-        return $this;
+    public function consoleApp()
+    {
+        return $this->consoleApp;
     }
 }

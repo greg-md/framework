@@ -3,12 +3,10 @@
 namespace Greg\Validation;
 
 use Greg\Support\Arr;
-use Greg\Support\InternalTrait;
+use Greg\Support\Obj;
 
 class Validator
 {
-    use InternalTrait;
-
     /**
      * @var ValidatorInterface[][]
      */
@@ -67,7 +65,7 @@ class Validator
 
             $className = $this->getClassByName($name);
 
-            $validator = $this->loadClassInstance($className, ...$args);
+            $validator = Obj::loadInstance($className, ...$args);
         }
 
         if (!($validator instanceof ValidatorInterface)) {

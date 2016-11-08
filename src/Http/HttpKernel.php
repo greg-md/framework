@@ -2,86 +2,38 @@
 
 namespace Greg\Http;
 
-use Greg\Application;
+use Greg\ApplicationStrategy;
 use Greg\Router\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
 use Greg\Support\Obj;
-use Greg\Support\Str;
 
-class HttpKernel
+class HttpKernel implements HttpKernelStrategy
 {
-    const EVENT_INIT = 'http.init';
+    private $app = null;
 
-    const EVENT_RUN = 'http.run';
-
-    const EVENT_DISPATCHING = 'http.dispatching';
-
-    const EVENT_DISPATCHED = 'http.dispatched';
-
-    const EVENT_FINISHED = 'http.finished';
-
-    protected $app = null;
+    private $router = null;
 
     protected $controllersPrefixes = [];
 
-    public function __construct(Application $app)
+    private $loadedControllers = [];
+
+    public function __construct(ApplicationStrategy $app)
     {
         $this->app = $app;
 
-        $this->init();
+        $this->router = new Router();
+
+        $this->addDispatcherToRouter($this->router);
+
+        $this->boot();
 
         return $this;
     }
 
-    protected function init()
+    protected function boot()
     {
-        $this->setControllersPrefixes($this->app->config()->getIndexArray('http.controllers_prefixes'));
 
-        $this->app->getIoCContainer()->inject(Router::class, function () {
-            return $this->getRouter();
-        });
-
-        $this->loadComponents();
-
-        $this->app->getListener()->fire(static::EVENT_INIT);
-
-        return $this;
-    }
-
-    protected function loadComponents()
-    {
-        foreach ($this->app->config()->getIndexArray('http.components') as $key => $component) {
-            $this->app->addComponent($component, $key);
-        }
-
-        return $this;
-    }
-
-    public function setControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = $prefixes;
-
-        return $this;
-    }
-
-    public function getControllersPrefixes()
-    {
-        return $this->controllersPrefixes;
-    }
-
-    public function appendControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = array_merge($this->controllersPrefixes, $prefixes);
-
-        return $this;
-    }
-
-    public function prependControllersPrefixes(array $prefixes)
-    {
-        $this->controllersPrefixes = array_merge($prefixes, $this->controllersPrefixes);
-
-        return $this;
     }
 
     public function run($path = '/')
@@ -92,12 +44,10 @@ class HttpKernel
             $path = $path ?: '/';
         }
 
-        $listener = $this->app->getListener();
+        $this->app->fireWith(static::EVENT_RUN, $path);
 
-        $listener->fireWith(static::EVENT_RUN, $path);
-
-        if ($route = $this->getRouter()->findRouteByPath($path)) {
-            $listener->fireWith(static::EVENT_DISPATCHING, $path, $route);
+        if ($route = $this->router->findRouteByPath($path)) {
+            $this->app->fireWith(static::EVENT_DISPATCHING, $path, $route);
 
             $response = $route->dispatch();
 
@@ -105,43 +55,14 @@ class HttpKernel
                 $response = new Response($response);
             }
 
-            $listener->fireWith(static::EVENT_DISPATCHED, $path, $route, $response);
+            $this->app->fireWith(static::EVENT_DISPATCHED, $path, $route, $response);
         } else {
             $response = new Response();
         }
 
-        $listener->fireWith(static::EVENT_FINISHED, $path, $response);
+        $this->app->fireWith(static::EVENT_FINISHED, $path, $response);
 
         return $response;
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return Response
-     */
-    public function dispatch($path)
-    {
-        $response = $this->getRouter()->dispatchPath($path);
-
-        if (Str::isScalar($response)) {
-            $response = new Response($response);
-        }
-
-        return $response;
-    }
-
-    public function getRouter()
-    {
-        if (!$class = $this->app->getFromMemory('router')) {
-            $this->app->setToMemory('router', $class = new Router());
-
-            $class->setCallCallableWith([$this->app->getIoCContainer(), 'callWith']);
-
-            $this->addDispatcherToRouter($class);
-        }
-
-        return $class;
     }
 
     protected function addDispatcherToRouter(Router $router)
@@ -169,19 +90,66 @@ class HttpKernel
             throw new \Exception('Controller `' . $name . '` not found.');
         }
 
-        if (!$class = $this->app->getFromMemory('controller:' . $className)) {
-            $class = $this->app->load($className);
+        if (!array_key_exists($className, $this->loadedControllers)) {
+            $class = $this->app->ioc()->load($className);
 
-            $this->app->setToMemory('controller:' . $className, $class);
-
-            $this->app->initClassInstance($class);
+            $this->loadedControllers[$className] = $class;
         }
 
-        return $class;
+        return $this->loadedControllers[$className];
     }
 
-    public function controllerExists($name)
+    protected function controllerExists($name)
     {
-        return Obj::classExists($name, array_merge($this->getControllersPrefixes(), ['']));
+        return Obj::classExists($name, array_merge($this->controllersPrefixes, ['']));
+    }
+
+    protected function fixControllersPrefixes()
+    {
+        $this->controllersPrefixes = array_unique($this->controllersPrefixes);
+
+        return $this;
+    }
+
+    public function addControllersPrefix($prefix)
+    {
+        $this->controllersPrefixes[] = (string) $prefix;
+
+        $this->fixControllersPrefixes();
+
+        return $this;
+    }
+
+    public function addControllersPrefixes(array $prefixes)
+    {
+        $this->controllersPrefixes = array_merge($this->controllersPrefixes, $prefixes);
+
+        $this->fixControllersPrefixes();
+
+        return $this;
+    }
+
+    public function setControllersPrefixes(array $prefixes)
+    {
+        $this->controllersPrefixes = $prefixes;
+
+        $this->fixControllersPrefixes();
+
+        return $this;
+    }
+
+    public function getControllersPrefixes()
+    {
+        return $this->controllersPrefixes;
+    }
+
+    public function app()
+    {
+        return $this->app;
+    }
+
+    public function router()
+    {
+        return $this->router;
     }
 }
