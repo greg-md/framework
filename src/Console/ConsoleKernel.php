@@ -26,7 +26,6 @@ class ConsoleKernel implements ConsoleKernelStrategy
 
     protected function boot()
     {
-
     }
 
     public function run(InputInterface $input = null, OutputInterface $output = null)

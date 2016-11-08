@@ -18,6 +18,7 @@ interface HttpKernelStrategy
 
     /**
      * @param string $path
+     *
      * @return Response
      */
     public function run($path = '/');

@@ -33,7 +33,6 @@ class HttpKernel implements HttpKernelStrategy
 
     protected function boot()
     {
-
     }
 
     public function run($path = '/')

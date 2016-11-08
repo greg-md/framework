@@ -28,7 +28,6 @@ class Application implements ApplicationStrategy
 
     protected function boot()
     {
-
     }
 
     public function addComponent($component, $name = null)
