@@ -2,7 +2,7 @@
 
 namespace Greg\Pagination;
 
-interface PaginationInterface
+interface PaginationStrategy
 {
     public function getPaginationCount();
 

@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class IntValidator implements ValidatorInterface
+class IntValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

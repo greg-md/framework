@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class MaxValidator implements ValidatorInterface
+class MaxValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

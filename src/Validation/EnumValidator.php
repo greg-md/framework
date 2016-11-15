@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class EnumValidator implements ValidatorInterface
+class EnumValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

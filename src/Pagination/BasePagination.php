@@ -5,11 +5,11 @@ namespace Greg\Pagination;
 class BasePagination implements \Countable
 {
     /**
-     * @var PaginationInterface|null
+     * @var PaginationStrategy|null
      */
     protected $adapter = null;
 
-    public function setAdapter(PaginationInterface $adapter)
+    public function setAdapter(PaginationStrategy $adapter)
     {
         $this->adapter = $adapter;
 

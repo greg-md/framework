@@ -2,13 +2,13 @@
 
 namespace Greg\Http;
 
-use Greg\ApplicationStrategy;
+use Greg\ApplicationContract;
 use Greg\Router\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
 use Greg\Support\Obj;
 
-class HttpKernel implements HttpKernelStrategy
+class HttpKernel implements HttpKernelContract
 {
     private $app = null;
 
@@ -18,7 +18,7 @@ class HttpKernel implements HttpKernelStrategy
 
     private $loadedControllers = [];
 
-    public function __construct(ApplicationStrategy $app)
+    public function __construct(ApplicationContract $app)
     {
         $this->app = $app;
 

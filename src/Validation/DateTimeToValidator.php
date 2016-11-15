@@ -4,7 +4,7 @@ namespace Greg\Validation;
 
 use Greg\Support\DateTime;
 
-class DateTimeToValidator implements ValidatorInterface
+class DateTimeToValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

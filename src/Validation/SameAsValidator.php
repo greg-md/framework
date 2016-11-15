@@ -4,7 +4,7 @@ namespace Greg\Validation;
 
 use Greg\Support\Arr;
 
-class SameAsValidator implements ValidatorInterface
+class SameAsValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-interface ValidatorInterface
+interface ValidatorStrategy
 {
     public function validate($value, array $values = []);
 

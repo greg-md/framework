@@ -8,7 +8,7 @@ use Greg\Support\Obj;
 class Validator
 {
     /**
-     * @var ValidatorInterface[][]
+     * @var ValidatorStrategy[][]
      */
     protected $validators = [];
 
@@ -68,7 +68,7 @@ class Validator
             $validator = Obj::loadInstance($className, ...$args);
         }
 
-        if (!($validator instanceof ValidatorInterface)) {
+        if (!($validator instanceof ValidatorStrategy)) {
             throw new \Exception('Validator should be an instance of `ValidatorInterface`.');
         }
 

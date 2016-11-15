@@ -2,7 +2,7 @@
 
 namespace Greg;
 
-interface ApplicationStrategy extends \ArrayAccess
+interface ApplicationContract extends \ArrayAccess
 {
     const EVENT_RUN = 'app.run';
 

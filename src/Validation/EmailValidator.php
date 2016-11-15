@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class EmailValidator implements ValidatorInterface
+class EmailValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

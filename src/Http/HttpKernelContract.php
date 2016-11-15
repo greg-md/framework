@@ -2,11 +2,11 @@
 
 namespace Greg\Http;
 
-use Greg\ApplicationStrategy;
+use Greg\ApplicationContract;
 use Greg\Router\Router;
 use Greg\Support\Http\Response;
 
-interface HttpKernelStrategy
+interface HttpKernelContract
 {
     const EVENT_RUN = 'http.run';
 
@@ -32,7 +32,7 @@ interface HttpKernelStrategy
     public function getControllersPrefixes();
 
     /**
-     * @return ApplicationStrategy
+     * @return ApplicationContract
      */
     public function app();
 

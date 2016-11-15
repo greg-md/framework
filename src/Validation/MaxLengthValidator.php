@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class MaxLengthValidator implements ValidatorInterface
+class MaxLengthValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class RequiredValidator implements ValidatorInterface
+class RequiredValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 

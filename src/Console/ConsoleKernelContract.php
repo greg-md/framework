@@ -5,7 +5,7 @@ namespace Greg\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-interface ConsoleKernelStrategy
+interface ConsoleKernelContract
 {
     const EVENT_RUN = 'console.run';
 

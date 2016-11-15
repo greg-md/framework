@@ -5,7 +5,7 @@ namespace Greg;
 use Greg\Support\Server;
 use Greg\Support\Str;
 
-class Application implements ApplicationStrategy
+class Application implements ApplicationContract
 {
     private $config = null;
 

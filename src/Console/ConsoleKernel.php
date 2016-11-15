@@ -2,18 +2,18 @@
 
 namespace Greg\Console;
 
-use Greg\ApplicationStrategy;
+use Greg\ApplicationContract;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConsoleKernel implements ConsoleKernelStrategy
+class ConsoleKernel implements ConsoleKernelContract
 {
     private $app = null;
 
     private $consoleApp = null;
 
-    public function __construct(ApplicationStrategy $app)
+    public function __construct(ApplicationContract $app)
     {
         $this->app = $app;
 

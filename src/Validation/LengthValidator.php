@@ -2,7 +2,7 @@
 
 namespace Greg\Validation;
 
-class LengthValidator implements ValidatorInterface
+class LengthValidator implements ValidatorStrategy
 {
     use ValidatorTrait;
 
