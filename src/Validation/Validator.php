@@ -69,7 +69,7 @@ class Validator
         }
 
         if (!($validator instanceof ValidatorStrategy)) {
-            throw new \Exception('Validator should be an instance of `ValidatorInterface`.');
+            throw new \Exception('Validator should be an instance of `' . ValidatorStrategy::class . '`.');
         }
 
         $this->validators[$key][] = $validator;
