@@ -131,13 +131,7 @@ class IoCContainer
             throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
         }
 
-        if (!$loader) {
-            $loader = function () use ($abstract) {
-                return $this->load($abstract);
-            };
-        }
-
-        return $this->register($abstract, null, $loader);
+        return $this->register($abstract, null, $loader ?: $abstract);
     }
 
     public function concrete($abstract, $concrete)
@@ -177,7 +171,7 @@ class IoCContainer
                         if (is_array($loader)) {
                             $this->setToConcrete($abstract, $this->load(...$loader));
                         } else {
-                            $this->setToConcrete($abstract, $this->expect($loader));
+                            $this->setToConcrete($abstract, $this->load($loader));
                         }
                     }
                 } else {

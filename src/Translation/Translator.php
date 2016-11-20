@@ -2,23 +2,43 @@
 
 namespace Greg\Translation;
 
-use Greg\Support\Accessor\ArrayAccessTrait;
+use Greg\Support\Accessor\AccessorTrait;
 
-class Translator implements \ArrayAccess
+class Translator implements TranslatorContract
 {
-    use ArrayAccessTrait;
-
-    protected $language = 'en';
-
-    protected $defaultLanguage = 'en';
+    use AccessorTrait;
 
     protected $languages = [];
 
+    protected $currentLanguage = 'en';
+
+    protected $defaultLanguage = 'en';
+
     protected $newTranslates = [];
 
-    public function isLanguage($language)
+    public function __construct(array $translates = [])
     {
-        return in_array($language, $this->getLanguages());
+        $this->addToAccessor($translates);
+    }
+
+    public function hasLanguage($language)
+    {
+        return array_key_exists($language, $this->languages);
+    }
+
+    public function getLanguages()
+    {
+        return $this->languages;
+    }
+
+    public function getLanguage($language)
+    {
+        return $this->hasLanguage($language) ? $this->languages[$language] : null;
+    }
+
+    public function getLanguagesKeys()
+    {
+        return array_keys($this->languages);
     }
 
     public function isDefault($language)
@@ -33,8 +53,10 @@ class Translator implements \ArrayAccess
 
     public function translateKey($key, $text, ...$args)
     {
-        if (!$this->has($key)) {
-            $this->setNewTranslate($key, $text);
+        if ($this->inAccessor($key)) {
+            $text = $this->getFromAccessor($key);
+        } else {
+            $this->newTranslates[$key] = $text;
         }
 
         if (count($args) == 1) {
@@ -53,38 +75,38 @@ class Translator implements \ArrayAccess
 
         $text = strtr($text, $replacements);
 
-        return sprintf($this->get($key, $text), ...$args);
+        return sprintf($text, ...$args);
     }
 
-    public function getTranslates($key = null)
-    {
-        if (func_num_args()) {
-            return $this->getFromAccessor($key);
-        }
-
-        return $this->getAccessor();
-    }
-
-    public function setTranslate($key, $value)
+    public function addTranslate($key, $value)
     {
         return $this->setToAccessor($key, $value);
     }
 
-    public function setTranslates(array $items)
+    public function addTranslates(array $items)
     {
         return $this->addToAccessor($items);
     }
 
-    public function setLanguage($name)
+    public function getTranslates()
     {
-        $this->language = (string) $name;
+        return $this->getAccessor();
+    }
+
+    public function setCurrentLanguage($name)
+    {
+        if (!$this->hasLanguage($name)) {
+            throw new \Exception('Language `' . $name . '` is not defined in translator.');
+        }
+
+        $this->currentLanguage = (string) $name;
 
         return $this;
     }
 
-    public function getLanguage()
+    public function getCurrentLanguage()
     {
-        return $this->language;
+        return $this->currentLanguage;
     }
 
     public function setDefaultLanguage($name)
@@ -106,27 +128,28 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function getLanguages()
-    {
-        return $this->languages;
-    }
-
-    public function setNewTranslate($key, $value)
-    {
-        $this->newTranslates[$key] = $value;
-
-        return $this;
-    }
-
-    public function setNewTranslates(array $translates)
-    {
-        $this->newTranslates = $translates;
-
-        return $this;
-    }
-
     public function getNewTranslates()
     {
         return $this->newTranslates;
+    }
+
+    public function offsetExists($key)
+    {
+        return $this->inAccessor($key);
+    }
+
+    public function offsetGet($key)
+    {
+        return $this->getFromAccessor($key);
+    }
+
+    public function offsetSet($key, $value)
+    {
+        return $this->setToAccessor($key, $value);
+    }
+
+    public function offsetUnset($key)
+    {
+        return $this->removeFromAccessor($key);
     }
 }

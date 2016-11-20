@@ -15,12 +15,23 @@ class Application implements ApplicationContract
 
     private $events = [];
 
-    public function __construct(array $config = [])
+    public function __construct(array $config = [], $abstract = null)
     {
         $this->config = new Config($config);
 
         $this->ioc = new IoCContainer();
 
+        if (!$abstract) {
+            $abstract = ApplicationContract::class;
+        }
+
+        $this->ioc->concrete($abstract, $this);
+
+        return $this;
+    }
+
+    public function init()
+    {
         $this->boot();
 
         return $this;
