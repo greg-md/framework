@@ -3,6 +3,7 @@
 namespace Greg\Http;
 
 use Greg\ApplicationContract;
+use Greg\Router\Route;
 use Greg\Router\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
@@ -56,7 +57,15 @@ class HttpKernel implements HttpKernelContract
 
             $this->app->fireWith(static::EVENT_DISPATCHED, $path, $route, $response);
         } else {
-            $response = new Response();
+            try {
+                $response = $this->router->dispatchException(new \Exception('Route not found.'));
+
+                if (!($response instanceof Response)) {
+                    $response = new Response($response);
+                }
+            } catch (\Exception $e) {
+                $response = (new Response($e->getMessage()))->setCode(404);
+            }
         }
 
         $this->app->fireWith(static::EVENT_FINISHED, $path, $response);
@@ -77,7 +86,9 @@ class HttpKernel implements HttpKernelContract
 
             $action = [$this->getController($controllerName), $actionName];
 
-            return $action;
+            return function ($params, Route $route) use ($action) {
+                return $this->app->ioc()->callWith($action, $params, $route);
+            };
         });
 
         return $this;
