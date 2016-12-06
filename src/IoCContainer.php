@@ -256,7 +256,7 @@ class IoCContainer
 
     protected function setToConcrete($abstract, $concrete)
     {
-        Arr::setRefValueRef($this->concrete, $abstract, $concrete);
+        Arr::set($this->concrete, $abstract, $concrete);
 
         return $this;
     }

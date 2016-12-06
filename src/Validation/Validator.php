@@ -26,7 +26,7 @@ class Validator
 
         foreach ($this->getValidators() as $key => $validators) {
             foreach ($validators as $validator) {
-                if (!$validator->validate(Arr::getRef($params, $key), $params)) {
+                if (!$validator->validate(Arr::get($params, $key), $params)) {
                     $this->addErrors($key, $validator->getErrors());
                 }
             }
@@ -89,7 +89,7 @@ class Validator
 
     public function getParam($name, $else = null)
     {
-        return Arr::getRef($this->getParams(), $name, $else);
+        return Arr::get($this->params, $name, $else);
     }
 
     public function getParams()
