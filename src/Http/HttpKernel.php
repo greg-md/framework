@@ -84,7 +84,13 @@ class HttpKernel implements HttpKernelContract
 
             list($controllerName, $actionName) = $parts;
 
-            $action = [$this->getController($controllerName), $actionName];
+            $controller = $this->getController($controllerName);
+
+            if (!method_exists($controller, $actionName)) {
+                throw new \Exception('Action `' . $actionName . '` does not exists in controller `' . $controllerName . '`.');
+            }
+
+            $action = [$controller, $actionName];
 
             return function (Route $route, Request $request, ...$params) use ($action) {
                 return $this->app->ioc()->callWith($action, $route, $request, ...$params);
