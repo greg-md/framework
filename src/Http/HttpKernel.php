@@ -92,8 +92,8 @@ class HttpKernel implements HttpKernelContract
 
             $action = [$controller, $actionName];
 
-            return function (Route $route, Request $request, ...$params) use ($action) {
-                return $this->app->ioc()->callWith($action, $route, $request, ...$params);
+            return function (Route $route, ...$params) use ($action) {
+                return $this->app->ioc()->callWith($action, $route, ...$params);
             };
         });
 
