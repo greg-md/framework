@@ -40,7 +40,11 @@ trait HttpControllerTrait
 
     protected function json($data = [])
     {
-        return $this->response()->json($data);
+        $response = $this->response();
+
+        $response->json($data);
+
+        return $response;
     }
 
     protected function download($content, $name = null, $type = null)
