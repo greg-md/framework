@@ -1,14 +1,12 @@
 <?php
 
-namespace Greg;
+namespace Greg\Framework;
 
 interface ApplicationContract extends \ArrayAccess
 {
     const EVENT_RUN = 'app.run';
 
     const EVENT_FINISHED = 'app.finished';
-
-    public function __construct(array $config = []);
 
     public function addComponent($component, $name = null);
 
@@ -32,13 +30,7 @@ interface ApplicationContract extends \ArrayAccess
 
     public function scope(callable $callable);
 
-    /**
-     * @return Config
-     */
     public function config();
 
-    /**
-     * @return IoCContainer
-     */
     public function ioc();
 }

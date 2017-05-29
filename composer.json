@@ -2,30 +2,30 @@
   "name": "greg-md/php-framework",
   "type": "library",
   "description": "Greg PHP Framework",
-  "keywords": [ "greg", "php-framework" ],
+  "keywords": [ "greg-md", "greg-php", "php-framework", "framework", "php", "web-artisans" ],
   "homepage": "https://github.com/greg-md/php-framework",
   "license": "MIT",
   "authors": [
     { "name": "Grigorii Duca", "email": "contact@greg.md", "homepage": "http://greg.md/" }
   ],
-  "minimum-stability": "dev",
   "require": {
-    "php": "^5.6 || ^7.0",
+    "php": "^7.1",
     "greg-md/php-router": "dev-master",
     "greg-md/php-support": "dev-master",
-    "symfony/console": "^3.1"
+    "symfony/console": "^3.2"
   },
   "require-dev": {
-    "phpunit/phpunit": "5.5.*"
+    "phpunit/phpunit": "6.0.*",
+    "symfony/var-dumper": "^3.2"
   },
   "autoload": {
     "psr-4": {
-      "Greg\\": "src/"
+      "Greg\\Framework\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Greg\\Tests\\": "tests/"
+      "Greg\\Framework\\": "tests/"
     }
   }
 }

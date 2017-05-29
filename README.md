@@ -8,15 +8,3 @@
 [![License](https://poser.pugx.org/greg-md/php-framework/license.svg)](https://packagist.org/packages/greg-md/php-framework)
 
 **Let's make it happen**
-
-```php
-// Start a new application
-$app = (new \Greg\Application\Runner($settings = [])->init();
-
-// Run the application
-$response = $app->run();
-
-// Send response
-$response->send();
-
-```

@@ -1,13 +1,13 @@
 <?php
 
-namespace Greg;
+namespace Greg\Framework;
 
 use Greg\Support\Server;
 use Greg\Support\Str;
 
 class Application implements ApplicationContract
 {
-    private $config = null;
+    private $config = [];
 
     private $ioc = null;
 
@@ -15,23 +15,26 @@ class Application implements ApplicationContract
 
     private $events = [];
 
-    public function __construct(array $config = [], $abstract = null)
+    public function __construct(Config $config = null, IoCContainer $ioc = null, string $abstract = null)
     {
-        $this->config = new Config($config);
+        if (!$config) {
+            $config = new Config();
+        }
 
-        $this->ioc = new IoCContainer();
+        if (!$ioc) {
+            $ioc = new IoCContainer();
+        }
 
         if (!$abstract) {
             $abstract = ApplicationContract::class;
         }
 
+        $this->config = $config;
+
+        $this->ioc = $ioc;
+
         $this->ioc->concrete($abstract, $this);
 
-        return $this;
-    }
-
-    public function init()
-    {
         $this->boot();
 
         return $this;
@@ -49,7 +52,16 @@ class Application implements ApplicationContract
 
         $this->components[$name ?: get_class($component)] = $component;
 
-        $this->initClassInstance($component);
+        if (method_exists($component, 'init')) {
+            $this->ioc->call([$component, 'init']);
+        }
+
+        // Call all methods which starts with "init"
+        foreach (get_class_methods($component) as $methodName) {
+            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
+                $this->ioc->call([$component, $methodName]);
+            }
+        }
 
         return $this;
     }
@@ -110,7 +122,7 @@ class Application implements ApplicationContract
                         $listener = $this->ioc->load($listener);
                     }
 
-                    $method = lcfirst(Str::phpName($event));
+                    $method = Str::phpLowerCamelCase($event);
 
                     if (!method_exists($listener, $method)) {
                         throw new \Exception('Undefined method `' . $method . '` in listener `' . get_class($listener) . '`.');
@@ -145,7 +157,7 @@ class Application implements ApplicationContract
                         $listener = $this->ioc->load($listener);
                     }
 
-                    $method = lcfirst(Str::phpName($event));
+                    $method = Str::phpLowerCamelCase($event);
 
                     if (!method_exists($listener, $method)) {
                         throw new \Exception('Undefined method `' . $method . '` in listener `' . get_class($listener) . '`.');
@@ -153,22 +165,6 @@ class Application implements ApplicationContract
 
                     $this->ioc->callWith([$listener, $method], ...$args);
                 }
-            }
-        }
-
-        return $this;
-    }
-
-    protected function initClassInstance($class)
-    {
-        if (method_exists($class, 'init')) {
-            $this->ioc->call([$class, 'init']);
-        }
-
-        // Call all methods which starts with "init"
-        foreach (get_class_methods($class) as $methodName) {
-            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
-                $this->ioc->call([$class, $methodName]);
             }
         }
 
@@ -207,6 +203,6 @@ class Application implements ApplicationContract
 
     public function offsetUnset($key)
     {
-        return $this->config->delIndex($key);
+        return $this->config->removeIndex($key);
     }
 }

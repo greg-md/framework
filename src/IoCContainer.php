@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg;
+namespace Greg\Framework;
 
 use Greg\Support\Accessor\AccessorTrait;
 use Greg\Support\Arr;
