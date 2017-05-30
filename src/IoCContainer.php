@@ -2,132 +2,83 @@
 
 namespace Greg\Framework;
 
-use Greg\Support\Accessor\AccessorTrait;
-use Greg\Support\Arr;
 use Greg\Support\Obj;
 
 class IoCContainer
 {
-    use AccessorTrait;
-
     private $prefixes = [];
+
+    private $storage = [];
 
     private $concrete = [];
 
-    public function __construct($prefixes = [])
+    public function __construct(array $prefixes = [])
     {
         $this->setPrefixes($prefixes);
 
         return $this;
     }
 
-    public function load($className, ...$args)
-    {
-        return $this->loadArgs($className, $args);
-    }
-
-    protected function loadArgs($className, array $args = [])
+    public function load(string $className, ...$arguments)
     {
         $class = new \ReflectionClass($className);
 
         $self = $class->newInstanceWithoutConstructor();
 
         if ($constructor = $class->getConstructor()) {
-            if ($expectedArgs = $constructor->getParameters()) {
-                $args = $this->addExpectedArgs($args, $expectedArgs);
+            if ($parameters = $constructor->getParameters()) {
+                $arguments = $this->populateParameters($parameters, $arguments);
             }
 
-            $constructor->invokeArgs($self, $args);
+            $constructor->invokeArgs($self, $arguments);
         }
 
         return $self;
     }
 
-    public function call(callable $callable, ...$args)
+    public function call(callable $callable, ...$arguments)
     {
-        return $this->callRef($callable, ...$args);
-    }
-
-    public function callRef(callable $callable, &...$args)
-    {
-        return $this->callArgs($callable, $args);
-    }
-
-    protected function callArgs(callable $callable, array $args = [])
-    {
-        return call_user_func_array($callable, $this->getCallableArgs($callable, $args));
-    }
-
-    public function callWith(callable $callable, ...$args)
-    {
-        return $this->callWithRef($callable, ...$args);
-    }
-
-    public function callWithRef(callable $callable, &...$args)
-    {
-        return $this->callWithArgs($callable, $args);
-    }
-
-    protected function callWithArgs(callable $callable, array $args = [])
-    {
-        return call_user_func_array($callable, $this->getCallableMixedArgs($callable, $args));
-    }
-
-    protected function getCallableArgs(callable $callable, array $args = [])
-    {
-        if ($expectedArgs = Obj::expectedArgs($callable)) {
-            return $this->addExpectedArgs($args, $expectedArgs);
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = $this->populateParameters($parameters, $arguments);
         }
 
-        return [];
+        return call_user_func_array($callable, $arguments);
     }
 
-    protected function getCallableMixedArgs(callable $callable, array $args = [])
+    public function callRef(callable $callable, &...$arguments)
     {
-        if ($expectedArgs = Obj::expectedArgs($callable)) {
-            return Obj::fetchExpectedArgs($expectedArgs, $args, function (\ReflectionParameter $expectedArg) {
-                return $this->expectedArg($expectedArg);
-            }, true);
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = $this->populateParameters($parameters, $arguments);
         }
 
-        return [];
+        return call_user_func_array($callable, $arguments);
     }
 
-    protected function addExpectedArgs(array $args, array $expectedArgs)
+    public function callMixed(callable $callable, ...$arguments)
     {
-        /* @var $expectedArgs \ReflectionParameter[] */
-
-        if ($args) {
-            $expectedArgs = array_slice($expectedArgs, count($args));
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
+                return $this->parameterValue($parameter);
+            });
         }
 
-        $newArgs = Obj::fetchExpectedArgs($expectedArgs, [], function (\ReflectionParameter $expectedArg) {
-            return $this->expectedArg($expectedArg);
-        });
-
-        if ($newArgs) {
-            $args = array_merge($args, $newArgs);
-        }
-
-        return $args;
+        return call_user_func_array($callable, $arguments);
     }
 
-    protected function expectedArg(\ReflectionParameter $expectedArg)
+    public function callMixedRef(callable $callable, &...$arguments)
     {
-        if ($expectedType = $expectedArg->getClass()) {
-            $className = $expectedType->getName();
-
-            $arg = $expectedArg->isOptional() ? $this->get($className) : $this->expect($className);
-        } else {
-            $arg = Obj::expectedArg($expectedArg);
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
+                return $this->parameterValue($parameter);
+            });
         }
 
-        return $arg;
+        return call_user_func_array($callable, $arguments);
     }
 
     public function inject($abstract, $loader = null)
     {
-        if ($this->inAccessor($abstract)) {
+        if (array_key_exists($abstract, $this->storage)) {
             throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
         }
 
@@ -136,7 +87,7 @@ class IoCContainer
 
     public function concrete($abstract, $concrete)
     {
-        if ($this->inAccessor($abstract)) {
+        if (array_key_exists($abstract, $this->storage)) {
             throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
         }
 
@@ -146,43 +97,35 @@ class IoCContainer
     public function object($object)
     {
         if (!is_object($object)) {
-            throw new \Exception('Item is not an object.');
+            throw new \Exception('Argument is not an object.');
         }
 
         return $this->concrete(get_class($object), $object);
     }
 
-    protected function register($abstract, $concrete = null, $loader = null)
-    {
-        return $this->setToAccessor($abstract, [
-            'concrete' => $concrete,
-            'loader'   => $loader,
-        ]);
-    }
-
     public function get($abstract)
     {
-        if (!$this->inConcrete($abstract)) {
-            if ($item = $this->getFromAccessor($abstract)) {
+        if (!array_key_exists($abstract, $this->concrete)) {
+            if ($item = $this->storage[$abstract] ?? null) {
                 if ($loader = $item['loader']) {
                     if (is_callable($loader)) {
-                        $this->setToConcrete($abstract, $this->call($loader));
+                        $this->concrete[$abstract] = $this->call($loader);
                     } elseif (!is_object($loader)) {
                         if (is_array($loader)) {
-                            $this->setToConcrete($abstract, $this->load(...$loader));
+                            $this->concrete[$abstract] = $this->load(...$loader);
                         } else {
-                            $this->setToConcrete($abstract, $this->load($loader));
+                            $this->concrete[$abstract] = $this->load($loader);
                         }
                     }
                 } else {
-                    $this->setToConcrete($abstract, $item['concrete']);
+                    $this->concrete[$abstract] = $this->load($item['concrete']);
                 }
             } elseif ($this->prefixIsRegistered($abstract)) {
-                $this->setToConcrete($abstract, $this->loadArgs($abstract));
+                $this->concrete[$abstract] = $this->load($abstract);
             }
         }
 
-        return $this->getFromConcrete($abstract);
+        return $this->concrete[$abstract] ?? null;
     }
 
     public function expect($abstract)
@@ -192,13 +135,6 @@ class IoCContainer
         }
 
         return $concrete;
-    }
-
-    protected function fixPrefixes()
-    {
-        $this->prefixes = array_unique($this->prefixes);
-
-        return $this;
     }
 
     public function addPrefix($prefix)
@@ -244,20 +180,50 @@ class IoCContainer
         return false;
     }
 
-    protected function inConcrete($abstract)
+    protected function register($abstract, $concrete = null, $loader = null)
     {
-        return array_key_exists($abstract, $this->concrete);
-    }
-
-    protected function getFromConcrete($abstract)
-    {
-        return $this->inConcrete($abstract) ? $this->concrete[$abstract] : null;
-    }
-
-    protected function setToConcrete($abstract, $concrete)
-    {
-        Arr::set($this->concrete, $abstract, $concrete);
+        $this->storage[$abstract] = [
+            'concrete' => $concrete,
+            'loader'   => $loader,
+        ];
 
         return $this;
+    }
+
+    protected function fixPrefixes()
+    {
+        $this->prefixes = array_unique($this->prefixes);
+
+        return $this;
+    }
+
+    protected function populateParameters(array $parameters, array $arguments)
+    {
+        if ($arguments) {
+            $parameters = array_slice($parameters, count($arguments));
+        }
+
+        $newArguments = Obj::populateParameters($parameters, [], false, function (\ReflectionParameter $parameter) {
+            return $this->parameterValue($parameter);
+        });
+
+        if ($newArguments) {
+            $arguments = array_merge($arguments, $newArguments);
+        }
+
+        return $arguments;
+    }
+
+    protected function parameterValue(\ReflectionParameter $parameter)
+    {
+        if ($expectedType = $parameter->getClass()) {
+            $className = $expectedType->getName();
+
+            $arg = $parameter->isOptional() ? $this->get($className) : $this->expect($className);
+        } else {
+            $arg = Obj::parameterValue($parameter);
+        }
+
+        return $arg;
     }
 }
