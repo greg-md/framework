@@ -19,106 +19,74 @@ class IoCContainer
         return $this;
     }
 
-    public function load(string $className, ...$arguments)
+    public function setPrefixes(array $prefixes)
     {
-        $class = new \ReflectionClass($className);
+        $this->prefixes = $prefixes;
 
-        $self = $class->newInstanceWithoutConstructor();
+        $this->fixPrefixes();
 
-        if ($constructor = $class->getConstructor()) {
-            if ($parameters = $constructor->getParameters()) {
-                $arguments = $this->populateParameters($parameters, $arguments);
+        return $this;
+    }
+
+    public function getPrefixes()
+    {
+        return $this->prefixes;
+    }
+
+    public function addPrefixes(string $prefix, string ...$prefixes)
+    {
+        $this->prefixes[] = $prefix;
+
+        if ($prefixes) {
+            $this->prefixes = array_merge($this->prefixes, $prefixes);
+        }
+
+        $this->fixPrefixes();
+
+        return $this;
+    }
+
+    public function inject(string $abstract, $concrete, ...$arguments)
+    {
+        if (array_key_exists($abstract, $this->storage)) {
+            throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
+        }
+
+        if (is_callable($concrete) or (is_string($concrete) and class_exists($concrete, false))) {
+            $this->storage[$abstract] = [
+                'loader' => $concrete,
+                'arguments' => $arguments,
+            ];
+        } elseif (is_object($concrete)) {
+            if (array_key_exists($abstract, $this->concrete)) {
+                throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
             }
 
-            $constructor->invokeArgs($self, $arguments);
+            $this->concrete[$abstract] = $concrete;
+        } else {
+            throw new \Exception('Unknown concrete type for abstract `' . $abstract . '`.');
         }
 
-        return $self;
+        return $this;
     }
 
-    public function call(callable $callable, ...$arguments)
-    {
-        if ($parameters = Obj::parameters($callable)) {
-            $arguments = $this->populateParameters($parameters, $arguments);
-        }
-
-        return call_user_func_array($callable, $arguments);
-    }
-
-    public function callRef(callable $callable, &...$arguments)
-    {
-        if ($parameters = Obj::parameters($callable)) {
-            $arguments = $this->populateParameters($parameters, $arguments);
-        }
-
-        return call_user_func_array($callable, $arguments);
-    }
-
-    public function callMixed(callable $callable, ...$arguments)
-    {
-        if ($parameters = Obj::parameters($callable)) {
-            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
-                return $this->parameterValue($parameter);
-            });
-        }
-
-        return call_user_func_array($callable, $arguments);
-    }
-
-    public function callMixedRef(callable $callable, &...$arguments)
-    {
-        if ($parameters = Obj::parameters($callable)) {
-            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
-                return $this->parameterValue($parameter);
-            });
-        }
-
-        return call_user_func_array($callable, $arguments);
-    }
-
-    public function inject($abstract, $loader = null)
-    {
-        if (array_key_exists($abstract, $this->storage)) {
-            throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
-        }
-
-        return $this->register($abstract, null, $loader ?: $abstract);
-    }
-
-    public function concrete($abstract, $concrete)
-    {
-        if (array_key_exists($abstract, $this->storage)) {
-            throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
-        }
-
-        return $this->register($abstract, $concrete);
-    }
-
-    public function object($object)
+    public function register($object)
     {
         if (!is_object($object)) {
             throw new \Exception('Argument is not an object.');
         }
 
-        return $this->concrete(get_class($object), $object);
+        return $this->inject(get_class($object), $object);
     }
 
     public function get($abstract)
     {
         if (!array_key_exists($abstract, $this->concrete)) {
-            if ($item = $this->storage[$abstract] ?? null) {
-                if ($loader = $item['loader']) {
-                    if (is_callable($loader)) {
-                        $this->concrete[$abstract] = $this->call($loader);
-                    } elseif (!is_object($loader)) {
-                        if (is_array($loader)) {
-                            $this->concrete[$abstract] = $this->load(...$loader);
-                        } else {
-                            $this->concrete[$abstract] = $this->load($loader);
-                        }
-                    }
+            if ($concrete = $this->storage[$abstract] ?? null) {
+                if (is_callable($concrete['loader'])) {
+                    $this->concrete[$abstract] = $this->callMixed($concrete['loader'], ...$concrete['arguments']);
                 } else {
-                    $this->concrete[$abstract] = $this->load($item['concrete']);
+                    $this->concrete[$abstract] = $this->load($concrete['loader'], ...$concrete['arguments']);
                 }
             } elseif ($this->prefixIsRegistered($abstract)) {
                 $this->concrete[$abstract] = $this->load($abstract);
@@ -137,39 +105,63 @@ class IoCContainer
         return $concrete;
     }
 
-    public function addPrefix($prefix)
+    public function load(string $className, &...$arguments)
     {
-        $this->prefixes[] = (string) $prefix;
-
-        $this->fixPrefixes();
-
-        return $this;
+        return $this->loadArgs($className, $arguments);
     }
 
-    public function addPrefixes(array $prefixes)
+    public function loadArgs(string $className, array $arguments)
     {
-        $this->prefixes = array_merge($this->prefixes, $prefixes);
+        $class = new \ReflectionClass($className);
 
-        $this->fixPrefixes();
+        if ($class->isInternal()) {
+            $self = $class->newInstanceArgs($arguments);
+        } else {
+            $self = $class->newInstanceWithoutConstructor();
 
-        return $this;
+            if ($constructor = $class->getConstructor()) {
+                if ($parameters = $constructor->getParameters()) {
+                    $arguments = $this->populateParameters($parameters, $arguments);
+                }
+
+                $constructor->invokeArgs($self, $arguments);
+            }
+        }
+
+        return $self;
     }
 
-    public function setPrefixes(array $prefixes)
+    public function call(callable $callable, &...$arguments)
     {
-        $this->prefixes = $prefixes;
-
-        $this->fixPrefixes();
-
-        return $this;
+        return $this->callArgs($callable, $arguments);
     }
 
-    public function getPrefixes()
+    public function callArgs(callable $callable, array $arguments)
     {
-        return $this->prefixes;
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = $this->populateParameters($parameters, $arguments);
+        }
+
+        return call_user_func_array($callable, $arguments);
     }
 
-    protected function prefixIsRegistered($className)
+    public function callMixed(callable $callable, &...$arguments)
+    {
+        return $this->callMixedArgs($callable, $arguments);
+    }
+
+    public function callMixedArgs(callable $callable, array $arguments)
+    {
+        if ($parameters = Obj::parameters($callable)) {
+            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
+                return $this->parameterValue($parameter);
+            });
+        }
+
+        return call_user_func_array($callable, $arguments);
+    }
+
+    protected function prefixIsRegistered($className): bool
     {
         foreach ($this->prefixes as $prefix) {
             if (strpos($className, $prefix) === 0) {
@@ -180,16 +172,6 @@ class IoCContainer
         return false;
     }
 
-    protected function register($abstract, $concrete = null, $loader = null)
-    {
-        $this->storage[$abstract] = [
-            'concrete' => $concrete,
-            'loader'   => $loader,
-        ];
-
-        return $this;
-    }
-
     protected function fixPrefixes()
     {
         $this->prefixes = array_unique($this->prefixes);
@@ -197,7 +179,7 @@ class IoCContainer
         return $this;
     }
 
-    protected function populateParameters(array $parameters, array $arguments)
+    protected function populateParameters(array $parameters, array $arguments): array
     {
         if ($arguments) {
             $parameters = array_slice($parameters, count($arguments));

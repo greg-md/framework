@@ -2,170 +2,91 @@
 
 namespace Greg\Framework;
 
-use Greg\Support\Server;
-use Greg\Support\Str;
-
-class Application implements ApplicationContract
+class Application
 {
+    const EVENT_RUN = 'app.run';
+
+    const EVENT_FINISHED = 'app.finished';
+
     private $config = [];
 
     private $ioc = null;
 
-    private $components = [];
+    private $bootstraps = [];
 
     private $events = [];
 
-    public function __construct(Config $config = null, IoCContainer $ioc = null, string $abstract = null)
+    public function __construct(Config $config = null, IoCContainer $ioc = null)
     {
-        if (!$config) {
-            $config = new Config();
-        }
+        $this->config = $config ?: new Config();
 
-        if (!$ioc) {
-            $ioc = new IoCContainer();
-        }
+        $this->ioc = $ioc ?: new IoCContainer();
 
-        if (!$abstract) {
-            $abstract = ApplicationContract::class;
-        }
-
-        $this->config = $config;
-
-        $this->ioc = $ioc;
-
-        $this->ioc->concrete($abstract, $this);
+        $this->ioc->register($this);
 
         $this->boot();
 
         return $this;
     }
 
-    protected function boot()
+    public function config(): Config
     {
+        return $this->config;
     }
 
-    public function addComponent($component, $name = null)
+    public function ioc(): IoCContainer
     {
-        if (!is_object($component)) {
-            $component = $this->ioc->load($component);
-        }
+        return $this->ioc;
+    }
 
-        $this->components[$name ?: get_class($component)] = $component;
+    public function bootstrap(BootstrapContract $class)
+    {
+        $this->bootstraps[get_class($class)] = $class;
 
-        if (method_exists($component, 'init')) {
-            $this->ioc->call([$component, 'init']);
-        }
+        $class->boot($this);
 
-        // Call all methods which starts with "init"
-        foreach (get_class_methods($component) as $methodName) {
-            if ($methodName[0] === 'i' and $methodName !== 'init' and Str::startsWith($methodName, 'init')) {
-                $this->ioc->call([$component, $methodName]);
-            }
+        return $this;
+    }
+
+    public function getBootstrap(string $name)
+    {
+        return $this->bootstraps[$name] ?? null;
+    }
+
+    public function getBootstraps()
+    {
+        return $this->bootstraps;
+    }
+
+    public function listen($eventNames, $listener)
+    {
+        $this->validateListener($listener);
+
+        foreach ((array) $eventNames as $eventName) {
+            $this->events[$eventName][] = $listener;
         }
 
         return $this;
     }
 
-    public function basePath()
+    public function event($event)
     {
-        return $this['base_path'] ?: realpath(Server::documentRoot() . '/..');
-    }
-
-    public function publicPath()
-    {
-        return $this['public_path'] ?: Server::documentRoot();
-    }
-
-    public function debugMode()
-    {
-        return (bool) $this['debug_mode'];
-    }
-
-    public function run(callable $callable)
-    {
-        $this->fireWith(static::EVENT_RUN);
-
-        $response = $this->scope($callable);
-
-        $this->fireWith(static::EVENT_FINISHED);
-
-        return $response;
-    }
-
-    public function on($event, $listener)
-    {
-        foreach ((array) $event as $e) {
-            $this->events[$e][] = $listener;
+        if (!is_object($event)) {
+            throw new \Exception('Event is not an object.');
         }
 
-        return $this;
+        return $this->fire(get_class($event), $event);
     }
 
-    public function fire($event, ...$args)
+    public function fire(string $eventName, &...$arguments)
     {
-        return $this->fireArgs($event, ...$args);
+        return $this->fireArgs($eventName, $arguments);
     }
 
-    public function fireRef($event, &...$args)
+    public function fireArgs(string $eventName, array $arguments)
     {
-        return $this->fireArgs($event, $args);
-    }
-
-    protected function fireArgs($event, array $args = [])
-    {
-        if (array_key_exists($event, $this->events)) {
-            foreach ((array) $this->events[$event] as $listener) {
-                if (is_callable($listener)) {
-                    $this->ioc->call($listener, ...$args);
-                } else {
-                    if (!is_object($listener)) {
-                        $listener = $this->ioc->load($listener);
-                    }
-
-                    $method = Str::phpLowerCamelCase($event);
-
-                    if (!method_exists($listener, $method)) {
-                        throw new \Exception('Undefined method `' . $method . '` in listener `' . get_class($listener) . '`.');
-                    }
-
-                    $this->ioc->call([$listener, $method], ...$args);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    public function fireWith($event, ...$args)
-    {
-        return $this->fireWithRef($event, ...$args);
-    }
-
-    public function fireWithRef($event, &...$args)
-    {
-        return $this->fireWithArgs($event, $args);
-    }
-
-    protected function fireWithArgs($event, array $args = [])
-    {
-        if (array_key_exists($event, $this->events)) {
-            foreach ((array) $this->events[$event] as &$listener) {
-                if (is_callable($listener)) {
-                    $this->ioc->callWith($listener, ...$args);
-                } else {
-                    if (!is_object($listener)) {
-                        $listener = $this->ioc->load($listener);
-                    }
-
-                    $method = Str::phpLowerCamelCase($event);
-
-                    if (!method_exists($listener, $method)) {
-                        throw new \Exception('Undefined method `' . $method . '` in listener `' . get_class($listener) . '`.');
-                    }
-
-                    $this->ioc->callWith([$listener, $method], ...$args);
-                }
-            }
+        foreach ($this->events[$eventName] ?? [] as $listener) {
+            $this->handleListener($listener, $arguments);
         }
 
         return $this;
@@ -176,14 +97,15 @@ class Application implements ApplicationContract
         return $this->ioc->call($callable);
     }
 
-    public function config()
+    public function run(callable $callable)
     {
-        return $this->config;
-    }
+        $this->fire(static::EVENT_RUN);
 
-    public function ioc()
-    {
-        return $this->ioc;
+        $response = $this->scope($callable);
+
+        $this->fire(static::EVENT_FINISHED);
+
+        return $response;
     }
 
     public function offsetExists($key)
@@ -204,5 +126,37 @@ class Application implements ApplicationContract
     public function offsetUnset($key)
     {
         return $this->config->removeIndex($key);
+    }
+
+    protected function boot()
+    {
+    }
+
+    protected function validateListener($listener)
+    {
+        if (!is_callable($listener) and !is_object($listener) and !class_exists($listener, false)) {
+            throw new \Exception('Unknown listener type');
+        }
+    }
+
+    protected function handleListener($listener, array $arguments)
+    {
+        if (is_callable($listener)) {
+            $this->ioc->callMixedArgs($listener, $arguments);
+
+            return $this;
+        }
+
+        if (!is_object($listener)) {
+            $listener = $this->ioc->load($listener);
+        }
+
+        if (!method_exists($listener, 'handle')) {
+            throw new \Exception('Listener `' . get_class($listener) . '` does not have `handle` method.');
+        }
+
+        $this->ioc->callMixedArgs([$listener, 'handle'], $arguments);
+
+        return $this;
     }
 }
