@@ -42,7 +42,7 @@ class IoCContainerTest extends TestCase
     {
         $container = new IoCContainer();
 
-        $container->inject('abstract', function() {
+        $container->inject('abstract', function () {
             return new \stdClass();
         });
 
@@ -71,7 +71,7 @@ class IoCContainerTest extends TestCase
     {
         $container = new IoCContainer();
 
-        $container->inject('abstract', function($foo) {
+        $container->inject('abstract', function ($foo) {
             $this->assertEquals('foo', $foo);
 
             return new \stdClass();
@@ -196,7 +196,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->call(function(\stdClass $class) use (&$success) {
+        $container->call(function (\stdClass $class) use (&$success) {
             $success = true;
 
             return $class;
@@ -213,7 +213,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->call(function(&$success, \stdClass $class) {
+        $container->call(function (&$success, \stdClass $class) {
             $success = true;
 
             return $class;
@@ -230,7 +230,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->callArgs(function($arg, \stdClass $class) use (&$success) {
+        $container->callArgs(function ($arg, \stdClass $class) use (&$success) {
             $this->assertEquals('foo', $arg);
 
             $success = true;
@@ -249,7 +249,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->callMixed(function(\stdClass $class, &$success) {
+        $container->callMixed(function (\stdClass $class, &$success) {
             $success = true;
 
             return $class;
@@ -266,7 +266,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->callMixedArgs(function(\stdClass $class, $arg) use (&$success) {
+        $container->callMixedArgs(function (\stdClass $class, $arg) use (&$success) {
             $this->assertEquals('foo', $arg);
 
             $success = true;
@@ -283,7 +283,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->call(function($arg = 'foo') use (&$success) {
+        $container->call(function ($arg = 'foo') use (&$success) {
             $this->assertEquals('foo', $arg);
 
             $success = true;

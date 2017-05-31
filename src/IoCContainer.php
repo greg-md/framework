@@ -54,7 +54,7 @@ class IoCContainer
 
         if (is_callable($concrete) or (is_string($concrete) and class_exists($concrete, false))) {
             $this->storage[$abstract] = [
-                'loader' => $concrete,
+                'loader'    => $concrete,
                 'arguments' => $arguments,
             ];
         } elseif (is_object($concrete)) {

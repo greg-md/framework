@@ -69,7 +69,7 @@ class ApplicationTest extends TestCase
 
         $success = false;
 
-        $app->listen('event', function($foo) use (&$success) {
+        $app->listen('event', function ($foo) use (&$success) {
             $success = true;
 
             $this->assertEquals('foo', $foo);
@@ -86,11 +86,10 @@ class ApplicationTest extends TestCase
 
         $success = false;
 
-        $event = new class {
-
+        $event = new class() {
         };
 
-        $app->listen(get_class($event), function($arg) use ($event, &$success) {
+        $app->listen(get_class($event), function ($arg) use ($event, &$success) {
             $success = true;
 
             $this->assertInstanceOf(get_class($event), $arg);
