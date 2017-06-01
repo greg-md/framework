@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class IoCContainerTest extends TestCase
 {
-    public function testSchouldThrowAFatalError()
+    public function testShouldThrowAFatalError()
     {
         call_user_func_array(function (&$foo, \stdClass $class) {
         }, ['foo']);
