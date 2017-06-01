@@ -6,6 +6,13 @@ use PHPUnit\Framework\TestCase;
 
 class IoCContainerTest extends TestCase
 {
+    public function testSchouldThrowAFatalError()
+    {
+        call_user_func_array(function (&$foo, \stdClass $class) {
+
+        }, ['foo']);
+    }
+
     public function testCanInitialize()
     {
         $this->assertInstanceOf(IoCContainer::class, new IoCContainer());
