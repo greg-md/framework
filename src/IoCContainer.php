@@ -84,7 +84,7 @@ class IoCContainer
         if (!array_key_exists($abstract, $this->concrete)) {
             if ($concrete = $this->storage[$abstract] ?? null) {
                 if (is_callable($concrete['loader'])) {
-                    $this->concrete[$abstract] = $this->callMixed($concrete['loader'], ...$concrete['arguments']);
+                    $this->concrete[$abstract] = $this->call($concrete['loader'], ...$concrete['arguments']);
                 } else {
                     $this->concrete[$abstract] = $this->load($concrete['loader'], ...$concrete['arguments']);
                 }
@@ -131,34 +131,25 @@ class IoCContainer
         return $self;
     }
 
-    public function call(callable $callable, &...$arguments)
+    public function &call(callable $callable, &...$arguments)
     {
         return $this->callArgs($callable, $arguments);
     }
 
-    public function callArgs(callable $callable, array $arguments)
+    public function &callArgs(callable $callable, array $arguments)
     {
         if ($parameters = Obj::parameters($callable)) {
             $arguments = $this->populateParameters($parameters, $arguments);
         }
 
-        return call_user_func_array($callable, $arguments);
-    }
-
-    public function callMixed(callable $callable, &...$arguments)
-    {
-        return $this->callMixedArgs($callable, $arguments);
-    }
-
-    public function callMixedArgs(callable $callable, array $arguments)
-    {
-        if ($parameters = Obj::parameters($callable)) {
-            $arguments = Obj::populateParameters($parameters, $arguments, true, function (\ReflectionParameter $parameter) {
-                return $this->parameterValue($parameter);
-            });
+        if (Obj::callableReturnsReference($callable)) {
+            return call_user_func_array($callable, $arguments);
         }
 
-        return call_user_func_array($callable, $arguments);
+        // Register value to a variable to return it's reference.
+        $return = call_user_func_array($callable, $arguments);
+
+        return $return;
     }
 
     protected function prefixIsRegistered($className): bool
@@ -179,33 +170,95 @@ class IoCContainer
         return $this;
     }
 
-    protected function populateParameters(array $parameters, array $arguments): array
+    protected function populateParameters(array $parameters, array $arguments = [])
     {
-        if ($arguments) {
-            $parameters = array_slice($parameters, count($arguments));
+        $countMixedExpected = $this->countMixableParameters($parameters);
+
+        [$argumentsTypes, $mixedArguments] = $this->extractArgumentsTypes($arguments);
+
+        $returnArguments = [];
+
+        /* @var $parameter \ReflectionParameter */
+        foreach (array_reverse($parameters) as $parameter) {
+            if ($parameter->isVariadic()) {
+                $returnArguments = array_merge($returnArguments, array_reverse(array_slice($arguments, $parameter->getPosition())));
+
+                continue;
+            }
+
+            if ($expectedType = $parameter->getClass()) {
+                if (array_key_exists($expectedType->getName(), $argumentsTypes)) {
+                    $returnArguments[] = &$argumentsTypes[$expectedType->getName()];
+
+                    continue;
+                }
+
+                $returnArguments[] = $this->expectedParameterValue($parameter);
+
+                continue;
+            }
+
+            --$countMixedExpected;
+
+            if (array_key_exists($countMixedExpected, $mixedArguments)) {
+                $returnArguments[] = &$mixedArguments[$countMixedExpected];
+
+                continue;
+            }
+
+            if (!$returnArguments and $parameter->isOptional()) {
+                continue;
+            }
+
+            if (array_key_exists($parameter->getPosition(), $arguments)) {
+                $returnArguments[] = &$arguments[$parameter->getPosition()];
+
+                continue;
+            }
+
+            $returnArguments[] = Obj::expectedParameterValue($parameter);
         }
 
-        $newArguments = Obj::populateParameters($parameters, [], false, function (\ReflectionParameter $parameter) {
-            return $this->parameterValue($parameter);
-        });
-
-        if ($newArguments) {
-            $arguments = array_merge($arguments, $newArguments);
-        }
-
-        return $arguments;
+        return array_reverse($returnArguments);
     }
 
-    protected function parameterValue(\ReflectionParameter $parameter)
+    private function expectedParameterValue(\ReflectionParameter $parameter)
     {
         if ($expectedType = $parameter->getClass()) {
             $className = $expectedType->getName();
 
-            $arg = $parameter->isOptional() ? $this->get($className) : $this->expect($className);
-        } else {
-            $arg = Obj::parameterValue($parameter);
+            return $parameter->isOptional() ? $this->get($className) : $this->expect($className);
         }
 
-        return $arg;
+        return Obj::expectedParameterValue($parameter);
+    }
+
+    private function extractArgumentsTypes($arguments)
+    {
+        $argumentsTypes = $mixedArguments = [];
+
+        foreach ($arguments as &$argument) {
+            if (is_object($argument)) {
+                foreach (Obj::typeAliases($argument) as $type) {
+                    $argumentsTypes[$type] = &$argument;
+                }
+            } else {
+                $mixedArguments[] = &$argument;
+            }
+        }
+        unset($argument);
+
+        return [$argumentsTypes, $mixedArguments];
+    }
+
+    private function countMixableParameters(array $parameters)
+    {
+        return count(array_filter($parameters, function (\ReflectionParameter $parameter) {
+            try {
+                return !$parameter->getClass();
+            } catch (\Exception $e) {
+                return false;
+            }
+        }));
     }
 }

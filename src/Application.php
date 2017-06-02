@@ -101,7 +101,7 @@ class Application
     {
         $this->fire(static::EVENT_RUN);
 
-        $response = $this->scope($callable);
+        $response = $this->ioc->call($callable);
 
         $this->fire(static::EVENT_FINISHED);
 
@@ -142,7 +142,7 @@ class Application
     protected function handleListener($listener, array $arguments)
     {
         if (is_callable($listener)) {
-            $this->ioc->callMixedArgs($listener, $arguments);
+            $this->ioc->callArgs($listener, $arguments);
 
             return $this;
         }
@@ -155,7 +155,7 @@ class Application
             throw new \Exception('Listener `' . get_class($listener) . '` does not have `handle` method.');
         }
 
-        $this->ioc->callMixedArgs([$listener, 'handle'], $arguments);
+        $this->ioc->callArgs([$listener, 'handle'], $arguments);
 
         return $this;
     }

@@ -249,7 +249,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->callMixed(function (\stdClass $class, &$success) {
+        $container->call(function (\stdClass $class, &$success) {
             $success = true;
 
             return $class;
@@ -266,7 +266,7 @@ class IoCContainerTest extends TestCase
 
         $success = false;
 
-        $container->callMixedArgs(function (\stdClass $class, $arg) use (&$success) {
+        $container->callArgs(function (\stdClass $class, $arg) use (&$success) {
             $this->assertEquals('foo', $arg);
 
             $success = true;
