@@ -142,14 +142,7 @@ class IoCContainer
             $arguments = $this->populateParameters($parameters, $arguments);
         }
 
-        if (Obj::callableReturnsReference($callable)) {
-            return call_user_func_array($callable, $arguments);
-        }
-
-        // Register value to a variable to return it's reference.
-        $return = call_user_func_array($callable, $arguments);
-
-        return $return;
+        return Obj::call($callable, $arguments);
     }
 
     protected function prefixIsRegistered($className): bool

@@ -360,23 +360,20 @@ class IoCContainerTest extends TestCase
         $this->assertTrue($success);
     }
 
-    /*
-     * @TODO Disabled in PHP 7.1.5 because of a bug: https://bugs.php.net/bug.php?id=74690
-     */
-//    public function testCanReturnValueReference()
-//    {
-//        $container = new IoCContainer();
-//
-//        $foo = 'foo';
-//
-//        $bar = &$container->callArgs(function &() use (&$foo) {
-//            return $foo;
-//        }, []);
-//
-//        $bar = 'bar';
-//
-//        $this->assertEquals('bar', $foo);
-//    }
+    public function testCanReturnValueReference()
+    {
+        $container = new IoCContainer();
+
+        $foo = 'foo';
+
+        $bar = &$container->callArgs(function &() use (&$foo) {
+            return $foo;
+        }, []);
+
+        $bar = 'bar';
+
+        $this->assertEquals('bar', $foo);
+    }
 }
 
 class ClassWithArguments
