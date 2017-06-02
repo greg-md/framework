@@ -193,7 +193,9 @@ class IoCContainer
                     continue;
                 }
 
-                $returnArguments[] = $this->expectedParameterValue($parameter);
+                $className = $expectedType->getName();
+
+                $returnArguments[] = $parameter->isOptional() ? $this->get($className) : $this->expect($className);
 
                 continue;
             }
@@ -222,17 +224,6 @@ class IoCContainer
         return array_reverse($returnArguments);
     }
 
-    private function expectedParameterValue(\ReflectionParameter $parameter)
-    {
-        if ($expectedType = $parameter->getClass()) {
-            $className = $expectedType->getName();
-
-            return $parameter->isOptional() ? $this->get($className) : $this->expect($className);
-        }
-
-        return Obj::expectedParameterValue($parameter);
-    }
-
     private function extractArgumentsTypes($arguments)
     {
         $argumentsTypes = $mixedArguments = [];
@@ -254,11 +245,14 @@ class IoCContainer
     private function countMixableParameters(array $parameters)
     {
         return count(array_filter($parameters, function (\ReflectionParameter $parameter) {
-            try {
+            /**
+             * In some of cases it throws an exception. Need to remember when.
+             */
+//            try {
                 return !$parameter->getClass();
-            } catch (\Exception $e) {
-                return false;
-            }
+//            } catch (\Exception $e) {
+//                return false;
+//            }
         }));
     }
 }

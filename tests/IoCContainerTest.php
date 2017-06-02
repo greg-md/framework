@@ -277,20 +277,106 @@ class IoCContainerTest extends TestCase
         $this->assertTrue($success);
     }
 
-    public function testCanCallWithOptionalArguments()
+    public function testCanCallWithOptionalMixedArgument()
     {
         $container = new IoCContainer();
 
         $success = false;
 
-        $container->call(function ($arg = 'foo') use (&$success) {
-            $this->assertEquals('foo', $arg);
-
+        $container->call(function ($arg = null) use (&$success) {
             $success = true;
+
+            $this->assertNull($arg);
         });
 
         $this->assertTrue($success);
     }
+
+    public function testCanCallWithOptionalTypeArgument()
+    {
+        $container = new IoCContainer();
+
+        $success = false;
+
+        $container->call(function (\stdClass $arg = null) use (&$success) {
+            $success = true;
+
+            $this->assertNull($arg);
+        });
+
+        $this->assertTrue($success);
+    }
+
+    public function testCanCallWithVariadicParameter()
+    {
+        $container = new IoCContainer();
+
+        $success = false;
+
+        $container->callArgs(function (...$arguments) use (&$success) {
+            $this->assertEquals(['foo', 'bar'], $arguments);
+
+            $success = true;
+        }, ['foo', 'bar']);
+
+        $this->assertTrue($success);
+    }
+
+    public function testCanCallWithMixedObjects()
+    {
+        $container = new IoCContainer();
+
+        $success = false;
+
+        $container->callArgs(function (\stdClass $arg1, $arg2) use (&$success) {
+            $success = true;
+
+            $this->assertEquals('foo', $arg2);
+
+            return $arg1;
+        }, ['foo', new \stdClass()]);
+
+        $this->assertTrue($success);
+    }
+
+    public function testCanCallWithMoreOptionalMixedParametersThenArguments()
+    {
+        $container = new IoCContainer();
+
+        $success = false;
+
+        $container->callArgs(function (string $arg1 = null, \stdClass $arg2 = null, string $arg3 = null, \stdClass $arg4 = null) use (&$success) {
+            $success = true;
+
+            $this->assertNull($arg1);
+
+            $this->assertNotNull($arg2);
+
+            $this->assertNull($arg3);
+
+            $this->assertNotNull($arg4);
+        }, [null, new \stdClass()]);
+
+        $this->assertTrue($success);
+    }
+
+    /**
+     * @TODO Disabled in PHP 7.1.5 because of a bug: https://bugs.php.net/bug.php?id=74690
+     */
+//    public function testCanReturnValueReference()
+//    {
+//        $container = new IoCContainer();
+//
+//        $foo = 'foo';
+//
+//        $bar = &$container->callArgs(function &() use (&$foo) {
+//            return $foo;
+//        }, []);
+//
+//        $bar = 'bar';
+//
+//        $this->assertEquals('bar', $foo);
+//    }
 }
 
 class ClassWithArguments

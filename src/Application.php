@@ -39,7 +39,7 @@ class Application
         return $this->ioc;
     }
 
-    public function bootstrap(BootstrapContract $class)
+    public function bootstrap(BootstrapInterface $class)
     {
         $this->bootstraps[get_class($class)] = $class;
 
@@ -132,14 +132,16 @@ class Application
     {
     }
 
-    protected function validateListener($listener)
+    private function validateListener($listener)
     {
         if (!is_callable($listener) and !is_object($listener) and !class_exists($listener, false)) {
             throw new \Exception('Unknown listener type');
         }
+
+        return $this;
     }
 
-    protected function handleListener($listener, array $arguments)
+    private function handleListener($listener, array $arguments)
     {
         if (is_callable($listener)) {
             $this->ioc->callArgs($listener, $arguments);

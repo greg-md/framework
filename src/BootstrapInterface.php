@@ -2,7 +2,7 @@
 
 namespace Greg\Framework;
 
-interface BootstrapContract
+interface BootstrapInterface
 {
     public function boot(Application $application);
 }
