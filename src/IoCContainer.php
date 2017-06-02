@@ -245,7 +245,7 @@ class IoCContainer
     private function countMixableParameters(array $parameters)
     {
         return count(array_filter($parameters, function (\ReflectionParameter $parameter) {
-            /**
+            /*
              * In some of cases it throws an exception. Need to remember when.
              */
 //            try {
