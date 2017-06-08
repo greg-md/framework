@@ -94,7 +94,8 @@ class ApplicationTest extends TestCase
                 $this->test = $test;
             }
 
-            public function handle($foo) {
+            public function handle($foo)
+            {
                 $this->success = true;
 
                 $this->test->assertEquals('foo', $foo);
@@ -134,7 +135,8 @@ class ApplicationTest extends TestCase
 
         $success = false;
 
-        $event = new class() {};
+        $event = new class() {
+        };
 
         $app->listen(get_class($event), function ($arg) use ($event, &$success) {
             $success = true;
@@ -162,7 +164,7 @@ class ApplicationTest extends TestCase
 
         $success = false;
 
-        $app->scope(function(Application $app) use (&$success) {
+        $app->scope(function (Application $app) use (&$success) {
             $success = true;
 
             $this->assertInstanceOf(Application::class, $app);
@@ -177,7 +179,7 @@ class ApplicationTest extends TestCase
 
         $success = false;
 
-        $app->run(function() use (&$success) {
+        $app->run(function () use (&$success) {
             $success = true;
         });
 
