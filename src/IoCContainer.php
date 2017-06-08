@@ -142,7 +142,7 @@ class IoCContainer
             $arguments = $this->populateParameters($parameters, $arguments);
         }
 
-        return Obj::call($callable, $arguments);
+        return Obj::callArgs($callable, $arguments);
     }
 
     protected function prefixIsRegistered($className): bool
@@ -165,87 +165,10 @@ class IoCContainer
 
     protected function populateParameters(array $parameters, array $arguments = [])
     {
-        $countMixedExpected = $this->countMixableParameters($parameters);
+        return Obj::populateParameters($parameters, $arguments, function (\ReflectionParameter $parameter) {
+            $className = $parameter->getClass()->getName();
 
-        [$argumentsTypes, $mixedArguments] = $this->extractArgumentsTypes($arguments);
-
-        $returnArguments = [];
-
-        /* @var $parameter \ReflectionParameter */
-        foreach (array_reverse($parameters) as $parameter) {
-            if ($parameter->isVariadic()) {
-                $returnArguments = array_merge($returnArguments, array_reverse(array_slice($arguments, $parameter->getPosition())));
-
-                continue;
-            }
-
-            if ($expectedType = $parameter->getClass()) {
-                if (array_key_exists($expectedType->getName(), $argumentsTypes)) {
-                    $returnArguments[] = &$argumentsTypes[$expectedType->getName()];
-
-                    continue;
-                }
-
-                $className = $expectedType->getName();
-
-                $returnArguments[] = $parameter->isOptional() ? $this->get($className) : $this->expect($className);
-
-                continue;
-            }
-
-            --$countMixedExpected;
-
-            if (array_key_exists($countMixedExpected, $mixedArguments)) {
-                $returnArguments[] = &$mixedArguments[$countMixedExpected];
-
-                continue;
-            }
-
-            if (!$returnArguments and $parameter->isOptional()) {
-                continue;
-            }
-
-            if (array_key_exists($parameter->getPosition(), $arguments)) {
-                $returnArguments[] = &$arguments[$parameter->getPosition()];
-
-                continue;
-            }
-
-            $returnArguments[] = Obj::expectedParameterValue($parameter);
-        }
-
-        return array_reverse($returnArguments);
-    }
-
-    private function extractArgumentsTypes($arguments)
-    {
-        $argumentsTypes = $mixedArguments = [];
-
-        foreach ($arguments as &$argument) {
-            if (is_object($argument)) {
-                foreach (Obj::typeAliases($argument) as $type) {
-                    $argumentsTypes[$type] = &$argument;
-                }
-            } else {
-                $mixedArguments[] = &$argument;
-            }
-        }
-        unset($argument);
-
-        return [$argumentsTypes, $mixedArguments];
-    }
-
-    private function countMixableParameters(array $parameters)
-    {
-        return count(array_filter($parameters, function (\ReflectionParameter $parameter) {
-            /*
-             * In some of cases it throws an exception. Need to remember when.
-             */
-//            try {
-                return !$parameter->getClass();
-//            } catch (\Exception $e) {
-//                return false;
-//            }
-        }));
+            return $parameter->isOptional() ? $this->get($className) : $this->expect($className);
+        });
     }
 }
