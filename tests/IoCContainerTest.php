@@ -174,7 +174,7 @@ class IoCContainerTest extends TestCase
     {
         $container = new IoCContainer();
 
-        $this->assertInstanceOf(ClassWithArguments::class, $class = $container->loadArgs(ClassWithArguments::class, ['foo']));
+        $this->assertInstanceOf(TestClassWithArguments::class, $class = $container->loadArgs(TestClassWithArguments::class, ['foo']));
 
         $this->assertEquals('foo', $class->foo);
     }
@@ -376,7 +376,7 @@ class IoCContainerTest extends TestCase
     }
 }
 
-class ClassWithArguments
+class TestClassWithArguments
 {
     public $foo;
 

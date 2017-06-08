@@ -2,19 +2,13 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Accessor\AccessorTrait;
-
 class HeadLink
 {
-    use AccessorTrait;
+    private $storage = [];
 
     public function set($rel, $href, array $attr = [], $id = null)
     {
-        $attr['rel'] = $rel;
-
-        $attr['href'] = $href;
-
-        $this->setToAccessor($id, $attr);
+        $this->storage[$id] = ['rel' => $rel, 'href' => $href] + $attr;
 
         return $this;
     }
@@ -35,7 +29,7 @@ class HeadLink
     {
         $items = [];
 
-        foreach ($this->getAccessor() as $id => $attr) {
+        foreach ($this->storage as $id => $attr) {
             $items[$id] = new HtmlElement('link', $attr);
         }
 

@@ -2,23 +2,21 @@
 
 namespace Greg\Html;
 
-use Greg\Support\Accessor\AccessorTrait;
-
 class HeadMeta
 {
-    use AccessorTrait;
+    private $storage = [];
 
     public function getName($name)
     {
-        return $this->getFromAccessor($name);
+        return $this->storage[$name] ?? null;
     }
 
     public function setName($name, $content)
     {
-        $this->setToAccessor($name, [
+        $this->storage[$name] = [
             'name'    => $name,
             'content' => HtmlElement::clearAttrValue($content),
-        ]);
+        ];
 
         return $this;
     }

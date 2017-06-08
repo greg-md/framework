@@ -2,13 +2,16 @@
 
 namespace Greg\Console;
 
-use Greg\ApplicationContract;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConsoleKernel implements ConsoleKernelContract
+class ConsoleKernel
 {
+    const EVENT_RUN = 'console.run';
+
+    const EVENT_FINISHED = 'console.finished';
+
     private $app = null;
 
     private $consoleApp = null;

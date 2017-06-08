@@ -63,7 +63,7 @@ class ApplicationTest extends TestCase
         $this->assertEquals([get_class($bootstrap) => $bootstrap], $app->getBootstraps());
     }
 
-    public function testCanFireEvents()
+    public function testCanListenCallable()
     {
         $app = new Application();
 
@@ -80,14 +80,61 @@ class ApplicationTest extends TestCase
         $this->assertTrue($success);
     }
 
+    public function testCanListenObject()
+    {
+        $app = new Application();
+
+        $class = new class($this) {
+            public $test;
+
+            public $success = false;
+
+            public function __construct(TestCase $test)
+            {
+                $this->test = $test;
+            }
+
+            public function handle($foo) {
+                $this->success = true;
+
+                $this->test->assertEquals('foo', $foo);
+            }
+        };
+
+        $app->listen('event', $class);
+
+        $app->fire('event', ...['foo']);
+
+        $this->assertTrue($class->success);
+    }
+
+    public function testCanThrowExceptionIfUndefinedListener()
+    {
+        $app = new Application();
+
+        $this->expectException(\Exception::class);
+
+        $app->listen('event', 'undefined_listener');
+    }
+
+    public function testCanThrowExceptionIfListenNotHaveHandleMethod()
+    {
+        $app = new Application();
+
+        $app->listen('event', \stdClass::class);
+
+        $this->expectException(\Exception::class);
+
+        $app->fire('event');
+    }
+
     public function testCanRunEvent()
     {
         $app = new Application();
 
         $success = false;
 
-        $event = new class() {
-        };
+        $event = new class() {};
 
         $app->listen(get_class($event), function ($arg) use ($event, &$success) {
             $success = true;
@@ -107,5 +154,48 @@ class ApplicationTest extends TestCase
         $this->expectException(\Exception::class);
 
         $app->event('test');
+    }
+
+    public function testCanScope()
+    {
+        $app = new Application();
+
+        $success = false;
+
+        $app->scope(function(Application $app) use (&$success) {
+            $success = true;
+
+            $this->assertInstanceOf(Application::class, $app);
+        });
+
+        $this->assertTrue($success);
+    }
+
+    public function testCanRun()
+    {
+        $app = new Application();
+
+        $success = false;
+
+        $app->run(function() use (&$success) {
+            $success = true;
+        });
+
+        $this->assertTrue($success);
+    }
+
+    public function testCanActApplicationAsArray()
+    {
+        $app = new Application();
+
+        $app['foo'] = 'bar';
+
+        $this->assertEquals($app['foo'], 'bar');
+
+        $this->assertTrue(isset($app['foo']));
+
+        unset($app['foo']);
+
+        $this->assertFalse(isset($app['foo']));
     }
 }

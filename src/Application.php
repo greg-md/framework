@@ -2,7 +2,7 @@
 
 namespace Greg\Framework;
 
-class Application
+class Application implements \ArrayAccess
 {
     const EVENT_RUN = 'app.run';
 
@@ -13,6 +13,8 @@ class Application
     private $ioc = null;
 
     private $bootstraps = [];
+
+    private $kernels = [];
 
     private $events = [];
 
@@ -69,15 +71,6 @@ class Application
         return $this;
     }
 
-    public function event($event)
-    {
-        if (!is_object($event)) {
-            throw new \Exception('Event is not an object.');
-        }
-
-        return $this->fire(get_class($event), $event);
-    }
-
     public function fire(string $eventName, &...$arguments)
     {
         return $this->fireArgs($eventName, $arguments);
@@ -90,6 +83,15 @@ class Application
         }
 
         return $this;
+    }
+
+    public function event($event)
+    {
+        if (!is_object($event)) {
+            throw new \Exception('Event is not an object.');
+        }
+
+        return $this->fire(get_class($event), $event);
     }
 
     public function scope(callable $callable)
@@ -132,7 +134,7 @@ class Application
     {
     }
 
-    private function validateListener($listener)
+    protected function validateListener($listener)
     {
         if (!is_callable($listener) and !is_object($listener) and !class_exists($listener, false)) {
             throw new \Exception('Unknown listener type');
@@ -141,7 +143,7 @@ class Application
         return $this;
     }
 
-    private function handleListener($listener, array $arguments)
+    protected function handleListener($listener, array $arguments)
     {
         if (is_callable($listener)) {
             $this->ioc->callArgs($listener, $arguments);
