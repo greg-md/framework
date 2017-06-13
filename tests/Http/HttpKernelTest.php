@@ -67,7 +67,7 @@ class HttpKernelTest extends TestCase
     {
         $kernel = new HttpKernel();
 
-        $kernel->router()->any('/', function() {
+        $kernel->router()->any('/', function () {
             return 'Hello World!';
         });
 

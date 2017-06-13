@@ -18,7 +18,7 @@ class Translator implements \ArrayAccess
 
     public function hasLanguages(): bool
     {
-        return (bool)$this->languages;
+        return (bool) $this->languages;
     }
 
     public function getLanguages(): array
@@ -90,7 +90,7 @@ class Translator implements \ArrayAccess
     {
         $this->checkLocaleIfExists($locale);
 
-        $this->defaultLanguage = (string)$locale;
+        $this->defaultLanguage = (string) $locale;
 
         return $this;
     }
@@ -104,7 +104,7 @@ class Translator implements \ArrayAccess
     {
         $this->checkLocaleIfExists($locale);
 
-        $this->currentLanguage = (string)$locale;
+        $this->currentLanguage = (string) $locale;
 
         return $this;
     }
@@ -116,7 +116,7 @@ class Translator implements \ArrayAccess
 
     public function hasTranslatesLoaders(): bool
     {
-        return (bool)$this->translatesLoader;
+        return (bool) $this->translatesLoader;
     }
 
     public function getTranslatesLoaders(): array
@@ -159,7 +159,7 @@ class Translator implements \ArrayAccess
 
     public function hasAnyTranslates(): bool
     {
-        return (bool)$this->translates;
+        return (bool) $this->translates;
     }
 
     public function getAllTranslates(): array
@@ -176,7 +176,7 @@ class Translator implements \ArrayAccess
 
     public function hasTranslates(string $locale): bool
     {
-        return (bool)($this->translates[$locale] ?? false);
+        return (bool) ($this->translates[$locale] ?? false);
     }
 
     public function getTranslates(string $locale): array

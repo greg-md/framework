@@ -41,7 +41,7 @@ class TranslatorTest extends TestCase
 
         $translator->addLanguage('ro_RO', ['name' => 'Romanian']);
 
-        $translator->addLanguage('ru_RU', ['name' => 'Russian'], function() {
+        $translator->addLanguage('ru_RU', ['name' => 'Russian'], function () {
             return [];
         });
 
@@ -83,7 +83,7 @@ class TranslatorTest extends TestCase
 
         $translator->addLanguage('ro_RO', ['name' => 'Romanian']);
 
-        $translator->addLanguage('ru_RU', ['name' => 'Russian'], function() {
+        $translator->addLanguage('ru_RU', ['name' => 'Russian'], function () {
             return ['translate_key' => 'translate_text'];
         });
 
@@ -178,7 +178,8 @@ class TranslatorTest extends TestCase
 
         $translator->addLanguage('en_EN');
 
-        $translator->addLanguage('ro_RO', [], function () {});
+        $translator->addLanguage('ro_RO', [], function () {
+        });
 
         $this->assertArrayNotHasKey('en_EN', $translator->getTranslatesLoaders());
 
@@ -189,9 +190,11 @@ class TranslatorTest extends TestCase
     {
         $translator = new Translator();
 
-        $translator->addLanguage('en_EN', [], function () {});
+        $translator->addLanguage('en_EN', [], function () {
+        });
 
-        $translator->addLanguage('ro_RO', [], function () {});
+        $translator->addLanguage('ro_RO', [], function () {
+        });
 
         $this->assertTrue($translator->hasTranslatesLoaders());
 
@@ -204,7 +207,8 @@ class TranslatorTest extends TestCase
     {
         $translator = new Translator();
 
-        $translator->addLanguage('ro_RO', [], $callable = function () {});
+        $translator->addLanguage('ro_RO', [], $callable = function () {
+        });
 
         $this->assertEquals($callable, $translator->getTranslateLoader('ro_RO'));
     }
@@ -215,7 +219,8 @@ class TranslatorTest extends TestCase
 
         $translator->addLanguage('ro_RO');
 
-        $translator->addTranslateLoader('ro_RO', $callable = function () {});
+        $translator->addTranslateLoader('ro_RO', $callable = function () {
+        });
 
         $this->assertEquals($callable, $translator->getTranslateLoader('ro_RO'));
     }
@@ -226,7 +231,8 @@ class TranslatorTest extends TestCase
 
         $translator->addLanguage('ro_RO');
 
-        $translator->addTranslateLoader('ro_RO', $callable = function () {});
+        $translator->addTranslateLoader('ro_RO', $callable = function () {
+        });
 
         $this->assertTrue($translator->hasTranslateLoader('ro_RO'));
 
@@ -437,7 +443,7 @@ class TranslatorTest extends TestCase
 
         $this->assertEquals('Hello John! You have 100 credits.', $translator->translate('hello', ['name' => 'John', 100]));
     }
-    
+
     public function testCanGetNewTranslates()
     {
         $translator = new Translator();
