@@ -109,8 +109,6 @@ class HttpKernel
 
     private function controllerExists($name)
     {
-        dump($name, array_merge($this->controllersPrefixes, ['']));
-
         return Obj::exists($name, array_merge($this->controllersPrefixes, ['']));
     }
 
