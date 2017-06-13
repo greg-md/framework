@@ -25,7 +25,7 @@ class HeadMeta
     {
         $this->storage[$name] = [
             'property' => $name,
-            'content' => $this->cleanupContent($content),
+            'content'  => $this->cleanupContent($content),
         ];
 
         return $this;
@@ -35,7 +35,7 @@ class HeadMeta
     {
         $this->storage[$name] = [
             'http-equiv' => $name,
-            'content' => $this->cleanupContent($content),
+            'content'    => $this->cleanupContent($content),
         ];
 
         return $this;
