@@ -41,12 +41,12 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function hasLanguage(string $locale)
+    public function hasLanguage(string $locale): bool
     {
         return array_key_exists($locale, $this->languages);
     }
 
-    public function getLanguage(string $locale)
+    public function getLanguage(string $locale): array
     {
         return $this->hasLanguage($locale) ? $this->languages[$locale] : null;
     }
@@ -81,7 +81,7 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function getLocales()
+    public function getLocales(): array
     {
         return array_keys($this->languages);
     }
@@ -95,7 +95,7 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function getDefaultLanguage()
+    public function getDefaultLanguage(): string
     {
         return $this->defaultLanguage ?: $this->findLocale();
     }
@@ -109,7 +109,7 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function getCurrentLanguage()
+    public function getCurrentLanguage(): string
     {
         return $this->currentLanguage ?: $this->findLocale();
     }
@@ -209,12 +209,12 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function hasTranslate(string $locale, string $key)
+    public function hasTranslate(string $locale, string $key): bool
     {
         return array_key_exists($key, $this->translates[$locale] ?? []);
     }
 
-    public function getTranslate(string $locale, string $key)
+    public function getTranslate(string $locale, string $key): string
     {
         return $this->hasTranslate($locale, $key) ? $this->translates[$locale][$key] : null;
     }
@@ -242,22 +242,22 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    public function isDefault(string $locale)
+    public function isDefault(string $locale): bool
     {
         return $locale == $this->getDefaultLanguage();
     }
 
-    public function currentTranslates()
+    public function currentTranslates(): array
     {
         return $this->translates[$this->getCurrentLanguage()] ?? [];
     }
 
-    public function translate(string $key, ...$arguments)
+    public function translate(string $key, ...$arguments): string
     {
         return $this->translateKey($key, $key, ...$arguments);
     }
 
-    public function translateKey(string $key, string $default, ...$arguments)
+    public function translateKey(string $key, string $default, ...$arguments): string
     {
         if (count($arguments) == 1) {
             $arguments = (array) $arguments[0];
@@ -266,7 +266,7 @@ class Translator implements \ArrayAccess
         return TranslateText::applyArguments($this->findText($key, $default), $arguments);
     }
 
-    public function newTranslates()
+    public function newTranslates(): array
     {
         return $this->newTranslates;
     }
@@ -291,7 +291,7 @@ class Translator implements \ArrayAccess
         return $this->removeTranslate($this->getCurrentLanguage(), $key);
     }
 
-    public function __invoke(string $key, ...$arguments)
+    public function __invoke(string $key, ...$arguments): string
     {
         return $this->translate($key, ...$arguments);
     }
@@ -305,12 +305,12 @@ class Translator implements \ArrayAccess
         return $this;
     }
 
-    private function findLocale()
+    private function findLocale(): string
     {
         return setlocale(LC_CTYPE, 0);
     }
 
-    private function findText(string $key, string $default)
+    private function findText(string $key, string $default): string
     {
         if (array_key_exists($key, $translates = $this->currentTranslates())) {
             return $translates[$key];
