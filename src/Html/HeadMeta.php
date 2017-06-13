@@ -83,12 +83,12 @@ class HeadMeta
         return $this->name('keywords', $name);
     }
 
-    public function viewPort($name)
+    public function viewport($name)
     {
         return $this->name('viewport', $name);
     }
 
-    public function toObjects()
+    public function toObjects(): array
     {
         $items = [];
 
@@ -99,7 +99,7 @@ class HeadMeta
         return $items;
     }
 
-    public function toString()
+    public function toString(): string
     {
         return implode("\n", $this->toObjects());
     }
@@ -109,7 +109,7 @@ class HeadMeta
         return $this->toString();
     }
 
-    private function cleanupContent($content)
+    private function cleanupContent($content): string
     {
         return HtmlElement::cleanupAttribute(trim(strip_tags($content)));
     }

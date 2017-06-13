@@ -6,32 +6,26 @@ class HtmlElement implements \ArrayAccess
 {
     const SHORT_TAGS = 'h1,h2,h3,h4,h5,h6,input,hr,br,link,meta,img,keygen';
 
-    protected $name;
+    private $name;
 
-    protected $attributes = [];
+    private $attributes = [];
 
     private $content;
 
     private $condition;
 
-    public function __construct($name = null, array $attributes = [], string $condition = null)
+    public function __construct($name, array $attributes = [], string $condition = null)
     {
-        if ($name !== null) {
-            $this->name = $name;
-        }
+        $this->name = $name;
 
-        if ($attributes) {
-            $this->attributes = array_merge($this->attributes, $attributes);
-        }
+        $this->attributes = $attributes;
 
-        if ($condition !== null) {
-            $this->setCondition($condition);
-        }
+        $this->condition = $condition;
 
         return $this;
     }
 
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
@@ -44,6 +38,20 @@ class HtmlElement implements \ArrayAccess
     public function getAttributes(): array
     {
         return $this->attributes;
+    }
+
+    public function setAttributes(array $attributes)
+    {
+        $this->attributes = $attributes;
+
+        return $this;
+    }
+
+    public function addAttributes(array $attributes)
+    {
+        $this->attributes = array_merge($this->attributes, $attributes);
+
+        return $this;
     }
 
     public function clearAttributes()
@@ -84,31 +92,31 @@ class HtmlElement implements \ArrayAccess
         return $this;
     }
 
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->content;
     }
 
-    public function setCondition($condition)
+    public function setCondition(string $condition)
     {
-        $this->condition = (string) $condition;
+        $this->condition = $condition;
 
         return $this;
     }
 
-    public function getCondition()
+    public function getCondition(): ?string
     {
         return $this->condition;
     }
 
-    public function startTag()
+    public function startTag(): string
     {
         $attr = $this->attrToString();
 
         return '<' . $this->name() . ($attr ? ' ' . $attr : '') . ($this->isShortElement() ? ' /' : '') . '>';
     }
 
-    public function endTag()
+    public function endTag(): ?string
     {
         return $this->isShortElement() ? null : '</' . $this->name() . '>';
     }
@@ -149,12 +157,12 @@ class HtmlElement implements \ArrayAccess
         return $this->toString();
     }
 
-    public static function cleanupAttribute(string $content)
+    public static function cleanupAttribute(string $content): string
     {
         return htmlspecialchars(preg_replace('#\n+#', ' ', $content));
     }
 
-    private function attrToString()
+    private function attrToString(): string
     {
         $attr = [];
 
@@ -171,7 +179,7 @@ class HtmlElement implements \ArrayAccess
         return implode(' ', $attr);
     }
 
-    private function isShortElement()
+    private function isShortElement(): bool
     {
         return in_array($this->name(), explode(',', static::SHORT_TAGS));
     }
