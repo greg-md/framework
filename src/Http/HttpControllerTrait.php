@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Http;
+namespace Greg\Framework\Http;
 
 use Greg\Support\Http\Response;
 
@@ -11,7 +11,7 @@ trait HttpControllerTrait
         return new Response();
     }
 
-    protected function location($location = null)
+    protected function location(string $location = null)
     {
         $response = $this->response();
 
@@ -38,7 +38,7 @@ trait HttpControllerTrait
         return $this->response()->back();
     }
 
-    protected function json($data = [])
+    protected function json($data)
     {
         $response = $this->response();
 
@@ -47,8 +47,12 @@ trait HttpControllerTrait
         return $response;
     }
 
-    protected function download($content, $name = null, $type = null)
+    protected function download(string $content, string $name = null, string $type = null)
     {
-        return $this->response()->download($content, $name, $type);
+        $response = $this->response();
+
+        $response->download($content, $name, $type);
+
+        return $response;
     }
 }

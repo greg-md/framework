@@ -4,7 +4,7 @@ namespace Greg\Framework;
 
 use Greg\Support\Str;
 
-abstract class Bootstrap implements BootstrapInterface
+abstract class Bootstrap implements BootstrapStrategy
 {
     private $application;
 

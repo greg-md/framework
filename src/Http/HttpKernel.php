@@ -3,14 +3,12 @@
 namespace Greg\Framework\Http;
 
 use Greg\Framework\Application;
-use Greg\Framework\KernelStrategy;
-use Greg\Routing\Route;
 use Greg\Routing\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
 use Greg\Support\Obj;
 
-class HttpKernel implements KernelStrategy
+class HttpKernel
 {
     const EVENT_RUN = 'http.run';
 
@@ -28,9 +26,9 @@ class HttpKernel implements KernelStrategy
 
     private $loadedControllers = [];
 
-    public function __construct(Application $app, Router $router = null)
+    public function __construct(Application $app = null, Router $router = null)
     {
-        $this->app = $app;
+        $this->app = $app ?: new Application();
 
         $this->router = $router ?: new Router();
 
@@ -51,17 +49,10 @@ class HttpKernel implements KernelStrategy
         return $this->router;
     }
 
-    public function addControllersPrefix($prefix)
+    public function addControllersPrefixes(string $prefix, string ...$prefixes)
     {
         $this->controllersPrefixes[] = (string) $prefix;
 
-        $this->fixControllersPrefixes();
-
-        return $this;
-    }
-
-    public function addControllersPrefixes(array $prefixes)
-    {
         $this->controllersPrefixes = array_merge($this->controllersPrefixes, $prefixes);
 
         $this->fixControllersPrefixes();
@@ -69,9 +60,11 @@ class HttpKernel implements KernelStrategy
         return $this;
     }
 
-    public function setControllersPrefixes(array $prefixes)
+    public function setControllersPrefixes(string $prefix, string ...$prefixes)
     {
         $this->controllersPrefixes = $prefixes;
+
+        array_unshift($this->controllersPrefixes, $prefix);
 
         $this->fixControllersPrefixes();
 
@@ -114,9 +107,18 @@ class HttpKernel implements KernelStrategy
     {
     }
 
-    protected function addDispatcherToRouter()
+    private function controllerExists($name)
+    {
+        return Obj::exists($name, array_merge($this->controllersPrefixes, ['']));
+    }
+
+    private function addDispatcherToRouter()
     {
         $this->router->setDispatcher(function ($action) {
+            if (!is_scalar($action)) {
+                return $action;
+            }
+
             $parts = explode('@', $action, 2);
 
             if (!isset($parts[1])) {
@@ -133,15 +135,15 @@ class HttpKernel implements KernelStrategy
 
             $action = [$controller, $actionName];
 
-            return function (Route $route, ...$params) use ($action) {
-                return $this->app->ioc()->call($action, $route, ...$params);
+            return function (...$params) use ($action) {
+                return $this->app->ioc()->call($action, ...$params);
             };
         });
 
         return $this;
     }
 
-    protected function getController($name)
+    private function getController($name)
     {
         if (!$className = $this->controllerExists($name)) {
             throw new \Exception('Controller `' . $name . '` not found.');
@@ -156,12 +158,7 @@ class HttpKernel implements KernelStrategy
         return $this->loadedControllers[$className];
     }
 
-    protected function controllerExists($name)
-    {
-        return Obj::exists($name, array_merge($this->controllersPrefixes, ['']));
-    }
-
-    protected function fixControllersPrefixes()
+    private function fixControllersPrefixes()
     {
         $this->controllersPrefixes = array_unique($this->controllersPrefixes);
 

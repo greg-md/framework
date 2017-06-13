@@ -1,8 +1,8 @@
 <?php
 
-namespace Greg\Console;
+namespace Greg\Framework\Console;
 
-use Symfony\Component\Console\Application;
+use Greg\Framework\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -14,41 +14,43 @@ class ConsoleKernel
 
     private $app = null;
 
-    private $consoleApp = null;
+    private $console = null;
 
-    public function __construct(ApplicationContract $app)
+    public function __construct(Application $app = null, \Symfony\Component\Console\Application $console = null)
     {
-        $this->app = $app;
+        $this->app = $app ?: new Application();
 
-        $this->consoleApp = new Application('Greg Application', '1.0.0');
+        $this->console = $console ?: new \Symfony\Component\Console\Application();
+
+        $this->console->setAutoExit(false);
 
         $this->boot();
 
         return $this;
     }
 
-    protected function boot()
-    {
-    }
-
-    public function run(InputInterface $input = null, OutputInterface $output = null)
-    {
-        $this->app->fireWith(static::EVENT_RUN, $this->consoleApp);
-
-        $response = $this->consoleApp->run($input, $output);
-
-        $this->app->fireWith(static::EVENT_FINISHED, $this->consoleApp);
-
-        return $response;
-    }
-
-    public function app()
+    public function app(): Application
     {
         return $this->app;
     }
 
-    public function consoleApp()
+    public function console(): \Symfony\Component\Console\Application
     {
-        return $this->consoleApp;
+        return $this->console;
+    }
+
+    public function run(InputInterface $input = null, OutputInterface $output = null): int
+    {
+        $this->app->fire(static::EVENT_RUN, $this->console);
+
+        $response = $this->console->run($input, $output);
+
+        $this->app->fire(static::EVENT_FINISHED, $this->console, $response);
+
+        return $response;
+    }
+
+    protected function boot()
+    {
     }
 }

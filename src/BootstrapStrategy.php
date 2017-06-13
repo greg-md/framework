@@ -2,7 +2,7 @@
 
 namespace Greg\Framework;
 
-interface BootstrapInterface
+interface BootstrapStrategy
 {
     public function boot(Application $application);
 }

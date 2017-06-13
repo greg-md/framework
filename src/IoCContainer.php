@@ -145,7 +145,7 @@ class IoCContainer
         return Obj::callArgs($callable, $arguments);
     }
 
-    protected function prefixIsRegistered($className): bool
+    private function prefixIsRegistered($className): bool
     {
         foreach ($this->prefixes as $prefix) {
             if (strpos($className, $prefix) === 0) {
@@ -156,14 +156,14 @@ class IoCContainer
         return false;
     }
 
-    protected function fixPrefixes()
+    private function fixPrefixes()
     {
         $this->prefixes = array_unique($this->prefixes);
 
         return $this;
     }
 
-    protected function populateParameters(array $parameters, array $arguments = [])
+    private function populateParameters(array $parameters, array $arguments = [])
     {
         return Obj::populateParameters($parameters, $arguments, function (\ReflectionParameter $parameter) {
             $className = $parameter->getClass()->getName();

@@ -31,8 +31,8 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        /** @var BootstrapInterface|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapInterface::class)->getMock();
+        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
 
         $bootstrap->expects($this->once())->method('boot');
 
@@ -43,8 +43,8 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        /** @var BootstrapInterface|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapInterface::class)->getMock();
+        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
 
         $app->bootstrap($bootstrap);
 
@@ -55,8 +55,8 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        /** @var BootstrapInterface|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapInterface::class)->getMock();
+        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
 
         $app->bootstrap($bootstrap);
 
