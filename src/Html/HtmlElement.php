@@ -1,34 +1,27 @@
 <?php
 
-namespace Greg\Html;
-
-use Greg\Support\Accessor\AccessorTrait;
-use Greg\Support\Accessor\ArrayAccessTrait;
+namespace Greg\Framework\Html;
 
 class HtmlElement implements \ArrayAccess
 {
-    use AccessorTrait, ArrayAccessTrait;
-
     const SHORT_TAGS = 'h1,h2,h3,h4,h5,h6,input,hr,br,link,meta,img,keygen';
 
-    protected $name = null;
+    protected $name;
 
-    protected $inner = null;
+    protected $attributes = [];
 
-    protected $before = null;
+    private $content;
 
-    protected $after = null;
+    private $condition;
 
-    protected $condition = null;
-
-    public function __construct($name = null, array $attr = [], $condition = null)
+    public function __construct($name = null, array $attributes = [], string $condition = null)
     {
         if ($name !== null) {
-            $this->setName($name);
+            $this->name = $name;
         }
 
-        if ($attr) {
-            $this->addToAccessor($attr);
+        if ($attributes) {
+            $this->attributes = array_merge($this->attributes, $attributes);
         }
 
         if ($condition !== null) {
@@ -38,61 +31,62 @@ class HtmlElement implements \ArrayAccess
         return $this;
     }
 
-    public static function clearAttrValue($content)
+    public function name()
     {
-        return htmlspecialchars(preg_replace('#\n+#', ' ', trim(strip_tags($content))));
-    }
-
-    public function setName($name)
-    {
-        $this->name = (string) $name;
-
-        return $this;
-    }
-
-    public function getName()
-    {
-        if (!$this->name) {
-            throw new \Exception('Undefined tag name.');
-        }
-
         return $this->name;
     }
 
-    public function setInner($html)
+    public function hasAttributes(): bool
     {
-        $this->inner = (string) $html;
+        return (bool) $this->attributes;
+    }
+
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    public function clearAttributes()
+    {
+        $this->attributes = [];
 
         return $this;
     }
 
-    public function getInner()
+    public function hasAttribute(string $name): bool
     {
-        return $this->inner;
+        return array_key_exists($name, $this->attributes);
     }
 
-    public function setBefore($html)
+    public function getAttribute(string $name): ?string
     {
-        $this->before = (string) $html;
+        return $this->hasAttribute($name) ? $this->attributes[$name] : null;
+    }
+
+    public function addAttribute(string $name, string $value = null)
+    {
+        $this->attributes[$name] = $value;
 
         return $this;
     }
 
-    public function getBefore()
+    public function removeAttribute(string $name)
     {
-        return $this->before;
-    }
-
-    public function setAfter($html)
-    {
-        $this->after = (string) $html;
+        unset($this->attributes[$name]);
 
         return $this;
     }
 
-    public function getAfter()
+    public function setContent(string $content)
     {
-        return $this->after;
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function getContent()
+    {
+        return $this->content;
     }
 
     public function setCondition($condition)
@@ -111,17 +105,63 @@ class HtmlElement implements \ArrayAccess
     {
         $attr = $this->attrToString();
 
-        return '<' . $this->getName() . ($attr ? ' ' . $attr : '') . ($this->short() ? ' /' : '') . '>';
+        return '<' . $this->name() . ($attr ? ' ' . $attr : '') . ($this->isShortElement() ? ' /' : '') . '>';
     }
 
-    protected function attrToString()
+    public function endTag()
+    {
+        return $this->isShortElement() ? null : '</' . $this->name() . '>';
+    }
+
+    public function toString()
+    {
+        $string = $this->startTag() . $this->content . $this->endTag();
+
+        if ($condition = $this->getCondition()) {
+            $string = '<!--[if ' . $condition . ']>' . $string . '<![endif]-->';
+        }
+
+        return $string;
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->hasAttribute($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->getAttribute($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        return $this->addAttribute($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        return $this->removeAttribute($offset);
+    }
+
+    public function __toString()
+    {
+        return $this->toString();
+    }
+
+    public static function cleanupAttribute(string $content)
+    {
+        return htmlspecialchars(preg_replace('#\n+#', ' ', $content));
+    }
+
+    private function attrToString()
     {
         $attr = [];
 
-        foreach ($this->getAccessor() as $key => $value) {
-            $value = htmlspecialchars((string) $value);
+        foreach ($this->attributes as $key => $value) {
+            $value = $this->cleanupAttribute($value);
 
-            if ($value != '') {
+            if ($value !== null || $value !== '') {
                 $key .= '="' . $value . '"';
             }
 
@@ -131,29 +171,8 @@ class HtmlElement implements \ArrayAccess
         return implode(' ', $attr);
     }
 
-    protected function short()
+    private function isShortElement()
     {
-        return in_array($this->getName(), explode(',', static::SHORT_TAGS));
-    }
-
-    public function endTag()
-    {
-        return !$this->short() ? '</' . $this->getName() . '>' : null;
-    }
-
-    public function toString()
-    {
-        $string = $this->startTag() . $this->getInner() . $this->endTag();
-
-        if ($condition = $this->getCondition()) {
-            $string = '<!--[if ' . $condition . ']>' . $string . '<![endif]-->';
-        }
-
-        return $this->getBefore() . $string . $this->getAfter();
-    }
-
-    public function __toString()
-    {
-        return $this->toString();
+        return in_array($this->name(), explode(',', static::SHORT_TAGS));
     }
 }

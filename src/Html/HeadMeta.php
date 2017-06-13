@@ -1,72 +1,56 @@
 <?php
 
-namespace Greg\Html;
+namespace Greg\Framework\Html;
 
 class HeadMeta
 {
     private $storage = [];
 
-    public function getName($name)
+    public function get(string $name): ?array
     {
         return $this->storage[$name] ?? null;
     }
 
-    public function setName($name, $content)
+    public function name(string $name, string $content)
     {
         $this->storage[$name] = [
             'name'    => $name,
-            'content' => HtmlElement::clearAttrValue($content),
+            'content' => $this->cleanupContent($content),
         ];
 
         return $this;
     }
 
-    public function getProperty($name)
+    public function property(string $name, string $content)
     {
-        return $this->getFromAccessor($name);
-    }
-
-    public function setProperty($name, $content)
-    {
-        $this->setToAccessor($name, [
+        $this->storage[$name] = [
             'property' => $name,
-            'content'  => HtmlElement::clearAttrValue($content),
-        ]);
-    }
-
-    public function getHttpEquiv($name)
-    {
-        return $this->getFromAccessor($name);
-    }
-
-    public function setHttpEquiv($name, $content)
-    {
-        $this->setToAccessor($name, [
-            'http-equiv' => $name,
-            'content'    => HtmlElement::clearAttrValue($content),
-        ]);
+            'content' => $this->cleanupContent($content),
+        ];
 
         return $this;
     }
 
-    public function getCharset()
+    public function httpEquiv(string $name, string $content)
     {
-        return $this->getFromAccessor('charset');
+        $this->storage[$name] = [
+            'http-equiv' => $name,
+            'content' => $this->cleanupContent($content),
+        ];
+
+        return $this;
     }
 
-    public function setCharset($charset)
+    public function charset(string $charset)
     {
-        $this->setToAccessor('charset', [
-            'charset' => HtmlElement::clearAttrValue($charset),
-        ]);
+        $this->storage['charset'] = [
+            'charset' => $this->cleanupContent($charset),
+        ];
+
+        return $this;
     }
 
-    public function getRefresh()
-    {
-        return $this->getHttpEquiv('refresh');
-    }
-
-    public function setRefresh($timeout = 0, $url = null)
+    public function refresh(int $timeout = 0, string $url = null)
     {
         $content = [
             $timeout,
@@ -76,65 +60,40 @@ class HeadMeta
             $content[] = 'url=' . $url;
         }
 
-        return $this->setHttpEquiv('refresh', implode('; ', $content));
+        return $this->httpEquiv('refresh', implode('; ', $content));
     }
 
-    public function getAuthor()
+    public function author($name)
     {
-        return $this->getName('author');
+        return $this->name('author', $name);
     }
 
-    public function setAuthor($name)
+    public function description($name)
     {
-        return $this->setName('author', $name);
+        return $this->name('description', $name);
     }
 
-    public function getDescription()
+    public function generator($name)
     {
-        return $this->getName('description');
+        return $this->name('generator', $name);
     }
 
-    public function setDescription($name)
+    public function keywords($name)
     {
-        return $this->setName('description', $name);
+        return $this->name('keywords', $name);
     }
 
-    public function getGenerator()
+    public function viewPort($name)
     {
-        return $this->getName('generator');
-    }
-
-    public function setGenerator($name)
-    {
-        return $this->setName('generator', $name);
-    }
-
-    public function getKeywords()
-    {
-        return $this->getName('keywords');
-    }
-
-    public function setKeywords($name)
-    {
-        return $this->setName('keywords', $name);
-    }
-
-    public function getViewPort()
-    {
-        return $this->getName('viewport');
-    }
-
-    public function setViewPort($name)
-    {
-        return $this->setName('viewport', $name);
+        return $this->name('viewport', $name);
     }
 
     public function toObjects()
     {
         $items = [];
 
-        foreach ($this->getAccessor() as $id => $attr) {
-            $items[$id] = new HtmlElement('meta', $attr);
+        foreach ($this->storage as $key => $attr) {
+            $items[$key] = new HtmlElement('meta', $attr);
         }
 
         return $items;
@@ -148,5 +107,10 @@ class HeadMeta
     public function __toString()
     {
         return $this->toString();
+    }
+
+    private function cleanupContent($content)
+    {
+        return HtmlElement::cleanupAttribute(trim(strip_tags($content)));
     }
 }

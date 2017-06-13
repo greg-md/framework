@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Html;
+namespace Greg\Framework\Html;
 
 class HeadStyle extends HtmlScript
 {

@@ -1,28 +1,28 @@
 <?php
 
-namespace Greg\Html;
+namespace Greg\Framework\Html;
 
-class HeadLink
+class HeadLinks
 {
     private $storage = [];
 
-    public function set($rel, $href, array $attr = [], $id = null)
+    public function set($rel, $href, array $attr = [], $key = null)
     {
-        $this->storage[$id] = ['rel' => $rel, 'href' => $href] + $attr;
+        $this->storage[$key] = ['rel' => $rel, 'href' => $href] + $attr;
 
         return $this;
     }
 
-    public function icon($href, $type, array $attr = [], $id = null)
+    public function icon($href, $type, array $attr = [], $key = null)
     {
         $attr['type'] = $type;
 
-        return $this->set(__FUNCTION__, $href, $attr, $id);
+        return $this->set(__FUNCTION__, $href, $attr, $key);
     }
 
-    public function style($href, array $attr = [], $id = null)
+    public function style($href, array $attr = [], $key = null)
     {
-        $this->set('stylesheet', $href, $attr, $id);
+        $this->set('stylesheet', $href, $attr, $key);
     }
 
     public function toObjects()

@@ -4,11 +4,11 @@ namespace Greg\Framework\Pagination;
 
 interface PaginationStrategy
 {
-    public function getPaginationCount();
+    public function paginationTotal(): int;
 
-    public function getPaginationTotal();
+    public function paginationPage(): int;
 
-    public function getPaginationPage();
+    public function paginationLimit(): int;
 
-    public function getPaginationLimit();
+    public function paginationCount(): int;
 }

@@ -4,81 +4,72 @@ namespace Greg\Framework\Pagination;
 
 class BasePagination implements \Countable
 {
-    /**
-     * @var PaginationStrategy|null
-     */
-    protected $adapter = null;
+    private $adapter = null;
 
-    public function setAdapter(PaginationStrategy $adapter)
+    public function __construct(PaginationStrategy $adapter)
     {
         $this->adapter = $adapter;
-
-        return $this;
     }
 
-    public function getAdapter()
+    public function adapter(): PaginationStrategy
     {
-        if (!$this->adapter) {
-            throw new \Exception('Pagination adapter is not defined.');
-        }
-
         return $this->adapter;
     }
 
-    public function count()
+    public function total(): int
     {
-        return $this->getAdapter()->getPaginationCount();
+        return $this->adapter->paginationTotal();
     }
 
-    public function offset()
+    public function page(): int
     {
-        return ($this->getPage() - 1) * $this->getLimit();
+        return $this->adapter->paginationPage();
     }
 
-    public function maxPage()
+    public function limit(): int
+    {
+        return $this->adapter->paginationLimit();
+    }
+
+    public function count(): int
+    {
+        return $this->adapter->paginationCount();
+    }
+
+    public function offset(): int
+    {
+        return ($this->page() - 1) * $this->limit();
+    }
+
+    public function maxPage(): int
     {
         $maxPage = 1;
 
-        if (($total = $this->getTotal()) > 0) {
-            $maxPage = ceil($total / $this->getLimit());
+        if (($total = $this->total()) > 0) {
+            $maxPage = ceil($total / $this->limit());
         }
 
         return $maxPage;
     }
 
-    public function prevPage()
+    public function prevPage(): int
     {
-        $page = $this->getPage() - 1;
+        $page = $this->page() - 1;
 
         return $page > 1 ? $page : 1;
     }
 
-    public function nextPage()
+    public function nextPage(): int
     {
-        $page = $this->getPage() + 1;
+        $page = $this->page() + 1;
 
         $maxPage = $this->maxPage();
 
         return $page > $maxPage ? $maxPage : $page;
     }
 
-    public function hasMorePages()
+    public function hasMorePages(): bool
     {
-        return $this->getPage() < $this->maxPage();
-    }
-
-    public function getTotal()
-    {
-        return $this->getAdapter()->getPaginationTotal();
-    }
-
-    public function getPage()
-    {
-        return $this->getAdapter()->getPaginationPage();
-    }
-
-    public function getLimit()
-    {
-        return $this->getAdapter()->getPaginationLimit();
+        return $this->page() < $this->maxPage();
     }
 }

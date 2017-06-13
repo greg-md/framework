@@ -4,11 +4,23 @@ namespace Greg\Framework\Pagination;
 
 class RangePagination extends BasePagination
 {
-    private $interval = 2;
+    private $interval;
 
-    public function startPage()
+    public function __construct(PaginationStrategy $adapter, int $interval = 2)
     {
-        $startPage = $this->getPage() - $this->getInterval();
+        $this->interval = $interval;
+
+        return parent::__construct($adapter);
+    }
+
+    public function interval(): int
+    {
+        return $this->interval;
+    }
+
+    public function startPage(): int
+    {
+        $startPage = $this->page() - $this->interval;
 
         if ($startPage < 1) {
             $startPage = 1;
@@ -17,9 +29,9 @@ class RangePagination extends BasePagination
         return $startPage;
     }
 
-    public function endPage()
+    public function endPage(): int
     {
-        $endPage = $this->getPage() + $this->getInterval();
+        $endPage = $this->page() + $this->interval;
 
         if ($endPage > $this->maxPage()) {
             $endPage = $this->maxPage();
@@ -28,10 +40,10 @@ class RangePagination extends BasePagination
         return $endPage;
     }
 
-    public function prevPageRange()
+    public function prevPageRange(): ?int
     {
-        if ($this->startPage() > 1) {
-            $prevRangePage = $this->startPage() - ($this->getInterval() + 1);
+        if (($startPage = $this->startPage()) > 1) {
+            $prevRangePage = $startPage - ($this->interval + 1);
 
             if ($prevRangePage < 1) {
                 $prevRangePage = 1;
@@ -43,30 +55,21 @@ class RangePagination extends BasePagination
         return null;
     }
 
-    public function nextPageRange()
+    public function nextPageRange(): ?int
     {
-        if ($this->endPage() < $this->maxPage()) {
-            $nextRangePage = $this->endPage() + ($this->getInterval() + 1);
+        $endPage = $this->endPage();
+        $maxPage = $this->maxPage();
 
-            if ($nextRangePage > $this->maxPage()) {
-                $nextRangePage = $this->maxPage();
+        if ($endPage < $maxPage) {
+            $nextRangePage = $endPage + ($this->interval + 1);
+
+            if ($nextRangePage > $maxPage) {
+                $nextRangePage = $maxPage;
             }
 
             return $nextRangePage;
         }
 
         return null;
-    }
-
-    public function setInterval($number)
-    {
-        $this->interval = (int) $number;
-
-        return $this;
-    }
-
-    public function getInterval()
-    {
-        return $this->interval;
     }
 }

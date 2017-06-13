@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Html;
+namespace Greg\Framework\Html;
 
 use Greg\Support\Accessor\AccessorTrait;
 
