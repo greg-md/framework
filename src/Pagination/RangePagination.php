@@ -1,6 +1,6 @@
 <?php
 
-namespace Greg\Pagination;
+namespace Greg\Framework\Pagination;
 
 class RangePagination extends BasePagination
 {

@@ -46,7 +46,7 @@ class Translator implements \ArrayAccess
         return array_key_exists($locale, $this->languages);
     }
 
-    public function getLanguage(string $locale): array
+    public function getLanguage(string $locale): ?array
     {
         return $this->hasLanguage($locale) ? $this->languages[$locale] : null;
     }
