@@ -20,7 +20,7 @@ abstract class Bootstrap implements BootstrapStrategy
         return $this->application;
     }
 
-    public function application(): Application
+    public function app(): Application
     {
         if (!$this->application) {
             throw new \Exception('Application not defined in bootstrap.');
@@ -46,7 +46,7 @@ abstract class Bootstrap implements BootstrapStrategy
                     continue;
                 }
 
-                $this->application()->ioc()->call([$this, $method]);
+                $this->app()->ioc()->call([$this, $method]);
 
                 $this->booted[] = $dependency;
             }
@@ -66,7 +66,7 @@ abstract class Bootstrap implements BootstrapStrategy
                 throw new \Exception('Bootable dependency `' . $dependency . '` does not exists.');
             }
 
-            $this->application()->ioc()->call([$this, $method]);
+            $this->app()->ioc()->call([$this, $method]);
 
             $this->booted[] = $dependency;
         }

@@ -85,7 +85,7 @@ class HttpKernel
         $this->app->fire(static::EVENT_RUN, $path);
 
         if ($route = $this->router->detect($path, $method, $data)) {
-            $this->app->fire(static::EVENT_DISPATCHING, $path, $route);
+            $this->app->fire(static::EVENT_DISPATCHING, $path, $route, $data);
 
             $response = $route->exec($data);
 
@@ -93,7 +93,7 @@ class HttpKernel
                 $response = new Response($response);
             }
 
-            $this->app->fire(static::EVENT_DISPATCHED, $path, $route, $response);
+            $this->app->fire(static::EVENT_DISPATCHED, $path, $route, $data, $response);
         } else {
             $response = new Response('Route not found.', null, 404);
         }

@@ -25,7 +25,7 @@ class BootstrapTest extends TestCase
 
         $bootstrap->setApplication(new Application());
 
-        $this->assertInstanceOf(Application::class, $bootstrap->application());
+        $this->assertInstanceOf(Application::class, $bootstrap->app());
     }
 
     public function testCanThrowExceptionIfApplicationIsNotDefined()
@@ -36,7 +36,7 @@ class BootstrapTest extends TestCase
 
         $this->expectException(\Exception::class);
 
-        $bootstrap->application();
+        $bootstrap->app();
     }
 
     public function testCanBootWithDependencies()
