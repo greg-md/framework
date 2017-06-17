@@ -52,7 +52,7 @@ class IoCContainer
             throw new \Exception('`' . $abstract . '` is already in use in IoC Container.');
         }
 
-        if (is_callable($concrete) or (is_string($concrete) and class_exists($concrete, false))) {
+        if (is_callable($concrete) or (is_string($concrete) and class_exists($concrete))) {
             $this->storage[$abstract] = [
                 'loader'    => $concrete,
                 'arguments' => $arguments,

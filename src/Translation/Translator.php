@@ -111,7 +111,7 @@ class Translator implements \ArrayAccess
 
     public function getCurrentLanguage(): string
     {
-        return $this->currentLanguage ?: $this->findLocale();
+        return $this->currentLanguage ?: $this->getDefaultLanguage();
     }
 
     public function hasTranslatesLoaders(): bool
