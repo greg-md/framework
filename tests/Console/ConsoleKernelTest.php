@@ -37,7 +37,7 @@ class ConsoleKernelTest extends TestCase
     {
         $kernel = new ConsoleKernel();
 
-        $kernel->addCommand(new class extends Command {
+        $kernel->addCommand(new class() extends Command {
             protected function configure()
             {
                 $this->setName('hello');
