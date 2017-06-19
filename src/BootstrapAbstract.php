@@ -2,13 +2,11 @@
 
 namespace Greg\Framework;
 
-use Greg\Support\Str;
-
 abstract class BootstrapAbstract implements BootstrapStrategy
 {
-    private $application;
+    use BootingTrait;
 
-    private $booted = [];
+    private $application;
 
     public function app(): Application
     {
@@ -19,53 +17,20 @@ abstract class BootstrapAbstract implements BootstrapStrategy
         return $this->application;
     }
 
-    public function boot(Application $application)
+    public function ioc(): IoCContainer
     {
-        $this->application = $application;
-
-        // Call all methods which starts with "boot"
-        foreach (get_class_methods($this) as $method) {
-            if ($method === 'boot') {
-                continue;
-            }
-
-            if (Str::startsWith($method, 'boot') and mb_strtoupper($method[4]) === $method[4]) {
-                $dependency = lcfirst(mb_substr($method, 4));
-
-                if (in_array($dependency, $this->booted)) {
-                    continue;
-                }
-
-                $application->ioc()->call([$this, $method]);
-
-                $this->booted[] = $dependency;
-            }
-        }
-
-        return $this;
+        return $this->app()->ioc();
     }
 
-    public function dependsOn(string ...$dependencies)
+    public function boot(Application $kernel)
     {
-        foreach ($dependencies as $dependency) {
-            if (in_array($dependency, $this->booted)) {
-                continue;
-            }
+        $this->application = $kernel;
 
-            if (!method_exists($this, $method = 'boot' . ucfirst($dependency))) {
-                throw new \Exception('Bootable dependency `' . $dependency . '` does not exists.');
-            }
-
-            $this->app()->ioc()->call([$this, $method]);
-
-            $this->booted[] = $dependency;
-        }
-
-        return $this;
+        return $this->bootstrap();
     }
 
-    public function booted(): array
+    protected function booting(string $method)
     {
-        return $this->booted;
+        return $this->app()->ioc()->call([$this, $method]);
     }
 }

@@ -4,6 +4,8 @@ namespace Greg\Framework;
 
 class Application implements \ArrayAccess
 {
+    use BootstrapTrait;
+
     const EVENT_RUN = 'app.run';
 
     const EVENT_FINISHED = 'app.finished';
@@ -12,8 +14,6 @@ class Application implements \ArrayAccess
 
     private $ioc = null;
 
-    private $bootstraps = [];
-
     private $events = [];
 
     public function __construct(Config $config = null, IoCContainer $ioc = null)
@@ -21,8 +21,6 @@ class Application implements \ArrayAccess
         $this->config = $config ?: new Config();
 
         $this->ioc = $ioc ?: new IoCContainer();
-
-        $this->ioc->register($this);
 
         $this->boot();
 
@@ -41,21 +39,11 @@ class Application implements \ArrayAccess
 
     public function bootstrap(BootstrapStrategy $class)
     {
-        $this->bootstraps[get_class($class)] = $class;
+        $this->setBootstrap($class);
 
         $class->boot($this);
 
         return $this;
-    }
-
-    public function getBootstrap(string $name)
-    {
-        return $this->bootstraps[$name] ?? null;
-    }
-
-    public function getBootstraps()
-    {
-        return $this->bootstraps;
     }
 
     public function listen($eventNames, $listener)

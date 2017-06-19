@@ -3,6 +3,7 @@
 namespace Greg\Framework\Http;
 
 use Greg\Framework\Application;
+use Greg\Framework\BootstrapTrait;
 use Greg\Routing\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
@@ -10,6 +11,8 @@ use Greg\Support\Obj;
 
 class HttpKernel
 {
+    use BootstrapTrait;
+
     const EVENT_RUN = 'http.run';
 
     const EVENT_DISPATCHING = 'http.dispatching';
@@ -32,8 +35,6 @@ class HttpKernel
 
         $this->router = $router ?: new Router();
 
-        $this->app->ioc()->register($this->router);
-
         $this->addDispatcherToRouter();
 
         $this->boot();
@@ -49,6 +50,15 @@ class HttpKernel
     public function router(): Router
     {
         return $this->router;
+    }
+
+    public function bootstrap(BootstrapStrategy $class)
+    {
+        $this->setBootstrap($class);
+
+        $class->boot($this);
+
+        return $this;
     }
 
     public function addControllersPrefixes(string $prefix, string ...$prefixes)
