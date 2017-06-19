@@ -10,16 +10,6 @@ abstract class BootstrapAbstract implements BootstrapStrategy
 
     private $booted = [];
 
-    public function setApplication(Application $application)
-    {
-        $this->application = $application;
-    }
-
-    public function getApplication(): ?Application
-    {
-        return $this->application;
-    }
-
     public function app(): Application
     {
         if (!$this->application) {
@@ -31,7 +21,7 @@ abstract class BootstrapAbstract implements BootstrapStrategy
 
     public function boot(Application $application)
     {
-        $this->setApplication($application);
+        $this->application = $application;
 
         // Call all methods which starts with "boot"
         foreach (get_class_methods($this) as $method) {
@@ -46,7 +36,7 @@ abstract class BootstrapAbstract implements BootstrapStrategy
                     continue;
                 }
 
-                $this->app()->ioc()->call([$this, $method]);
+                $application->ioc()->call([$this, $method]);
 
                 $this->booted[] = $dependency;
             }

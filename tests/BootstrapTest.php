@@ -6,24 +6,13 @@ use PHPUnit\Framework\TestCase;
 
 class BootstrapTest extends TestCase
 {
-    public function testCanDefineApplication()
-    {
-        /** @var BootstrapAbstract $bootstrap */
-        $bootstrap = new class() extends BootstrapAbstract {
-        };
-
-        $bootstrap->setApplication(new Application());
-
-        $this->assertInstanceOf(Application::class, $bootstrap->getApplication());
-    }
-
     public function testCanGetApplication()
     {
         /** @var BootstrapAbstract $bootstrap */
         $bootstrap = new class() extends BootstrapAbstract {
         };
 
-        $bootstrap->setApplication(new Application());
+        $bootstrap->boot(new Application());
 
         $this->assertInstanceOf(Application::class, $bootstrap->app());
     }

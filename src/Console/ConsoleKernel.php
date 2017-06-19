@@ -3,6 +3,7 @@
 namespace Greg\Framework\Console;
 
 use Greg\Framework\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -37,6 +38,19 @@ class ConsoleKernel
     public function console(): \Symfony\Component\Console\Application
     {
         return $this->console;
+    }
+
+    public function addCommand($command)
+    {
+        if (is_scalar($command)) {
+            $command = $this->app()->ioc()->load($command);
+        }
+
+        if (!($command instanceof Command)) {
+            throw new \Exception('Application command should be an instance of `' . Command::class . '`.');
+        }
+
+        $this->console()->add($command);
     }
 
     public function run(InputInterface $input = null, OutputInterface $output = null): int

@@ -252,9 +252,9 @@ class Translator implements \ArrayAccess
         return $this->translates[$this->getCurrentLanguage()] ?? [];
     }
 
-    public function translate(string $key, ...$arguments): string
+    public function translate(string $text, ...$arguments): string
     {
-        return $this->translateKey($key, $key, ...$arguments);
+        return $this->translateKey($text, $text, ...$arguments);
     }
 
     public function translateKey(string $key, string $default, ...$arguments): string

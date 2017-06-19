@@ -32,6 +32,8 @@ class HttpKernel
 
         $this->router = $router ?: new Router();
 
+        $this->app->ioc()->register($this->router);
+
         $this->addDispatcherToRouter();
 
         $this->boot();
