@@ -67,7 +67,7 @@ class ConsoleKernel
 
     public function run(InputInterface $input = null, OutputInterface $output = null): int
     {
-        return $this->app->run(function() use ($input, $output) {
+        return $this->app->run(function () use ($input, $output) {
             $this->app->fire(static::EVENT_RUN, $this->console);
 
             $response = $this->console->run($input, $output);
