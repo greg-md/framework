@@ -88,31 +88,33 @@ class HttpKernel
         return $this->controllersPrefixes;
     }
 
-    public function run(?string $path = null, ?string $method = null)
+    public function run(?string $path = null, ?string $method = null): Response
     {
-        $path = $path ?: Request::relativeUriPath();
+        return $this->app->run(function () use ($path, $method) {
+            $path = $path ?: Request::relativeUriPath();
 
-        $method = $method ?: Request::method();
+            $method = $method ?: Request::method();
 
-        $this->app->fire(static::EVENT_RUN, $path);
+            $this->app->fire(static::EVENT_RUN, $path);
 
-        if ($route = $this->router->detect($path, $method, $data)) {
-            $this->app->fire(static::EVENT_DISPATCHING, $path, $route, $data);
+            if ($route = $this->router->detect($path, $method, $data)) {
+                $this->app->fire(static::EVENT_DISPATCHING, $path, $route, $data);
 
-            $response = $route->exec($data);
+                $response = $route->exec($data);
 
-            if (!($response instanceof Response)) {
-                $response = new Response($response);
+                if (!($response instanceof Response)) {
+                    $response = new Response($response);
+                }
+
+                $this->app->fire(static::EVENT_DISPATCHED, $path, $route, $data, $response);
+            } else {
+                $response = new Response('Route not found.', null, 404);
             }
 
-            $this->app->fire(static::EVENT_DISPATCHED, $path, $route, $data, $response);
-        } else {
-            $response = new Response('Route not found.', null, 404);
-        }
+            $this->app->fire(static::EVENT_FINISHED, $path, $response);
 
-        $this->app->fire(static::EVENT_FINISHED, $path, $response);
-
-        return $response;
+            return $response;
+        });
     }
 
     protected function boot()

@@ -80,6 +80,26 @@ class Application implements \ArrayAccess
         return $this->fire(get_class($event), $event);
     }
 
+    public function inject(string $abstract, $concrete, ...$arguments)
+    {
+        return $this->ioc->inject($abstract, $concrete, ...$arguments);
+    }
+
+    public function register($object)
+    {
+        return $this->ioc->register($object);
+    }
+
+    public function get($abstract)
+    {
+        return $this->ioc->get($abstract);
+    }
+
+    public function expect($abstract)
+    {
+        return $this->ioc->expect($abstract);
+    }
+
     public function scope(callable $callable)
     {
         return $this->ioc->call($callable);
@@ -89,7 +109,7 @@ class Application implements \ArrayAccess
     {
         $this->fire(static::EVENT_RUN);
 
-        $response = $this->ioc->call($callable);
+        $response = $this->ioc->call($callable, $this);
 
         $this->fire(static::EVENT_FINISHED);
 

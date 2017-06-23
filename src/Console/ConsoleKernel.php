@@ -67,13 +67,15 @@ class ConsoleKernel
 
     public function run(InputInterface $input = null, OutputInterface $output = null): int
     {
-        $this->app->fire(static::EVENT_RUN, $this->console);
+        return $this->app->run(function() use ($input, $output) {
+            $this->app->fire(static::EVENT_RUN, $this->console);
 
-        $response = $this->console->run($input, $output);
+            $response = $this->console->run($input, $output);
 
-        $this->app->fire(static::EVENT_FINISHED, $this->console, $response);
+            $this->app->fire(static::EVENT_FINISHED, $this->console, $response);
 
-        return $response;
+            return $response;
+        });
     }
 
     protected function boot()
