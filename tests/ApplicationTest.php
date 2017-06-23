@@ -162,6 +162,8 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
+        $app->register($app);
+
         $success = false;
 
         $app->scope(function (Application $app) use (&$success) {
