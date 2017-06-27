@@ -113,7 +113,7 @@ A bootstrap class should be an instance of `\Greg\Framework\BootstrapStrategy` t
 ```php
 <?php
 
-class Bootstrap extends \Greg\Framework\BootstrapAbstract
+class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 {
     public function boot(\Greg\Framework\Application $app)
     {
@@ -131,7 +131,7 @@ Each method in this class that starts with `boot` in a `lowerCamelCase` format w
 ```php
 <?php
 
-class Bootstrap extends \Greg\Framework\BootstrapAbstract
+class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 {
     public function bootFoo()
     { 
@@ -149,6 +149,24 @@ class Bootstrap extends \Greg\Framework\BootstrapAbstract
         $this->app()->inject('redis.client', $redis);
     }
 }
+```
+
+***Next***, you have to add the bootstrap to the application.
+
+```php
+$app->addBootstrap(new AppBootstrap());
+```
+
+The same way you can define and create bootstraps only for the HTTP and Console kernels,
+using the `Greg\Framework\Console\BootstrapStrategy` and `Greg\Framework\Http\BootstrapStrategy` strategies,
+or extending the `Greg\Framework\Console\BootstrapAbstract` and `Greg\Framework\Http\BootstrapAbstract` classes.
+
+```php
+$httpKernel->addBootstrap(new AppHttpBootstrap());
+```
+
+```php
+$consoleKernel->addBootstrap(new AppConsoleBootstrap());
 ```
 
 # License
