@@ -10,7 +10,7 @@
 Greg Framework provides you a lightweight engine for fast creating powerful apps.
 
 [Greg PHP Application](https://github.com/greg-md/php-app) is a prepared and deploy-ready application that you can use
-to achieve maximum productivity.
+to achieve maximum productivity of that framework.
 
 # Table of Contents
 
