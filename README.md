@@ -25,7 +25,7 @@ to achieve maximum productivity of that framework.
 
 # Installation
 
-`composer require greg-md/php-orm`
+`composer require greg-md/php-framework`
 
 # Quick Start
 
