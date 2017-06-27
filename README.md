@@ -41,7 +41,8 @@ $app->run(function () {
 ```
 
 Yeah, the previous example practically doesn't do nothing because you didn't use any features.
-But let's look on the next examples when we want to create an application that should be run in Browser or in Console.
+But let's look on the next examples when we want to create an application
+that should be run in [Browser](#running-for-http-requests) or in [Console](#running-for-console-requests).
 
 ### Running for HTTP Requests
 
