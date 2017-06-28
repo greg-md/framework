@@ -275,9 +275,7 @@ $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 
 #### Application
 
-```php
-\Greg\Framework\Application::EVENT_RUN
-```
+##### `\Greg\Framework\Application::EVENT_RUN`
 
 This event is fired before the Application is run.
 
