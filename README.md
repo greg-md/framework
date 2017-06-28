@@ -311,15 +311,15 @@ $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 
 #### **HTTP Kernel**
 
-* `\Greg\Framework\Http\HttpKernel::EVENT_RUN` - Fired before the kernel is ran;
+* `\Greg\Framework\Http\HttpKernel::EVENT_RUN` - Fired **before** the kernel is ran;
 * `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHING` - Fired **before** the route is dispatched;
 * `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHED` - Fired **after** the route is dispatched;
 * `\Greg\Framework\Http\HttpKernel::EVENT_FINISHED` - Fired **after** the kernel is ran.
 
 #### **Console Kernel**
 
-* `\Greg\Framework\Console\ConsoleKernel::EVENT_RUN` - Fired before the Console Kernel is ran;
-* `\Greg\Framework\Console\ConsoleKernel::EVENT_FINISHED` - Fired after the Console Kernel is ran.
+* `\Greg\Framework\Console\ConsoleKernel::EVENT_RUN` - Fired **before** the kernel is ran;
+* `\Greg\Framework\Console\ConsoleKernel::EVENT_FINISHED` - Fired **v** the kernel is ran.
 
 # License
 
