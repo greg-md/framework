@@ -136,20 +136,21 @@ and can act as an array.
 
 ```php
 $config = new \Greg\Framework\Config([
-    'foo' => 'bar',
+    'foo' => 'FOO',
+    'bar' => 'BAR',
     'db' => [
         'username' => 'foousername',
-        'password' => 'foopassword',
+        'password' => 'foosecret',
     ],
 ]);
 
-$config->get('foo'); // result: 'bar'
+$config->get('foo'); // result: 'FOO'
 // or
-$config['foo']; // result: 'bar'
+$config['bar']; // result: 'BAR'
 
 $config->getIndex('db.username'); // result: 'foousername'
 // or
-$config['db.username']; // result: 'foousername'
+$config['db.password']; // result: 'foosecret'
 ```
 
 # Bootstrapping
