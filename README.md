@@ -267,6 +267,31 @@ $app->event(new LoginEvent($user));
 $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 ```
 
+### Builtin Events
+
+The Application fires the next events:
+
+```php
+\Greg\Framework\Application::EVENT_RUN
+\Greg\Framework\Application::EVENT_FINISHED
+```
+
+The HTTP Kernel fires the next events:
+
+```php
+\Greg\Framework\Http\HttpKernel::EVENT_RUN
+\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHING
+\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHED
+\Greg\Framework\Http\HttpKernel::EVENT_FINISHED
+```
+
+The Console Kernel fires the next events:
+
+```php
+\Greg\Framework\Console\ConsoleKernel::EVENT_RUN
+\Greg\Framework\Console\ConsoleKernel::EVENT_FINISHED
+```
+
 # License
 
 MIT © [Grigorii Duca](http://greg.md)
