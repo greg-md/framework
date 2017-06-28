@@ -16,8 +16,10 @@ to achieve maximum productivity of that framework.
 
 * [Requirements](#requirements)
 * [Installation](#installation)
-* [Quick Start](#quick-start)
+* [How It Works](#how-it-works)
 * [Bootstrapping](#bootstrapping)
+* [License](#license)
+* [Huuuge Quote](#huuuge-quote)
 
 # Requirements
 
@@ -27,13 +29,11 @@ to achieve maximum productivity of that framework.
 
 `composer require greg-md/php-framework`
 
-# Quick Start
+# How It Works
 
 All you need is to instantiate a new application and run it from your chosen environment.
 
 ```php
-<?php
-
 require_once __DIR__ . '/vendor/autoload.php';
 
 $app = new \Greg\Framework\Application();
@@ -58,8 +58,6 @@ In the next example we will instantiate the kernel and create a router that will
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
-<?php
-
 require_once __DIR__ . '/vendor/autoload.php';
 
 $httpKernel = new \Greg\Framework\Http\HttpKernel();
@@ -84,8 +82,6 @@ In the next example we will instantiate the kernel and create a command that wil
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
-<?php
-
 require_once __DIR__ . '/vendor/autoload.php';
 
 $consoleKernel = new \Greg\Framework\Console\ConsoleKernel();
@@ -111,8 +107,6 @@ To keep the consistency of the application, you can define/register/load it's co
 A bootstrap class should be an instance of `\Greg\Framework\BootstrapStrategy` that requires the `boot` method.
 
 ```php
-<?php
-
 class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 {
     public function boot(\Greg\Framework\Application $app)
@@ -129,8 +123,6 @@ It will allow you to define multiple boots in a specific order.
 Each method in this class that starts with `boot` in a `lowerCamelCase` format will be triggered. 
 
 ```php
-<?php
-
 class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 {
     public function bootFoo()
