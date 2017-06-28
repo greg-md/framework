@@ -12,6 +12,7 @@
     "php": "^7.1",
     "greg-md/php-router": "dev-master",
     "greg-md/php-support": "dev-master",
+    "greg-md/php-dependency-injection": "dev-master",
     "symfony/console": "^3.2"
   },
   "require-dev": {

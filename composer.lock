@@ -4,8 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d74eb0542d8a5ef5111b87f9ede4a87",
+    "content-hash": "a70a2c5c6c99d05e05bde8e0ffcc8e09",
     "packages": [
+        {
+            "name": "greg-md/php-dependency-injection",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/greg-md/php-dependency-injection.git",
+                "reference": "42e36fde5653612b64d9eb81a4acd957d1bfc297"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/greg-md/php-dependency-injection/zipball/42e36fde5653612b64d9eb81a4acd957d1bfc297",
+                "reference": "42e36fde5653612b64d9eb81a4acd957d1bfc297",
+                "shasum": ""
+            },
+            "require": {
+                "greg-md/php-support": "dev-master",
+                "php": "^7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "6.2.*",
+                "symfony/var-dumper": "^3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Greg\\DependencyInjection\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Grigorii Duca",
+                    "email": "contact@greg.md",
+                    "homepage": "http://greg.md/"
+                }
+            ],
+            "description": "Greg PHP Dependency Injection",
+            "homepage": "https://github.com/greg-md/php-dependency-injection",
+            "keywords": [
+                "dependency-injection",
+                "greg-dependency-injection",
+                "greg-md",
+                "greg-php",
+                "php",
+                "php-dependency-injection",
+                "web-artisans"
+            ],
+            "time": "2017-06-27 21:35:40"
+        },
         {
             "name": "greg-md/php-router",
             "version": "dev-master",
@@ -63,12 +115,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/greg-md/php-support.git",
-                "reference": "d7f7033be0d7ef7e04896c766bff82c58549a5b8"
+                "reference": "c1a571f441eb1b98dc30d55bd7f59b928be729aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/greg-md/php-support/zipball/d7f7033be0d7ef7e04896c766bff82c58549a5b8",
-                "reference": "d7f7033be0d7ef7e04896c766bff82c58549a5b8",
+                "url": "https://api.github.com/repos/greg-md/php-support/zipball/c1a571f441eb1b98dc30d55bd7f59b928be729aa",
+                "reference": "c1a571f441eb1b98dc30d55bd7f59b928be729aa",
                 "shasum": ""
             },
             "require": {
@@ -104,7 +156,7 @@
                 "support",
                 "web-artisans"
             ],
-            "time": "2017-06-13 12:16:59"
+            "time": "2017-06-19 20:56:12"
         },
         {
             "name": "psr/log",
@@ -1302,16 +1354,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "3.0.3",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "02b6b2c7aefe2cdb1185b8dbf8718b0bcedf3ab3"
+                "reference": "74776f8dbc081cab9287c2a601c0c1d842568744"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/02b6b2c7aefe2cdb1185b8dbf8718b0bcedf3ab3",
-                "reference": "02b6b2c7aefe2cdb1185b8dbf8718b0bcedf3ab3",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/74776f8dbc081cab9287c2a601c0c1d842568744",
+                "reference": "74776f8dbc081cab9287c2a601c0c1d842568744",
                 "shasum": ""
             },
             "require": {
@@ -1348,7 +1400,7 @@
                 "environment",
                 "hhvm"
             ],
-            "time": "2017-05-18T10:10:00+00:00"
+            "time": "2017-06-20T16:25:05+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -1861,7 +1913,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "greg-md/php-router": 20,
-        "greg-md/php-support": 20
+        "greg-md/php-support": 20,
+        "greg-md/php-dependency-injection": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

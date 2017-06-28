@@ -2,9 +2,9 @@
 
 namespace Greg\Framework\Console;
 
+use Greg\DependencyInjection\IoCContainer;
 use Greg\Framework\Application;
 use Greg\Framework\BootingTrait;
-use Greg\Framework\IoCContainer;
 
 abstract class BootstrapAbstract implements BootstrapStrategy
 {

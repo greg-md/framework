@@ -2,6 +2,7 @@
 
 namespace Greg\Framework;
 
+use Greg\DependencyInjection\IoCContainer;
 use PHPUnit\Framework\TestCase;
 
 class ApplicationTest extends TestCase

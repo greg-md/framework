@@ -2,6 +2,8 @@
 
 namespace Greg\Framework;
 
+use Greg\DependencyInjection\IoCContainer;
+
 class Application implements \ArrayAccess
 {
     use BootstrapTrait;

@@ -2,6 +2,8 @@
 
 namespace Greg\Framework;
 
+use Greg\DependencyInjection\IoCContainer;
+
 abstract class BootstrapAbstract implements BootstrapStrategy
 {
     use BootingTrait;
