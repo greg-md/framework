@@ -18,6 +18,7 @@ to achieve maximum productivity of that framework.
 * [Installation](#installation)
 * [How It Works](#how-it-works)
 * [Bootstrapping](#bootstrapping)
+* [Events](#Events)
 * [License](#license)
 * [Huuuge Quote](#huuuge-quote)
 
@@ -142,14 +143,14 @@ class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 
 For a better experience you can extend the `\Greg\Framework\BootstrapAbstract` class.
 It will allow you to define multiple boots in a specific order.
-Each method in this class that starts with `boot` in a `lowerCamelCase` format will be triggered. 
+Each method in this class that starts with `boot` in a `lowerCamelCase` format will be called. 
 
 ```php
 class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 {
     public function bootFoo()
     { 
-        $this->dependsOn('redis'); // Trigger `bootRedis` method first.
+        $this->dependsOn('redis'); // Call `bootRedis` method first.
 
         $redis = $this->app()->get('redis.client');
 
@@ -181,6 +182,89 @@ $httpKernel->addBootstrap(new AppHttpBootstrap());
 
 ```php
 $consoleKernel->addBootstrap(new AppConsoleBootstrap());
+```
+
+# Events
+
+You can define and fire events in your application.
+
+### Listeners
+
+Listeners could be a callable, an object or a class name.
+
+```php
+$app->listen('my.event', function() {
+    echo "Event is fired.";
+});
+```
+
+Objects and class names requires the `handle` method that will be fired.
+
+```php
+class MyListener
+{
+    public function handle() {
+        echo "Event is fired.";
+    }
+}
+```
+
+```php
+$app->listen('my.event', MyListener::class);
+// or
+$app->listen('my.event', new MyListener());
+```
+
+### Fire Events
+
+You can fire events with or without custom arguments.
+
+```php
+$app->fire('my.event');
+
+// or
+
+$user = new User();
+
+$app->fire('my.event', $user);
+
+// or
+
+$app->fireArgs('my.event', [new User()]);
+```
+
+### Events Objects
+
+Following the best practices, you can define events as objects.
+
+Let say we have a `LoginEvent` class that requires an `User`.
+
+```php
+class LoginEvent
+{
+    private $user;
+
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+}
+```
+
+You can define listeners using the class name as event name.
+
+```php
+$app->listen(LoginEvent::class, function(LoginEvent $event) {
+    // do the bussiness logic...
+});
+```
+
+And fire them in application.
+
+```php
+$app->event(new LoginEvent($user));
+// this is the same as
+$app->fire(LoginEvent::class, new LoginEvent($user));
 ```
 
 # License
