@@ -51,7 +51,7 @@ You can also construct the application with custom configs and an [IoC Container
 require_once __DIR__ . '/vendor/autoload.php';
 
 $config = new \Greg\Framework\Config([
-    'author' => 'John',
+    'name' => 'John',
 ]);
 
 $ioc = new \Greg\DependencyInjection\IoCContainer();
@@ -61,7 +61,7 @@ $ioc->register($config);
 $app = new \Greg\Framework\Application($config, $ioc);
 
 $app->run(function (\Greg\Framework\Config $config) {
-    echo 'Hello ' . $config['author'] . '!';
+    echo 'Hello ' . $config['name'] . '!';
 });
 ```
 
