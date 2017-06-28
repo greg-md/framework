@@ -31,9 +31,11 @@ to achieve maximum productivity of that framework.
 
 # How It Works
 
-All you need is to instantiate a new application and run it from your chosen environment.
+All you need is to instantiate a new Application and run it from your chosen environment.
 
 ```php
+<?php
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 $app = new \Greg\Framework\Application();
@@ -43,7 +45,7 @@ $app->run(function () {
 });
 ```
 
-You can also construct the application with custom configs and an [IoC Container](https://github.com/greg-md/php-dependency-injection).
+You can also construct the Application with custom configs and an [IoC Container](https://github.com/greg-md/php-dependency-injection).
 
 ```php
 <?php
@@ -66,7 +68,7 @@ $app->run(function (\Greg\Framework\Config $config) {
 ```
 
 Yeah, the previous example practically doesn't do nothing because you practically didn't use any features.
-But let's look on the next examples when we want to create an application
+But let's look on the next examples when we want to create an Application
 that should be run in [Browser](#running-for-http-requests) or in [Console](#running-for-console-requests).
 
 ### Running for HTTP Requests
@@ -76,13 +78,15 @@ that is working with [HTTP Routes](https://github.com/greg-md/php-router).
 
 In the next example we will instantiate the kernel and create a router that will say hello.
 
-> Providing the application to the kernel is optional.
-> If you will not provide it, the kernel will instantiate a new application by itself.
+> Providing the Application and Router to the kernel is optional.
+> If you will not provide them, the kernel will instantiate them by itself.
 
 ```php
 $httpKernel = new \Greg\Framework\Http\HttpKernel($app);
 
-$httpKernel->router()->get('/', function() {
+$router = $httpKernel->router();
+
+$router->get('/', function() {
     return 'Hello World!';
 });
 
@@ -98,8 +102,8 @@ that is working with [Symfony Console Component](http://symfony.com/doc/current/
 
 In the next example we will instantiate the kernel and create a command that will say hello.
 
-> Providing the application to the kernel is optional.
-> If you will not provide it, the kernel will instantiate a new application by itself.
+> Providing the Application and Symfony Console Application to the kernel is optional.
+> If you will not provide them, the kernel will instantiate them by itself.
 
 ```php
 $consoleKernel = new \Greg\Framework\Console\ConsoleKernel($app);
