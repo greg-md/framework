@@ -18,7 +18,11 @@ to achieve maximum productivity of that framework.
 * [Installation](#installation)
 * [How It Works](#how-it-works)
 * [Bootstrapping](#bootstrapping)
-* [Events](#Events)
+* [Events](#events)
+    * [Listeners](#listeners)
+    * [Fire Events](#fire-events)
+    * [Events Objects](#events-objects)
+    * [Builtin Events](#builtin-events)
 * [License](#license)
 * [Huuuge Quote](#huuuge-quote)
 
@@ -269,14 +273,14 @@ $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 
 ### Builtin Events
 
-The Application fires the next events:
+The **Application** fires the next events:
 
 ```php
 \Greg\Framework\Application::EVENT_RUN
 \Greg\Framework\Application::EVENT_FINISHED
 ```
 
-The HTTP Kernel fires the next events:
+The **HTTP Kernel** fires the next events:
 
 ```php
 \Greg\Framework\Http\HttpKernel::EVENT_RUN
@@ -285,7 +289,7 @@ The HTTP Kernel fires the next events:
 \Greg\Framework\Http\HttpKernel::EVENT_FINISHED
 ```
 
-The Console Kernel fires the next events:
+The **Console Kernel** fires the next events:
 
 ```php
 \Greg\Framework\Console\ConsoleKernel::EVENT_RUN
