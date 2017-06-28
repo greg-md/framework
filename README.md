@@ -298,7 +298,7 @@ And fire them in application.
 
 ```php
 $app->event(new LoginEvent($user));
-// the same as
+// or
 $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 ```
 
