@@ -136,7 +136,7 @@ class AppBootstrap extends \Greg\Framework\BootstrapAbstract
 }
 ```
 
-For a better experience you can extend the `\Greg\Framework\BootstrapAbstract`.
+For a better experience you can extend the `\Greg\Framework\BootstrapAbstract` class.
 It will allow you to define multiple boots in a specific order.
 Each method in this class that starts with `boot` in a `lowerCamelCase` format will be triggered. 
 
