@@ -294,7 +294,7 @@ $app->listen(LoginEvent::class, function(LoginEvent $event) {
 });
 ```
 
-And fire them in application.
+And fire event in application.
 
 ```php
 $app->event(new LoginEvent($user));
