@@ -275,41 +275,20 @@ $app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 
 #### Application
 
-##### `\Greg\Framework\Application::EVENT_RUN`
-
-This event is fired before the Application is run.
-
-##### `\Greg\Framework\Application::EVENT_FINISHED`
-
-This event is fired after the Application is run.
+* `\Greg\Framework\Application::EVENT_RUN` - Fired **before** the application is ran;
+* `\Greg\Framework\Application::EVENT_FINISHED` - Fired **after** the application is ran.
 
 #### **HTTP Kernel**
 
-##### `\Greg\Framework\Http\HttpKernel::EVENT_RUN`
-
-This event is fired before the Http Kernel is run.
-
-##### `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHING`
-
-This event is fired before the Http Kernel Route is dispatched.
-
-##### `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHED`
-
-This event is fired after the Http Kernel Route is dispatched.
-
-##### `\Greg\Framework\Http\HttpKernel::EVENT_FINISHED`
-
-This event is fired after the Http Kernel is run.
+* `\Greg\Framework\Http\HttpKernel::EVENT_RUN` - Fired before the kernel is ran;
+* `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHING` - Fired **before** the route is dispatched;
+* `\Greg\Framework\Http\HttpKernel::EVENT_DISPATCHED` - Fired **after** the route is dispatched;
+* `\Greg\Framework\Http\HttpKernel::EVENT_FINISHED` - Fired **after** the kernel is ran.
 
 #### **Console Kernel**
 
-##### `\Greg\Framework\Console\ConsoleKernel::EVENT_RUN`
-
-This event is fired before the Console Kernel is run.
-
-##### `\Greg\Framework\Console\ConsoleKernel::EVENT_FINISHED`
-
-This event is fired after the Console Kernel is run.
+* `\Greg\Framework\Console\ConsoleKernel::EVENT_RUN` - Fired before the Console Kernel is ran;
+* `\Greg\Framework\Console\ConsoleKernel::EVENT_FINISHED` - Fired after the Console Kernel is ran.
 
 # License
 
