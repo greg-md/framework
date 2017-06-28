@@ -43,6 +43,28 @@ $app->run(function () {
 });
 ```
 
+You can also construct the application with custom configs and an IoC Container.
+
+```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$config = new \Greg\Framework\Config([
+    'author' => 'John',
+]);
+
+$ioc = new \Greg\DependencyInjection\IoCContainer();
+
+$ioc->register($config);
+
+$app = new \Greg\Framework\Application($config, $ioc);
+
+$app->run(function (\Greg\Framework\Config $config) {
+    echo 'Hello ' . $config['author'] . '!';
+});
+```
+
 Yeah, the previous example practically doesn't do nothing because you didn't use any features.
 But let's look on the next examples when we want to create an application
 that should be run in [Browser](#running-for-http-requests) or in [Console](#running-for-console-requests).
