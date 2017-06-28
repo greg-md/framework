@@ -17,6 +17,7 @@ to achieve maximum productivity of that framework.
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [How It Works](#how-it-works)
+* [Config](#config)
 * [Bootstrapping](#bootstrapping)
 * [Events](#events)
     * [Listeners](#listeners)
@@ -50,7 +51,7 @@ $app->run(function () {
 });
 ```
 
-You can also construct the Application with custom configs and an [IoC Container](https://github.com/greg-md/php-dependency-injection).
+You can also construct the Application with custom [Config](#config) and an [IoC Container](https://github.com/greg-md/php-dependency-injection).
 
 ```php
 <?php
@@ -125,6 +126,30 @@ $consoleKernel->addCommand($helloCommand);
 $responseCode = $consoleKernel->run();
 
 exit($responseCode);
+```
+
+# Config
+
+You can define application configurations using the `\Greg\Framework\Config` class.
+It uses the [`ArrayAccessTrait`](https://github.com/greg-md/php-support/blob/master/docs/Accessor/ArrayAccessTrait.md)
+and can act as an array.
+
+```php
+$config = new \Greg\Framework\Config([
+    'foo' => 'bar',
+    'db' => [
+        'username' => 'foousername',
+        'password' => 'foopassword',
+    ],
+]);
+
+$config->get('foo'); // result: 'bar'
+// or
+$config['foo']; // result: 'bar'
+
+$config->getIndex('db.username'); // result: 'foousername'
+// or
+$config['db.username']; // result: 'foousername'
 ```
 
 # Bootstrapping
