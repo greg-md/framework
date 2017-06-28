@@ -54,7 +54,7 @@ that is working with [HTTP Routes](https://github.com/greg-md/php-router).
 
 In the next example we will instantiate the kernel and create a router that will say hello.
 
-> Providing the `\Greg\Framework\Application` to the `\Greg\Framework\Http\HttpKernel` is optional.
+> Providing the application to the kernel is optional.
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
@@ -78,7 +78,7 @@ that is working with [Symfony Console Component](http://symfony.com/doc/current/
 
 In the next example we will instantiate the kernel and create a command that will say hello.
 
-> Providing the `\Greg\Framework\Application` to the `\Greg\Framework\Console\ConsoleKernel` is optional.
+> Providing the application to the kernel is optional.
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
