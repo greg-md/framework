@@ -224,7 +224,7 @@ Listeners could be a callable, an object or a class name.
 
 ```php
 $app->listen('my.event', function() {
-    echo "Event is fired.";
+    // do the bussiness logic...
 });
 ```
 
@@ -234,7 +234,7 @@ Objects and class names requires the `handle` method that will be fired.
 class MyListener
 {
     public function handle() {
-        echo "Event is fired.";
+        // do the bussiness logic...
     }
 }
 ```
