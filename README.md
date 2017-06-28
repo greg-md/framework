@@ -80,9 +80,7 @@ In the next example we will instantiate the kernel and create a router that will
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
-require_once __DIR__ . '/vendor/autoload.php';
-
-$httpKernel = new \Greg\Framework\Http\HttpKernel();
+$httpKernel = new \Greg\Framework\Http\HttpKernel($app);
 
 $httpKernel->router()->get('/', function() {
     return 'Hello World!';
@@ -104,9 +102,7 @@ In the next example we will instantiate the kernel and create a command that wil
 > If you will not provide it, the kernel will instantiate a new application by itself.
 
 ```php
-require_once __DIR__ . '/vendor/autoload.php';
-
-$consoleKernel = new \Greg\Framework\Console\ConsoleKernel();
+$consoleKernel = new \Greg\Framework\Console\ConsoleKernel($app);
 
 $helloCommand = new Symfony\Component\Console\Command\Command();
 $helloCommand->setName('hello');
