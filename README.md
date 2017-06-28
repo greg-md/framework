@@ -43,7 +43,7 @@ $app->run(function () {
 });
 ```
 
-You can also construct the application with custom configs and an IoC Container.
+You can also construct the application with custom configs and an [IoC Container](https://github.com/greg-md/php-dependency-injection).
 
 ```php
 <?php
