@@ -263,8 +263,8 @@ And fire them in application.
 
 ```php
 $app->event(new LoginEvent($user));
-// this is the same as
-$app->fire(LoginEvent::class, new LoginEvent($user));
+// the same as
+$app->fire(LoginEvent::class, ...[new LoginEvent($user)]);
 ```
 
 # License
