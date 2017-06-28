@@ -73,7 +73,7 @@ $app->run(function (\Greg\Framework\Config $config) {
 });
 ```
 
-Yeah, the previous example practically doesn't do nothing because you practically didn't use any features.
+Yeah, the previous example practically doesn't do nothing because you didn't use any features.
 But let's look on the next examples when we want to create an Application
 that should be run in [Browser](#running-for-http-requests) or in [Console](#running-for-console-requests).
 
