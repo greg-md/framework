@@ -54,7 +54,7 @@ class HttpKernel
 
     public function bootstrap(ServiceProvider $serviceProvider)
     {
-        $this->app()->bootstrap($serviceProvider);
+        $this->app()->addServiceProvider($serviceProvider);
 
         $this->app()->ioc()->call([$serviceProvider, 'bootHttpKernel'], $this);
 

@@ -47,7 +47,7 @@ class Application implements \ArrayAccess
         return $this->ioc;
     }
 
-    public function bootstrap(ServiceProvider $serviceProvider)
+    public function addServiceProvider(ServiceProvider $serviceProvider)
     {
         $this->serviceProviders[$serviceProvider->name()] = $serviceProvider;
 

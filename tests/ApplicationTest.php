@@ -37,7 +37,7 @@ class ApplicationTest extends TestCase
 
         $bootstrap->expects($this->once())->method('boot');
 
-        $app->bootstrap($bootstrap);
+        $app->addServiceProvider($bootstrap);
     }
 
     public function testCanGetBootstrap()
@@ -47,7 +47,7 @@ class ApplicationTest extends TestCase
         /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
         $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
-        $app->bootstrap($bootstrap);
+        $app->addServiceProvider($bootstrap);
 
         $this->assertEquals($bootstrap, $app->getServiceProvider(get_class($bootstrap)));
     }
@@ -59,7 +59,7 @@ class ApplicationTest extends TestCase
         /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
         $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
-        $app->bootstrap($bootstrap);
+        $app->addServiceProvider($bootstrap);
 
         $this->assertEquals([get_class($bootstrap) => $bootstrap], $app->getServiceProviders());
     }
