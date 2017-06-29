@@ -48,10 +48,15 @@ class Application implements \ArrayAccess
         return $this;
     }
 
+    public function getServiceProvider($name): ?ServiceProvider
+    {
+        return $this->serviceProviders[$name] ?? null;
+    }
+
     /**
      * @return ServiceProvider[]
      */
-    public function serviceProviders(): array
+    public function getServiceProviders(): array
     {
         return $this->serviceProviders;
     }

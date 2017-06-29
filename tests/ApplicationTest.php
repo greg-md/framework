@@ -32,8 +32,8 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
         $bootstrap->expects($this->once())->method('boot');
 
@@ -44,24 +44,24 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
         $app->bootstrap($bootstrap);
 
-        $this->assertEquals($bootstrap, $app->getBootstrap(get_class($bootstrap)));
+        $this->assertEquals($bootstrap, $app->getServiceProvider(get_class($bootstrap)));
     }
 
     public function testCanGetBootstraps()
     {
         $app = new Application();
 
-        /** @var BootstrapStrategy|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(BootstrapStrategy::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
+        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
         $app->bootstrap($bootstrap);
 
-        $this->assertEquals([get_class($bootstrap) => $bootstrap], $app->getBootstraps());
+        $this->assertEquals([get_class($bootstrap) => $bootstrap], $app->getServiceProviders());
     }
 
     public function testCanListenCallable()
