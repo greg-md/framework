@@ -119,7 +119,7 @@ class HttpKernel
 
     private function bootServiceProviders()
     {
-        foreach ($this->app()->serviceProviders() as $serviceProvider) {
+        foreach ($this->app()->getServiceProviders() as $serviceProvider) {
             $serviceProvider->bootHttpKernel($this);
         }
 
