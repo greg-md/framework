@@ -3,15 +3,13 @@
 namespace Greg\Framework\Console;
 
 use Greg\Framework\Application;
-use Greg\Framework\BootstrapTrait;
+use Greg\Framework\ServiceProvider;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ConsoleKernel
 {
-    use BootstrapTrait;
-
     const EVENT_RUN = 'console.run';
 
     const EVENT_FINISHED = 'console.finished';
@@ -28,6 +26,8 @@ class ConsoleKernel
 
         $this->console->setAutoExit(false);
 
+        $this->bootServiceProviders();
+
         $this->boot();
 
         return $this;
@@ -43,11 +43,11 @@ class ConsoleKernel
         return $this->console;
     }
 
-    public function bootstrap(BootstrapStrategy $class)
+    public function bootstrap(ServiceProvider $class)
     {
-        $this->setBootstrap($class);
+        $this->app()->bootstrap($class);
 
-        $class->boot($this);
+        $class->bootConsoleKernel($this);
 
         return $this;
     }
@@ -76,6 +76,15 @@ class ConsoleKernel
 
             return $response;
         });
+    }
+
+    private function bootServiceProviders()
+    {
+        foreach ($this->app()->serviceProviders() as $serviceProvider) {
+            $serviceProvider->bootConsoleKernel($this);
+        }
+
+        return $this;
     }
 
     protected function boot()

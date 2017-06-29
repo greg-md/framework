@@ -3,7 +3,7 @@
 namespace Greg\Framework\Http;
 
 use Greg\Framework\Application;
-use Greg\Framework\BootstrapTrait;
+use Greg\Framework\ServiceProvider;
 use Greg\Routing\Router;
 use Greg\Support\Http\Request;
 use Greg\Support\Http\Response;
@@ -11,8 +11,6 @@ use Greg\Support\Obj;
 
 class HttpKernel
 {
-    use BootstrapTrait;
-
     const EVENT_RUN = 'http.run';
 
     const EVENT_DISPATCHING = 'http.dispatching';
@@ -37,6 +35,8 @@ class HttpKernel
 
         $this->addDispatcherToRouter();
 
+        $this->bootServiceProviders();
+
         $this->boot();
 
         return $this;
@@ -52,11 +52,11 @@ class HttpKernel
         return $this->router;
     }
 
-    public function bootstrap(BootstrapStrategy $class)
+    public function bootstrap(ServiceProvider $serviceProvider)
     {
-        $this->setBootstrap($class);
+        $this->app()->bootstrap($serviceProvider);
 
-        $class->boot($this);
+        $serviceProvider->bootHttpKernel($this);
 
         return $this;
     }
@@ -115,6 +115,15 @@ class HttpKernel
 
             return $response;
         });
+    }
+
+    private function bootServiceProviders()
+    {
+        foreach ($this->app()->serviceProviders() as $serviceProvider) {
+            $serviceProvider->bootHttpKernel($this);
+        }
+
+        return $this;
     }
 
     protected function boot()

@@ -6,8 +6,6 @@ use Greg\DependencyInjection\IoCContainer;
 
 class Application implements \ArrayAccess
 {
-    use BootstrapTrait;
-
     const EVENT_RUN = 'app.run';
 
     const EVENT_FINISHED = 'app.finished';
@@ -17,6 +15,8 @@ class Application implements \ArrayAccess
     private $ioc = null;
 
     private $events = [];
+
+    private $serviceProviders = [];
 
     public function __construct(Config $config = null, IoCContainer $ioc = null)
     {
@@ -39,13 +39,21 @@ class Application implements \ArrayAccess
         return $this->ioc;
     }
 
-    public function bootstrap(BootstrapStrategy $class)
+    public function bootstrap(ServiceProvider $serviceProvider)
     {
-        $this->setBootstrap($class);
+        $this->serviceProviders[get_class($serviceProvider)] = $serviceProvider;
 
-        $class->boot($this);
+        $serviceProvider->boot($this);
 
         return $this;
+    }
+
+    /**
+     * @return ServiceProvider[]
+     */
+    public function serviceProviders(): array
+    {
+        return $this->serviceProviders;
     }
 
     public function listen($eventNames, $listener)
