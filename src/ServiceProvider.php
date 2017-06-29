@@ -11,11 +11,11 @@ abstract class ServiceProvider
     {
     }
 
-    public function bootConsoleKernel(ConsoleKernel $app)
+    public function bootConsoleKernel(ConsoleKernel $kernel)
     {
     }
 
-    public function bootHttpKernel(HttpKernel $app)
+    public function bootHttpKernel(HttpKernel $kernel)
     {
     }
 }
