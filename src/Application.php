@@ -48,15 +48,10 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function getServiceProvider($name): ?ServiceProvider
-    {
-        return $this->serviceProviders[$name] ?? null;
-    }
-
     /**
      * @return ServiceProvider[]
      */
-    public function getServiceProviders(): array
+    public function serviceProviders(): array
     {
         return $this->serviceProviders;
     }
@@ -72,12 +67,7 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function fire(string $eventName, &...$arguments)
-    {
-        return $this->fireArgs($eventName, $arguments);
-    }
-
-    public function fireArgs(string $eventName, array $arguments)
+    public function fire(string $eventName, ...$arguments)
     {
         foreach ($this->events[$eventName] ?? [] as $listener) {
             $this->handleListener($listener, $arguments);

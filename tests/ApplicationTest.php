@@ -76,7 +76,7 @@ class ApplicationTest extends TestCase
             $this->assertEquals('foo', $foo);
         });
 
-        $app->fire('event', ...['foo']);
+        $app->fire('event', 'foo');
 
         $this->assertTrue($success);
     }
@@ -105,7 +105,7 @@ class ApplicationTest extends TestCase
 
         $app->listen('event', $class);
 
-        $app->fire('event', ...['foo']);
+        $app->fire('event', 'foo');
 
         $this->assertTrue($class->success);
     }
