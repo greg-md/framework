@@ -42,6 +42,13 @@ class Application implements \ArrayAccess
         return $this;
     }
 
+    public function removeConfig(string $name)
+    {
+        unset($this->config[$name]);
+
+        return $this;
+    }
+
     public function ioc(): IoCContainer
     {
         return $this->ioc;
