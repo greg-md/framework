@@ -8,6 +8,7 @@
   "authors": [
     { "name": "Grigorii Duca", "email": "contact@greg.md", "homepage": "http://greg.md/" }
   ],
+  "minimum-stability": "dev",
   "require": {
     "php": "^7.1",
     "greg-md/php-router": "dev-master",

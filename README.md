@@ -1,4 +1,4 @@
-# Greg Framework
+# Greg PHP Framework
 
 [![StyleCI](https://styleci.io/repos/29315729/shield?style=flat)](https://styleci.io/repos/29315729)
 [![Build Status](https://travis-ci.org/greg-md/php-framework.svg)](https://travis-ci.org/greg-md/php-framework)
