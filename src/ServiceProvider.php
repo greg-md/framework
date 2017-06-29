@@ -18,4 +18,8 @@ abstract class ServiceProvider
     public function bootHttpKernel(HttpKernel $kernel)
     {
     }
+
+    public function install()
+    {
+    }
 }
