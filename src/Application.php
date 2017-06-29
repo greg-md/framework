@@ -41,7 +41,7 @@ class Application implements \ArrayAccess
 
     public function bootstrap(ServiceProvider $serviceProvider)
     {
-        $this->serviceProviders[get_class($serviceProvider)] = $serviceProvider;
+        $this->serviceProviders[$serviceProvider->name()] = $serviceProvider;
 
         $serviceProvider->boot($this);
 

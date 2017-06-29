@@ -7,6 +7,8 @@ use Greg\Framework\Http\HttpKernel;
 
 abstract class ServiceProvider
 {
+    abstract public function name();
+
     public function boot(Application $app)
     {
     }
