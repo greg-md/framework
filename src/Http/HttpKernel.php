@@ -56,7 +56,7 @@ class HttpKernel
     {
         $this->app()->bootstrap($serviceProvider);
 
-        $serviceProvider->bootHttpKernel($this);
+        $this->app()->ioc()->call([$serviceProvider, 'bootHttpKernel'], $this);
 
         return $this;
     }
@@ -120,7 +120,7 @@ class HttpKernel
     private function bootServiceProviders()
     {
         foreach ($this->app()->getServiceProviders() as $serviceProvider) {
-            $serviceProvider->bootHttpKernel($this);
+            $this->app->callServiceProvider($serviceProvider, 'bootHttpKernel', $this);
         }
 
         return $this;

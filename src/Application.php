@@ -3,6 +3,7 @@
 namespace Greg\Framework;
 
 use Greg\DependencyInjection\IoCContainer;
+use Greg\Support\Arr;
 
 class Application implements \ArrayAccess
 {
@@ -12,15 +13,15 @@ class Application implements \ArrayAccess
 
     private $config = [];
 
-    private $ioc = null;
+    private $ioc;
 
     private $events = [];
 
     private $serviceProviders = [];
 
-    public function __construct(Config $config = null, IoCContainer $ioc = null)
+    public function __construct(array $config = [], IoCContainer $ioc = null)
     {
-        $this->config = $config ?: new Config();
+        $this->config = Arr::fixIndexes($config);
 
         $this->ioc = $ioc ?: new IoCContainer();
 
@@ -29,9 +30,16 @@ class Application implements \ArrayAccess
         return $this;
     }
 
-    public function config(): Config
+    public function config(string $index = null)
     {
-        return $this->config;
+        return $index ? Arr::getIndex($this->config, $index) : $this->config;
+    }
+
+    public function addConfig(string $name, array $config)
+    {
+        $this->config[$name] = Arr::fixIndexes($config);
+
+        return $this;
     }
 
     public function ioc(): IoCContainer
@@ -43,7 +51,16 @@ class Application implements \ArrayAccess
     {
         $this->serviceProviders[$serviceProvider->name()] = $serviceProvider;
 
-        $serviceProvider->boot($this);
+        $this->callServiceProvider($serviceProvider, 'boot', $this);
+
+        return $this;
+    }
+
+    public function callServiceProvider(ServiceProvider $serviceProvider, string $method, ...$arguments)
+    {
+        if (method_exists($serviceProvider, $method)) {
+            $this->ioc->call([$serviceProvider, $method], ...$arguments);
+        }
 
         return $this;
     }
@@ -128,22 +145,22 @@ class Application implements \ArrayAccess
 
     public function offsetExists($key)
     {
-        return $this->config->hasIndex($key);
+        return Arr::hasIndex($this->config, $key);
     }
 
     public function offsetSet($key, $value)
     {
-        return $this->config->setIndex($key, $value);
+        return Arr::setIndex($this->config, $key, Arr::fixIndexes($value));
     }
 
     public function offsetGet($key)
     {
-        return $this->config->getIndex($key);
+        return Arr::getIndex($this->config, $key);
     }
 
     public function offsetUnset($key)
     {
-        return $this->config->removeIndex($key);
+        return Arr::removeIndex($this->config, $key);
     }
 
     protected function boot()
@@ -152,7 +169,7 @@ class Application implements \ArrayAccess
 
     private function validateListener($listener)
     {
-        if (!is_callable($listener) and !is_object($listener) and !class_exists($listener, false)) {
+        if (!is_callable($listener) and !is_object($listener) and !class_exists($listener)) {
             throw new \Exception('Unknown listener type');
         }
 

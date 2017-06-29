@@ -43,11 +43,11 @@ class ConsoleKernel
         return $this->console;
     }
 
-    public function bootstrap(ServiceProvider $class)
+    public function bootstrap(ServiceProvider $serviceProvider)
     {
-        $this->app()->bootstrap($class);
+        $this->app()->bootstrap($serviceProvider);
 
-        $class->bootConsoleKernel($this);
+        $this->app()->ioc()->call([$serviceProvider, 'bootConsoleKernel'], $this);
 
         return $this;
     }
@@ -81,7 +81,7 @@ class ConsoleKernel
     private function bootServiceProviders()
     {
         foreach ($this->app()->getServiceProviders() as $serviceProvider) {
-            $serviceProvider->bootConsoleKernel($this);
+            $this->app->callServiceProvider($serviceProvider, 'bootConsoleKernel', $this);
         }
 
         return $this;
