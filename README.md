@@ -7,7 +7,7 @@
 [![Latest Unstable Version](https://poser.pugx.org/greg-md/php-framework/v/unstable.svg)](https://packagist.org/packages/greg-md/php-framework)
 [![License](https://poser.pugx.org/greg-md/php-framework/license.svg)](https://packagist.org/packages/greg-md/php-framework)
 
-Greg Framework provides you a lightweight engine for fast creating powerful apps.
+Greg Framework provides a lightweight engine for fast creating powerful apps.
 
 [Greg PHP Application](https://github.com/greg-md/php-app) is a prepared and deploy-ready application that you can use
 to achieve maximum productivity of that framework.
