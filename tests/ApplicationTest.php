@@ -18,7 +18,7 @@ class ApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $this->assertInstanceOf(Config::class, $app->config());
+        $this->assertEquals([], $app->config());
     }
 
     public function testCanGetIoCContainer()

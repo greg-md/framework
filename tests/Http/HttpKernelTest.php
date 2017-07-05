@@ -82,7 +82,7 @@ class HttpKernelTest extends TestCase
 
         $kernel->addControllersPrefixes(__NAMESPACE__ . '\\');
 
-        $kernel->router()->any('/', 'FooController@fooAction');
+        $kernel->router()->any('/', 'FooTestingController@fooAction');
 
         $response = $kernel->run('/');
 
@@ -95,7 +95,7 @@ class HttpKernelTest extends TestCase
 
         $kernel->addControllersPrefixes(__NAMESPACE__ . '\\');
 
-        $kernel->router()->any('/', 'FooController');
+        $kernel->router()->any('/', 'FooTestingController');
 
         $this->expectException(\Exception::class);
 
@@ -108,7 +108,7 @@ class HttpKernelTest extends TestCase
 
         $kernel->addControllersPrefixes(__NAMESPACE__ . '\\');
 
-        $kernel->router()->any('/', 'FooController@undefinedAction');
+        $kernel->router()->any('/', 'FooTestingController@undefinedAction');
 
         $this->expectException(\Exception::class);
 
@@ -126,13 +126,5 @@ class HttpKernelTest extends TestCase
         $this->expectException(\Exception::class);
 
         $kernel->run('/');
-    }
-}
-
-class FooController
-{
-    public function fooAction()
-    {
-        return 'Hello World!';
     }
 }
