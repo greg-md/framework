@@ -114,6 +114,11 @@ class Application implements \ArrayAccess
         return $this->fire(get_class($event), $event);
     }
 
+    public function events()
+    {
+        return $this->events;
+    }
+
     public function inject(string $abstract, $concrete, ...$arguments)
     {
         return $this->ioc->inject($abstract, $concrete, ...$arguments);
