@@ -162,7 +162,7 @@ class Application implements \ArrayAccess
 
     public function offsetSet($key, $value)
     {
-        return Arr::setIndex($this->config, $key, Arr::fixIndexes($value));
+        return Arr::setIndex($this->config, $key, is_array($value) ? Arr::fixIndexes($value) : $value);
     }
 
     public function offsetGet($key)

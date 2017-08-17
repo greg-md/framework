@@ -28,40 +28,44 @@ class ApplicationTest extends TestCase
         $this->assertInstanceOf(IoCContainer::class, $app->ioc());
     }
 
-    public function testCanAddBootstrap()
+    public function testCanAddServiceProvider()
     {
         $app = new Application();
 
-        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $serviceProvider */
+        $serviceProvider = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
-        $bootstrap->expects($this->once())->method('boot');
+        $serviceProvider->expects($this->once())->method('name');
 
-        $app->addServiceProvider($bootstrap);
+        $app->addServiceProvider($serviceProvider);
     }
 
-    public function testCanGetBootstrap()
+    public function testCanGetServiceProvider()
     {
         $app = new Application();
 
-        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $serviceProvider */
+        $serviceProvider = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
-        $app->addServiceProvider($bootstrap);
+        $serviceProvider->method('name')->willReturn('foo');
 
-        $this->assertEquals($bootstrap, $app->getServiceProvider(get_class($bootstrap)));
+        $app->addServiceProvider($serviceProvider);
+
+        $this->assertEquals($serviceProvider, $app->getServiceProvider('foo'));
     }
 
-    public function testCanGetBootstraps()
+    public function testCanGetServiceProviders()
     {
         $app = new Application();
 
-        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $bootstrap */
-        $bootstrap = $this->getMockBuilder(ServiceProvider::class)->getMock();
+        /** @var ServiceProvider|\PHPUnit_Framework_MockObject_MockObject $serviceProvider */
+        $serviceProvider = $this->getMockBuilder(ServiceProvider::class)->getMock();
 
-        $app->addServiceProvider($bootstrap);
+        $serviceProvider->method('name')->willReturn('foo');
 
-        $this->assertEquals([get_class($bootstrap) => $bootstrap], $app->getServiceProviders());
+        $app->addServiceProvider($serviceProvider);
+
+        $this->assertEquals(['foo' => $serviceProvider], $app->getServiceProviders());
     }
 
     public function testCanListenCallable()
