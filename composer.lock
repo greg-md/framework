@@ -64,12 +64,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/greg-md/php-router.git",
-                "reference": "f689c38c6100798cfa4c5c578518e015925e65b7"
+                "reference": "c8b8db831c50defd422d326cfd6883eaf20da222"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/greg-md/php-router/zipball/f689c38c6100798cfa4c5c578518e015925e65b7",
-                "reference": "f689c38c6100798cfa4c5c578518e015925e65b7",
+                "url": "https://api.github.com/repos/greg-md/php-router/zipball/c8b8db831c50defd422d326cfd6883eaf20da222",
+                "reference": "c8b8db831c50defd422d326cfd6883eaf20da222",
                 "shasum": ""
             },
             "require": {
@@ -107,7 +107,7 @@
                 "routing",
                 "web-artisans"
             ],
-            "time": "2017-08-17 11:56:31"
+            "time": "2017-08-17 12:32:45"
         },
         {
             "name": "greg-md/php-support",
