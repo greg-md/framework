@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/greg-md/php-dependency-injection.git",
-                "reference": "e1a40042938d3f2e55757a14ac0af3fbf4a46878"
+                "reference": "8b02a14b97f0c5833d934bf8620ba7890169df04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/greg-md/php-dependency-injection/zipball/e1a40042938d3f2e55757a14ac0af3fbf4a46878",
-                "reference": "e1a40042938d3f2e55757a14ac0af3fbf4a46878",
+                "url": "https://api.github.com/repos/greg-md/php-dependency-injection/zipball/8b02a14b97f0c5833d934bf8620ba7890169df04",
+                "reference": "8b02a14b97f0c5833d934bf8620ba7890169df04",
                 "shasum": ""
             },
             "require": {
@@ -56,7 +56,7 @@
                 "php-dependency-injection",
                 "web-artisans"
             ],
-            "time": "2019-07-23T21:26:22+00:00"
+            "time": "2019-07-23T22:13:15+00:00"
         },
         {
             "name": "greg-md/php-router",
@@ -64,12 +64,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/greg-md/php-router.git",
-                "reference": "df2755a5be5a472c7e0e3a8eff3d97ced293b9ed"
+                "reference": "dc49e12af39523f99d2e358a651db0e1ac0cc35a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/greg-md/php-router/zipball/df2755a5be5a472c7e0e3a8eff3d97ced293b9ed",
-                "reference": "df2755a5be5a472c7e0e3a8eff3d97ced293b9ed",
+                "url": "https://api.github.com/repos/greg-md/php-router/zipball/dc49e12af39523f99d2e358a651db0e1ac0cc35a",
+                "reference": "dc49e12af39523f99d2e358a651db0e1ac0cc35a",
                 "shasum": ""
             },
             "require": {
@@ -107,7 +107,7 @@
                 "routing",
                 "web-artisans"
             ],
-            "time": "2019-07-23T21:40:36+00:00"
+            "time": "2019-07-23T22:12:58+00:00"
         },
         {
             "name": "greg-md/php-support",
@@ -115,19 +115,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/greg-md/php-support.git",
-                "reference": "7e70d861f6c3c5f7a72c4a79bbc7ea7c40292c7b"
+                "reference": "7c251fc1815b3df17308aeea7348d7c2dc045f35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/greg-md/php-support/zipball/7e70d861f6c3c5f7a72c4a79bbc7ea7c40292c7b",
-                "reference": "7e70d861f6c3c5f7a72c4a79bbc7ea7c40292c7b",
+                "url": "https://api.github.com/repos/greg-md/php-support/zipball/7c251fc1815b3df17308aeea7348d7c2dc045f35",
+                "reference": "7c251fc1815b3df17308aeea7348d7c2dc045f35",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^7.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "6.3.*"
+                "phpunit/phpunit": "^8"
             },
             "type": "library",
             "autoload": {
@@ -156,7 +156,7 @@
                 "support",
                 "web-artisans"
             ],
-            "time": "2017-08-17T12:57:26+00:00"
+            "time": "2019-07-23T22:00:53+00:00"
         },
         {
             "name": "psr/container",
